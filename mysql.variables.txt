@@ -1,0 +1,59 @@
+#charset
+character-set-server=utf8
+collation-server=utf8_general_ci
+
+#repl - master
+log-bin=mysql-bin
+server-id=1
+binlog-do-db=exiaoxin
+
+#repl - slave
+log-bin=mysql-bin
+server-id=3
+replicate-do-db=exiaoxin
+log-slave-updates
+slave-skip-errors=all
+sync_binlog=1
+slave-net-timeout=60
+
+#log
+#general_log_file=/var/log/mysql/general.log
+slow-query-log=1
+long_query_time=1
+slow-query-log-file=/var/log/mysql/slow-queries.logdd
+#log-queries-not-using-indexes
+
+#skip & trust
+skip-name-resolve
+log-bin-trust-function-creators=1
+
+#buffer
+sort_buffer_size = 4M
+join_buffer_size = 4M
+read_buffer_size = 4M
+
+#query
+query_cache_size = 512M
+query_cache_limit = 2M
+
+#thread
+thread_stack = 512K
+thread_cache_size = 64
+thread_concurrency = 16
+
+#innodb
+innodb_flush_log_at_trx_commit = 2
+innodb_log_buffer_size = 16M
+innodb_flush_method = O_DSYNC
+innodb_read_io_threads = 8
+innodb_write_io_threads = 16
+innodb_buffer_pool_size = 12G
+
+#tmp & heap & max
+tmp_table_size = 512M
+max_heap_table_size = 512M
+max_length_for_sort_data = 16k
+max_allowed_packet=32M
+max_connections=3000
+
+

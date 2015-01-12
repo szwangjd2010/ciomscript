@@ -1,0 +1,26 @@
+#!/bin/bash
+
+if [ $# -lt 3 ]; then
+	cat <<USAGE
+usage: 
+  $0 %port %local.file.or.path %remote.path
+  
+USAGE
+	
+	exit 1
+fi
+
+
+port=$1
+file=$2
+remotePath=${3:-/root/}
+isp=${4:-1}
+
+
+ip=122.193.22.133
+if [ "$isp" == "0" ]; then
+	ip=122.193.22.133
+fi
+
+scp -r -P $port $file $ip:$remotePath
+

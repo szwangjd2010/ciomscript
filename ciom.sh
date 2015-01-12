@@ -1,0 +1,1 @@
+export CIOM_HOME="/home/tech/ci"
