@@ -5,7 +5,7 @@ if [ "$JENKINS_HOME" == "" ]; then
 	source $CIOM_HOME/ciom.util.sh
 	simulateJenkinsContainer
 else 
-	source $JENKINS_HOME/workspace/ci/ciom.util.sh
+	source $JENKINS_HOME/workspace/ciom/ciom.util.sh
 fi
 
 appName=$1
@@ -25,13 +25,13 @@ toGuoke() {
 	for key in "${!ports[@]}"; do
 		if [ "${!key}" == "YES" ]; then
 			port=${ports["$key"]}
-			$JENKINS_HOME/workspace/ci/deploy.app.to.host.with.multi.tomcats.sh $appName $host $port /opt $asRoot
+			$JENKINS_HOME/workspace/ciom/deploy.app.to.host.with.multi.tomcats.sh $appName $host $port /opt $asRoot
 		fi
 	done	
 }
 
 toTest() {
-	$JENKINS_HOME/workspace/ci/deploy.app.to.host.with.multi.tomcats.sh $appName 192.168.0.125 22 /opt $asRoot
+	$JENKINS_HOME/workspace/ciom/deploy.app.to.host.with.multi.tomcats.sh $appName 192.168.0.125 22 /opt $asRoot
 }
 
 

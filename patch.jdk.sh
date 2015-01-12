@@ -4,7 +4,7 @@ source ./ciom.util.sh
 
 port=$1
 
-javaEnvShell="/home/tech/ci/java.sh"
+javaEnvShell="/home/tech/ciom/java.sh"
 local_policy='/tech/user/micro/ciom.workspace/ver.env.specific/jdk1.6/jre/lib/security/local_policy.jar'
 US_export_policy='/tech/user/micro/ciom.workspace/ver.env.specific/jdk1.6/jre/lib/security/US_export_policy.jar'
 remoteJdkHome='/usr/java/jdk1.6.0_45'

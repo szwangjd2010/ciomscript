@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # example:
-# cd /tech/user/micro/backup && /home/tech/ci/importdb.sh nest 222.92.116.85 3308 root 'Juziwl!@#' 20141206
+# cd /tech/user/micro/backup && /home/tech/ciom/importdb.sh nest 222.92.116.85 3308 root 'Juziwl!@#' 20141206
 
 
 dbs=$(mysql -h222.92.116.85 -P3308 -uroot -p'Juziwl!@#' -e "show databases;"  | grep -P "nest-\d+" | sort -r)

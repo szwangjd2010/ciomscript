@@ -1,1 +1,1 @@
-export CIOM_HOME="/home/tech/ci"
+export CIOM_HOME="/tech/user/micro/ciom"

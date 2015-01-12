@@ -19,7 +19,7 @@ my $Ports = {
 sub main() {
 	for my $key (keys %{$Ports}) {
 		if ($ENV{$key} eq "YES") {
-			system("$ENV{JENKINS_HOME}/workspace/ci/restart.tomcat.on.host.sh 122.193.22.133 $Ports->{$key} /opt");
+			system("$ENV{JENKINS_HOME}/workspace/ciom/restart.tomcat.on.host.sh 122.193.22.133 $Ports->{$key} /opt");
 		}
 	}
 }
