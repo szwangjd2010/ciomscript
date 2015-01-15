@@ -10,3 +10,5 @@ grant all privileges on *.* to xxv2@'%' identified by 'xxv2__';
 grant all privileges on *.* to root@'%' identified by 'P@ss~!@321';
 grant select on *.* to readonly@'%' identified by 'readonly__';
 flush privileges;
+
+grant all privileges on *.* to xxv2@'%' identified by 'xv2PassWD-321';

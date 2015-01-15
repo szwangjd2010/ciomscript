@@ -5,7 +5,7 @@ if [ "$Password" == "woyaobusuXX" ]; then
 	touch "$WORKSPACE/__auth_success"
 fi
 
-if [ "$Passwordv2" == "woyaobusuv2" ]; then
+if [ "$Passwordv2" == "woyaobusuXXXXv2" ]; then
 	touch "$WORKSPACE/__auth_success"
 fi
 
