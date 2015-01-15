@@ -132,6 +132,7 @@ dump() {
 		--add-drop-database \
 		--add-drop-table \
 		--lock-all-tables \
+		--routines \
 		--databases $dbName > $fileDumpout
 }
 

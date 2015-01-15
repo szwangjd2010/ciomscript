@@ -18,6 +18,7 @@ dumpDb2File() {
 		--default-character-set=utf8 \
 		--add-drop-database \
 		--add-drop-table \
+		--routines \
 		--databases $1 > $2
 }
 dump() {
