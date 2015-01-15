@@ -34,6 +34,23 @@ toTest() {
 	$JENKINS_HOME/workspace/ciom/deploy.app.to.host.with.multi.tomcats.sh $appName 192.168.0.125 22 /opt $asRoot
 }
 
+toAliyun_ws() {
+	wsTomcatParent="/opt/ws$1"
+	port=22
+	declare -A hosts=( \
+		["Admin"]="121.41.62.20" \
+		["Api1"]="121.40.200.186" \
+		["Api2"]="121.41.37.12" \
+		["Web"]="121.40.202.100" \
+	)
+
+	for key in "${!hosts[@]}"; do
+		if [ "${!key}" == "YES" ]; then
+			host=${hosts["$key"]}
+			$JENKINS_HOME/workspace/ciom/deploy.app.to.host.with.multi.tomcats.sh $appName $host $port $wsTomcatParent $asRoot
+		fi
+	done	
+}
 
 main() {
 	if [ "$cloudId" == "guoke" ]; then
@@ -42,7 +59,23 @@ main() {
 	
 	if [ "$cloudId" == "test" ]; then
 		toTest
-	fi	
+	fi
+
+	if [ "$cloudId" == "aliyun-ws1" ]; then
+		toAliyun_ws 1
+	fi
+
+	if [ "$cloudId" == "aliyun-ws2" ]; then
+		toAliyun_ws 2
+	fi
+
+	if [ "$cloudId" == "aliyun-ws3" ]; then
+		toAliyun_ws 3
+	fi
+
+	if [ "$cloudId" == "aliyun-ws4" ]; then
+		toAliyun_ws 4
+	fi
 }
 
 main
