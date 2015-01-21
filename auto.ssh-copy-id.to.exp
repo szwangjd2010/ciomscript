@@ -1,5 +1,4 @@
 #!/usr/bin/expect
-# micro li
 #
 
 set timeout 30
