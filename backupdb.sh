@@ -10,7 +10,6 @@ EXiaoxinOutFile="exiaoxin-$timestamp"
 TigaseOutFile="tigase-$timestamp"
 
 CompressExtName="bz2"
-RemoteBackupLocation="root@192.168.0.4:/data/bak/mysqlbak"
 
 enterWorkspace() {
 	cd $BackupLocation
@@ -32,25 +31,17 @@ dump() {
 compressFile() {
 	tar -cjvf "$1.$CompressExtName" $1
 }
+
 compress() {
 	compressFile $EXiaoxinOutFile
 	compressFile $TigaseOutFile
 }
 
-uploadFile() {
-	scp -P 22 $1 $RemoteBackupLocation
-}
-
-backup() {
-	uploadFile "$EXiaoxinOutFile.$CompressExtName"
-	uploadFile "$TigaseOutFile.$CompressExtName"
-}
 
 main() {
 	enterWorkspace
 	dump
 	compress
-#	backup
 }
 
 main
