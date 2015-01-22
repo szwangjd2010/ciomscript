@@ -23,6 +23,7 @@ dumpDb2File() {
 		--routines \
 		--databases $1 > $2
 }
+
 dump() {
 	dumpDb2File exiaoxin $EXiaoxinOutFile
 	dumpDb2File tigasedb $TigaseOutFile
@@ -37,11 +38,17 @@ compress() {
 	compressFile $TigaseOutFile
 }
 
+deletePlainDumpout() {
+	rm -rf $EXiaoxinOutFile
+	rm -rf $TigaseOutFile
+}
+
 
 main() {
 	enterWorkspace
 	dump
 	compress
+	deletePlainDumpout
 }
 
 main
