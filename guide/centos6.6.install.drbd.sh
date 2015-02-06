@@ -1,7 +1,11 @@
 #!/bin/bash
 
-#http://www.tuicool.com/articles/3eie6r
+heartbeat
+rpm -ivUh epel-release-6-5.noarch.rpm
+yum --enablerepo=epel install heartbeat -y
 
+
+drbd
 rpm -ivh http://www.elrepo.org/elrepo-release-6-6.el6.elrepo.noarch.rpm
 yum -y install drbd84-utils kmod-drbd84
 

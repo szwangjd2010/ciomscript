@@ -6,9 +6,10 @@ yum install -y mysql-community-client mysql-community-common mysql-community-lib
 
 /usr/bin/mysql_secure_installation
 
-grant all privileges on *.* to xxv2@'%' identified by 'xxv2__';
-grant all privileges on *.* to root@'%' identified by 'P@ss~!@321';
-grant select on *.* to readonly@'%' identified by 'readonly__';
+grant all privileges on *.* to root@'%' identified by 'pwdasdwx';
+grant all privileges on *.* to yxt@'%' identified by 'pwdasdwx';
+grant select on *.* to readonly@'%' identified by 'readonly';
+grant select on *.* to nagios@'%' identified by 'nagios';
 flush privileges;
 
-grant all privileges on *.* to xxv2@'%' identified by 'xv2PassWD-321';
+CREATE DATABASE yxt DEFAULT CHARACTER SET utf8;
