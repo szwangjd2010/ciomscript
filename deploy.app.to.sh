@@ -68,7 +68,7 @@ stopTargetService() {
 }
 
 startTargetService() {
-	execRemoteCmd "export JRE_HOME='/usr/java/jdk1.6.0_45'; $targetTomcatHome/bin/startup.sh"
+	execRemoteCmd "export JRE_HOME='/usr/java/jdk1.7.0_76'; $targetTomcatHome/bin/startup.sh"
 }
 
 checkArgus() {

@@ -12,7 +12,7 @@ sub main();
 my $cloudProvider = $ARGV[0];
 my $bashUtil = new BashUtil(1);
 my $CmdTpl_KillTomcat = "pkill -9 -f '%s/'";
-my $CmdTpl_StartTomcat = "export JRE_HOME='/usr/java/jdk1.6.0_45'; %s/bin/startup.sh";
+my $CmdTpl_StartTomcat = "export JRE_HOME='/usr/java/jdk1.7.0_76'; %s/bin/startup.sh";
 
 my $Tomcats = {
 	test => [

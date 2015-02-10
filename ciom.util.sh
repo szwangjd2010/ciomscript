@@ -7,7 +7,7 @@ LOG=/tmp/_ciom.log
 execCmd() {
 	echo "$1" | tee -a $Log
 	if [ $RUN_MODE -eq 1 ]; then
-		eval $1 
+		eval $1
 	fi
 }
 
@@ -52,7 +52,7 @@ startTomcats() {
 	execRemoteCmd $host $port "find $tomcatParent -maxdepth 1 -type d -name 'tomcat7-*' | sort > /opt/_ciom_tomcats"
 	download $host $port "/opt/_ciom_tomcats" "."
 	for tomcat in $(cat _ciom_tomcats); do
-		execRemoteCmd $host $port "export JRE_HOME='/usr/java/jdk1.6.0_45'; $tomcat/bin/startup.sh"
+		execRemoteCmd $host $port "export JRE_HOME='/usr/java/jdk1.7.0_76'; $tomcat/bin/startup.sh"
 		sleep 30
 	done
 }
