@@ -3,7 +3,6 @@
 #
 if [ "$JENKINS_HOME" == "" ]; then
 	source $CIOM_HOME/ciom.util.sh
-	simulateJenkinsContainer
 else 
 	source $JENKINS_HOME/workspace/ciom/ciom.util.sh
 fi
@@ -12,22 +11,22 @@ accountName=${AccountName:-$1}
 oldPassword=${OldPassword:-$2}
 newPassword=${NewPassword:-$3}
 
-FileHtpasswd='/svnsvr.share/httpd.conf/passwd'
+FileHtpasswd='/var/www/svn/passwd'
 Salt='lle'
 
-isUserExists() {
-	echo -n $(execCmd "grep -c '$accountName:' $FileHtpasswd")
+checkUser() {
+	execCmd "grep -c '$accountName:' $FileHtpasswd > /tmp/_tmp.ciom"
 }
 
-isValidPasswd() {
+checkUserEntry() {
 	accountEntry=$(getAccountEntry $accountName $oldPassword)
-	echo -n $(execCmd "grep -c '$accountEntry' $FileHtpasswd")
+	execCmd "grep -c '$accountEntry' $FileHtpasswd > /tmp/_tmp.ciom"
 }
 
 updatePasswd() {
 	accountEntry=$(getAccountEntry $accountName $oldPassword)
 	accountNewEntry=$(getAccountEntry $accountName $newPassword)
-	execCmd "sed -i 's/$accountEntry/$accountNewEntry/g' $FileHtpasswd"
+	execCmd "sed -i 's|$accountEntry|$accountNewEntry|g' $FileHtpasswd"
 }
 
 getPasswd() {
@@ -41,24 +40,28 @@ getAccountEntry() {
 	echo -n "$name:$(getPasswd $password)"
 }
 
+getCheckResult() {
+	echo -n $(cat /tmp/_tmp.ciom)
+}
+
 main() {
-	isUserExists
-	#echo "% $bUserExists %"
+	checkUser
+	bUserExists=$(getCheckResult)
 	if [ "$bUserExists" == "0" ]; then
 		echo "user does not exist!"
 		exit 1
 	fi
 
-	isValidPasswd
-	#echo $bValidPasswd
+	checkUserEntry
+	bValidPasswd=$(getCheckResult)
 	if [ "$bValidPasswd" == "0" ]; then
 		echo "user password is not correct!"
 		exit 2
 	fi
 
 	updatePasswd
+	echo "password updated successfully!"
+	
 }
 
 main
-
-unsimulateJenkinsContainer
