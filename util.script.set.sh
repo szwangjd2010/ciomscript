@@ -17,3 +17,10 @@ iperf -s -u #udp
 client
 iperf -c %serverIp%
 iperf -c %serverIp% -u -b 10000m
+
+winrm create winrm/config/Listener?Address=*+Transport=HTTPS @{HOST="172.17.120.60";CertificateThumbprint="A905295A5D17FB075828FD15BD36FD7D0B875F5B"}
+
+openssl req -x509 -config cert.request.tpl -extensions 'lle exts' -nodes\
+ -days 1000 -newkey rsa:1024 -keyout myserver.key -out myserver.crt
+
+ A905295A5D17FB075828FD15BD36FD7D0B875F5B

@@ -6,7 +6,7 @@ Ciom_Mysql_Log=/tmp/_ciom.mysql.log
 Ciom_Mysql_Password='P@ss~!@321'
 Ciom_Mysql_Master="192.168.0.100"
 Ciom_Mysql_Slaves="192.168.0.10 192.168.0.11"
-Ciom_Mysql_Workspace="/opt/data/ciom.workspace"
+Ciom_Mysql_Workspace="/tech/user/micro/backup"
 Ciom_Mysql_Timestamp=$(date +%04Y%02m%02d)
 Ciom_Mysql_Error_Log="_ciom.mysql.util.error.log"
 
