@@ -7,10 +7,10 @@ else
 	source $JENKINS_HOME/workspace/ciom/ciom.util.sh
 fi
 
-appName=$1
-host=$2
-port=$3
-tomcatParent=$4
+host=$1
+port=$2
+tomcatParent=$3
+appName=$4
 asRoot=${5:-NotAsRoot}
 
 AppPackageFile="$appName.war"
@@ -32,7 +32,7 @@ uploadFiles() {
 }
 
 applyAppPackage() {
-	execRemoteCmd $host $port "unzip -o $tomcatParent/$AppPackageFile $WebappsLocation/$appContextName"
+	execRemoteCmd $host $port "unzip -o $tomcatParent/$AppPackageFile -d $WebappsLocation/$appContextName"
 }
 
 backup() {

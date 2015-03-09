@@ -7,7 +7,7 @@ source ./ciom.mysql.util.sh
 logFileYMD=$(date -d '1 days ago' +%04Y%02m%02d)
 
 getEventLogFile() {
-	echo -n "/logs/eventlog$logFileYMD"
+	echo -n "/data/logs/yxt/event.log.$logFileYMD"
 }
 
 instanceSQLTpl() {
@@ -16,7 +16,7 @@ instanceSQLTpl() {
 }
 
 logInfo() {
-	logFile='/logs/exx.event.csv2db.log'
+	logFile='/data/logs/yxt/eventlog.csv2db.log'
 	eventlogFile=$(getEventLogFile)
 
 	records=$(wc -l $eventlogFile | gawk '{print $1}')
@@ -27,7 +27,7 @@ logInfo() {
 
 main() {
 	instanceSQLTpl
-	execSQLFile $Ciom_Mysql_Master 3306 root $Ciom_Mysql_Password load.eventlog.to.db.sql exiaoxin
+	execSQLFile $Ciom_Mysql_Master 3306 root $Ciom_Mysql_Password load.eventlog.to.db.sql yxt
 	logInfo
 }
 

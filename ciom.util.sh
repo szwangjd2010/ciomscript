@@ -5,7 +5,7 @@ RUN_MODE=1
 LOG=/tmp/_ciom.log
 
 execCmd() {
-	echo "$1" | tee -a $Log
+	echo "$1" | tee -a $LOG
 	if [ $RUN_MODE -eq 1 ]; then
 		eval $1
 	fi
