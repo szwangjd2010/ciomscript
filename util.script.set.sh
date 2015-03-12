@@ -23,4 +23,10 @@ winrm create winrm/config/Listener?Address=*+Transport=HTTPS @{HOST="172.17.120.
 openssl req -x509 -config cert.request.tpl -extensions 'lle exts' -nodes\
  -days 1000 -newkey rsa:1024 -keyout myserver.key -out myserver.crt
 
+perl -i.bak -p0E 
+    's|(<artifactId>api</artifactId>[^<]+<version>)(bbb)(</version>)|\1a\3|smg' pom.xml
+# named groups/backreferences
+(?<name>groupPattern)   \g{name} -> in pattern, $+{name} -> outside of pattern
+perl -p0E 's|(?<g1><stringProp name="Argument.name">ServerIP</stringProp>\s+<stringProp name="Argument.value">)[\w\.]+(?<g2></stringProp>)|$+{g1}1.1.1.1$+{g2}|smg' /tech/api.jmx | head -n 20
+
  A905295A5D17FB075828FD15BD36FD7D0B875F5B
