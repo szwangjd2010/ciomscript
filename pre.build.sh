@@ -29,7 +29,7 @@ replaceEnvSpecialFiles() {
 }
 
 execPrebuildExtraAction() {
-	filePrebuildExtraAction="$CnfLocation/$appName.prebuild.extra.cmds"
+	filePrebuildExtraAction="$CnfLocation/$appName.prebuild.extra.action"
 	if [ ! -e $filePrebuildExtraAction ]; then
 		return
 	fi
