@@ -28,22 +28,22 @@ replaceEnvSpecialFiles() {
 	execCmd "/bin/cp -rf $CnfLocation/$appName/* $WORKSPACE/$appName/"
 }
 
-execExtraPrebuildCmds() {
-	filePrebuildExtraCmds="$CnfLocation/$appName.prebuild.extra.cmds"
-	if [ ! -e $filePrebuildExtraCmds ]; then
+execPrebuildExtraAction() {
+	filePrebuildExtraAction="$CnfLocation/$appName.prebuild.extra.cmds"
+	if [ ! -e $filePrebuildExtraAction ]; then
 		return
 	fi
 
 	echo
-	cat $filePrebuildExtraCmds
+	cat $filePrebuildExtraAction
 	echo
-	source $filePrebuildExtraCmds
+	source $filePrebuildExtraAction
 }
 
 main() {
 	enterWorkspace
 	replaceEnvSpecialFiles
-	execExtraPrebuildCmds
+	execPrebuildExtraAction
 	leaveWorkspace
 }
 
