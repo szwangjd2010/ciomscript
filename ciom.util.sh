@@ -79,3 +79,7 @@ getTimestamp() {
 	echo -n $(date +%04Y%02m%02d.%02k%02M%02S)	
 }
 
+getDatestamp() {
+	echo -n $(date +%04Y%02m%02d)	
+}
+
