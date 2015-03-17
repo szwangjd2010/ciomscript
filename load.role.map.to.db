@@ -1,0 +1,11 @@
+LOAD DATA LOCAL INFILE '/tmp/out.sql'
+	REPLACE 
+	INTO TABLE core_position_position_map
+	FIELDS TERMINATED BY ','
+	ENCLOSED BY '"'
+	LINES TERMINATED BY '\n'
+	(
+		pid,
+		currentPosition,
+		nextPosition
+	);
