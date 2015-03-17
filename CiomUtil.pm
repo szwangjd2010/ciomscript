@@ -49,5 +49,21 @@ sub remoteExec() {
 	$self->exec("ssh -p $port root\@$host \"$cmd\"");
 }
 
+sub write() {
+	my $self = shift;
+	my $file = shift;
+	my $content = shift;
+	my $h;
+	if (!open($h, '>', $file)) {
+		print "open $file failed!\n";
+		return -1
+	}
+
+	print $h $content;
+	close($h);
+	
+	return 0;
+}
+
 1;
 __END__

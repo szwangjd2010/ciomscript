@@ -25,6 +25,8 @@ my $uuid2 = "";
 my $uuid3 = "";
 my $uuid4 = "";
 
+my $ciomUtil = new CiomUtil();
+
 sub newLine($$$) {
 	my $orgId = shift;
 	my $parentId = shift;
@@ -79,18 +81,13 @@ LOAD DATA LOCAL INFILE '/tmp/department.csv'
  IGNORE 1 LINES
  (orgId,parentId,pid);
 SQL
-	my $h;
-	if (!open($h, '>', "_tmp_")) {
-		print "open _tmp_ failed!\n";
-	}
-	print $h $sql;
-	close($h);
+
+	$ciomUtil->write("_tmp_", $sql);
 		
-	#system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source _tmp_' yxt");
+	#system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source ./_tmp_' yxt");
 }
 
 sub main() {
-	print $#ARGV;
 	if ($#ARGV == -1) {
 		generateDataFile();
 	} else {

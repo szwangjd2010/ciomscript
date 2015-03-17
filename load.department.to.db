@@ -1,8 +1,0 @@
-LOAD DATA LOCAL INFILE '/tmp/department.csv'
-	REPLACE 
-	INTO TABLE core_department
-	FIELDS TERMINATED BY ','
-	ENCLOSED BY '\''
-	LINES TERMINATED BY '\n'
-	IGNORE 1 lines
-	(orgId,parentId,pid);

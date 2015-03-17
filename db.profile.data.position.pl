@@ -37,7 +37,7 @@ sub newLine($$) {
 	}
 }
 
-sub main() {
+sub generateDataFile() {
 	if (!open($hOut, '>', $fileCsv)) {
 		output("Can not open $fileCsv\n");
 		return 1;
@@ -67,6 +67,30 @@ sub main() {
 
 	print $hOut $buf->flush() || '';
 	close($hOut);
+}
+
+sub importData2Db() {
+	my $sql =<<'SQL';
+LOAD DATA LOCAL INFILE '/tmp/position.csv'
+ REPLACE INTO TABLE core_position_position_map
+ FIELDS TERMINATED BY ','
+ ENCLOSED BY '\'' \
+ LINES TERMINATED BY '\n'
+ IGNORE 1 LINES
+ (pid,currentPosition,nextPosition);
+SQL
+
+	$ciomUtil->write("_tmp_", $sql);
+		
+	#system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source ./_tmp_' yxt");
+}
+
+sub main() {
+	if ($#ARGV == -1) {
+		generateDataFile();
+	} else {
+		importData2Db();
+	}
 }
 
 main();
