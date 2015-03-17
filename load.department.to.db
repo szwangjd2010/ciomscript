@@ -1,6 +1,8 @@
-LOAD DATA LOCAL INFILE '/tmp/out.csv'
+LOAD DATA LOCAL INFILE '/tmp/department.csv'
 	REPLACE 
-	INTO TABLE core_position_position_map
+	INTO TABLE core_department
 	FIELDS TERMINATED BY ','
 	ENCLOSED BY '\''
-	LINES TERMINATED BY '\n';
+	LINES TERMINATED BY '\n'
+	IGNORE 1 lines
+	(orgId,parentId,pid);

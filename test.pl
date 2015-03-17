@@ -3,9 +3,9 @@ use strict;
 use English;
 use Data::Dumper;
 
-use BashUtil;
+use CiomUtil;
 
-my $util = new BashUtil(0);
+my $util = new CiomUtil(0);
 print $ENV{CIOM_HOME};
 $util->exec('echo "sdafsdf"');
 

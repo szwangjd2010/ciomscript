@@ -4,7 +4,7 @@
 use strict;
 use English;
 use Data::Dumper;
-use BashUtil;
+use CiomUtil;
 
 my $job = $ARGV[0];
 my $JobParameters = {
@@ -73,7 +73,7 @@ sub main() {
 		return;
 	}
 	
-	my $util = new BashUtil(1);
+	my $util = new CiomUtil(1);
 	$util->exec(constructCmd());
 }
 

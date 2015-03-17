@@ -5,7 +5,7 @@ use strict;
 use English;
 use Data::Dumper;
 use Data::UUID;
-use BashUtil;
+use CiomUtil;
 use String::Buffer;
 
 
@@ -38,7 +38,7 @@ sub newLine($$$) {
 	}
 }
 
-sub main() {
+sub generateDataFile() {
 	if (!open($hOut, '>', $fileCsv)) {
 		output("Can not open $fileCsv\n");
 		return 1;
@@ -67,6 +67,35 @@ sub main() {
 
 	print $hOut $buf->flush() || '';
 	close($hOut);
+}
+
+sub importData2Db() {
+	my $sql =<<'SQL';
+LOAD DATA LOCAL INFILE '/tmp/department.csv'
+ REPLACE INTO TABLE core_department
+ FIELDS TERMINATED BY ','
+ ENCLOSED BY '\'' \
+ LINES TERMINATED BY '\n'
+ IGNORE 1 LINES
+ (orgId,parentId,pid);
+SQL
+	my $h;
+	if (!open($h, '>', "_tmp_")) {
+		print "open _tmp_ failed!\n";
+	}
+	print $h $sql;
+	close($h);
+		
+	#system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source _tmp_' yxt");
+}
+
+sub main() {
+	print $#ARGV;
+	if ($#ARGV == -1) {
+		generateDataFile();
+	} else {
+		importData2Db();
+	}
 }
 
 main();

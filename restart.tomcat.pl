@@ -4,13 +4,13 @@
 use strict;
 use English;
 use Data::Dumper;
-use BashUtil;
+use CiomUtil;
 
 sub restart($$$);
 sub main();
 
 my $cloudProvider = $ARGV[0];
-my $bashUtil = new BashUtil(1);
+my $ciomUtil = new CiomUtil(1);
 my $CmdTpl_KillTomcat = "pkill -9 -f '%s/'";
 my $CmdTpl_StartTomcat = "export JRE_HOME='/usr/java/jdk1.7.0_76'; %s/bin/startup.sh";
 
@@ -63,16 +63,16 @@ sub restart($$$) {
 	
 	my $int1 = 5;
 	my $int2 = 30;
-	if ($bashUtil->{RunMode} == 0) {
+	if ($ciomUtil->{RunMode} == 0) {
 		$int1 = 0;
 		$int2 = 0;
 	}
 	
-	$bashUtil->remoteExec($host, $port, sprintf($CmdTpl_KillTomcat, $tomcatHome));
-	$bashUtil->exec("sleep $int1");
+	$ciomUtil->remoteExec($host, $port, sprintf($CmdTpl_KillTomcat, $tomcatHome));
+	$ciomUtil->exec("sleep $int1");
 	
-	$bashUtil->remoteExec($host, $port, sprintf($CmdTpl_StartTomcat, $tomcatHome));
-	$bashUtil->exec("sleep $int2");	
+	$ciomUtil->remoteExec($host, $port, sprintf($CmdTpl_StartTomcat, $tomcatHome));
+	$ciomUtil->exec("sleep $int2");	
 }
 
 sub main() {

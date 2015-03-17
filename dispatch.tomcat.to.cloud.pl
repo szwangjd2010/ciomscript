@@ -6,10 +6,10 @@ use strict;
 use English;
 use Data::Dumper;
 use Cwd;
-use BashUtil;
+use CiomUtil;
 
 my $cloudId = $ARGV[0];
-my $bashUtil = new BashUtil(1);
+my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
 my $CloudHosts = {
@@ -98,7 +98,7 @@ my $CloudHosts = {
 };
 
 sub generateTomcatInstances() {
-	$bashUtil->exec(sprintf("%s %s %s %s %s",
+	$ciomUtil->exec(sprintf("%s %s %s %s %s",
 		"$ENV{CIOM_HOME}/generate.tomcat.instance.sh",
 		$CloudHosts->{$cloudId}->{tomcatAmount},
 		$CloudHosts->{$cloudId}->{basePortDelta},
@@ -113,7 +113,7 @@ sub dispatch() {
 	my $cnt = $#{$hosts} + 1;
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $host = $hosts->[$i];
-		$bashUtil->exec(sprintf("%s %s %s %s",
+		$ciomUtil->exec(sprintf("%s %s %s %s",
 			"$ENV{CIOM_HOME}/dispatch.tomcat.to.host.sh",
 			$host->{host},
 			$host->{port},
