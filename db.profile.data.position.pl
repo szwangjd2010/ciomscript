@@ -70,8 +70,7 @@ sub generateDataFile() {
 }
 
 sub importData2Db() {
-	my $cmd = "perl -pE 's|#File#|$fileCsv|mg; s|#Table#|core_position_position_map|mg; s|#Column#|pid,currentPosition,nextPosition|mg;' mysql.load.data.from.file.tpl > _tmp_";
-	system($cmd);
+	system("perl -pE 's|#File#|$fileCsv|mg; s|#Table#|core_position_position_map|mg; s|#Column#|pid,currentPosition,nextPosition|mg;' mysql.load.data.from.file.tpl > _tmp_");
 	system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source ./_tmp_' yxt");
 }
 
