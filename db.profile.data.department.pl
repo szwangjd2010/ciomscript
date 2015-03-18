@@ -72,20 +72,10 @@ sub generateDataFile() {
 }
 
 sub importData2Db() {
-	my $sql =<<'SQL';
-LOAD DATA LOCAL INFILE '/tmp/department.csv'
- REPLACE INTO TABLE core_department
- FIELDS TERMINATED BY ','
- ENCLOSED BY '\'' \
- LINES TERMINATED BY '\n'
- IGNORE 1 LINES
- (orgId,parentId,pid);
-SQL
-
-	$ciomUtil->write("_tmp_", $sql);
-		
-	#system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source ./_tmp_' yxt");
-}
+	my $cmd = "perl -pE 's|#File#|$fileCsv|mg; s|#Table#|core_department|mg; s|#Column#|orgId,parentId,pid|mg;' mysql.load.data.from.file.tpl > _tmp_";
+	system($cmd);
+	system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source ./_tmp_' yxt");
+}		
 
 sub main() {
 	if ($#ARGV == -1) {

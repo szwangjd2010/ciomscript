@@ -70,19 +70,9 @@ sub generateDataFile() {
 }
 
 sub importData2Db() {
-	my $sql =<<'SQL';
-LOAD DATA LOCAL INFILE '/tmp/position.csv'
- REPLACE INTO TABLE core_position_position_map
- FIELDS TERMINATED BY ','
- ENCLOSED BY '\'' \
- LINES TERMINATED BY '\n'
- IGNORE 1 LINES
- (pid,currentPosition,nextPosition);
-SQL
-
-	$ciomUtil->write("_tmp_", $sql);
-		
-	#system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source ./_tmp_' yxt");
+	my $cmd = "perl -pE 's|#File#|$fileCsv|mg; s|#Table#|core_position_position_map|mg; s|#Column#|pid,currentPosition,nextPosition|mg;' mysql.load.data.from.file.tpl > _tmp_";
+	system($cmd);
+	system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source ./_tmp_' yxt");
 }
 
 sub main() {
