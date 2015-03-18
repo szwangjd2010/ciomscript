@@ -50,7 +50,7 @@ preDeployApp() {
 
 postDeployApp() {
 	if [ $asRoot == "AsRoot" ]; then
-		makeAppAsRoot #must be before start tomcats
+		makeAppAsRoot
 	fi
 	
 	startTomcats $host $port $tomcatParent
