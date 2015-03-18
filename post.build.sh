@@ -25,7 +25,7 @@ leaveWorkspace() {
 }
 
 generateAppPackage() {
-	execCmd "cd $appName; zip -0 -r ../$AppPackageFile *"
+	execCmd "cd $appName; zip -r ../$AppPackageFile *"
 }
 
 replaceEnvSpecialFiles() {
