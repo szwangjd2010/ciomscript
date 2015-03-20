@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -I /var/lib/jenkins/workspace/ciom
 use strict;
 use English;
 use Data::Dumper;
@@ -15,4 +15,4 @@ print "1\
 3\
 4";
 
-$util->remoteExec("192.168.0.125", "22", "echo aaa >> /tmp/_1; echo bbb >> /tmp/_1");
+#$util->remoteExec("192.168.0.125", "22", "echo aaa >> /tmp/_1; echo bbb >> /tmp/_1");

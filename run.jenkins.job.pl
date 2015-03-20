@@ -1,4 +1,4 @@
-#!/usr/bin/perl -W
+#!/usr/bin/perl -W -I /var/lib/jenkins/workspace/ciom
 #
 
 use strict;
@@ -29,25 +29,6 @@ $jobList
 HELP
 }
 
-sub constructJenkinsParameters() {
-	my $str = "";
-	while ( my ($key, $value) = each(%{$JobParameters->{$job}}) ) {
-		$str .= " -p $key=$value";
-	}
-	
-	return $str;
-}
-
-sub constructCmd() {
-	my $CmdPrefix = "java -jar /var/lib/jenkins/jenkins-cli.jar"
-		. " -s http://172.17.128.240:8080/"
-		. " -i /var/lib/jenkins/.ssh/id_rsa"
-		. " build $job"
-		. " -s -v";
-		
-	return $CmdPrefix . constructJenkinsParameters();
-}
-
 sub main() {
 	if ($#ARGV < 0) {
 		help();
@@ -55,7 +36,8 @@ sub main() {
 	}
 	
 	my $util = new CiomUtil(1);
-	$util->exec(constructCmd());
+	#$util->runJenkinsJob($job, $JobParameters->{$job});
+	print $util->constructJenkinsJobCmd($job, $JobParameters->{$job});
 }
 
 main();

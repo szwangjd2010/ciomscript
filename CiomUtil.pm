@@ -27,7 +27,7 @@ sub setRunMode() {
 sub log() {
 	my $self = shift;
 	my $cmd = shift;
-	system("echo $cmd | tee -a $self->{Log}");
+	system("printf \"$cmd\" | tee -a $self->{Log}");
 }
 
 sub exec() {
@@ -63,6 +63,40 @@ sub write() {
 	close($h);
 	
 	return 0;
+}
+
+sub _constructJenkinsJobParameters() {
+	my $self = shift;
+	my $hashParams = shift;
+	my $str = "";
+	while ( my ($key, $value) = each(%{$hashParams}) ) {
+		$str .= " -p $key='$value'";
+	}
+	
+	return $str;
+}
+
+sub constructJenkinsJobCmd() {
+	my $self = shift;
+	my $job = shift;
+	my $hashParams = shift;
+
+	my $CmdPrefix = "java -jar /var/lib/jenkins/jenkins-cli.jar"
+		. " -s http://172.17.128.240:8080/"
+		. " -i /var/lib/jenkins/.ssh/id_rsa"
+		. " build $job"
+		. " -s -v";
+		
+	return $CmdPrefix . $self->_constructJenkinsJobParameters($hashParams);
+}
+
+sub runJenkinsJob() {
+	my $self = shift;
+	my $job = shift;
+	my $hashParams = shift;
+
+	my $cmd = $self->constructJenkinsJobCmd($job, $hashParams);
+	$self->exec($cmd);
 }
 
 1;
