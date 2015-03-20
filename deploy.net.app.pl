@@ -9,13 +9,14 @@ use Cwd;
 use CiomUtil;
 
 my $cloudId = $ARGV[0];
+my $appName = $ARGV[1];
 my $ciomUtil = new CiomUtil(0);
 my $OldPwd = getcwd();
 
 my $Job = '__dev.env-yxt.web.deploy.to.host';
 my $CloudInfo = {
 	dev => {
-		appFile => 'C:\ciom.workspace\yxtweb.zip',
+		appFile => 'C:\ciom.workspace\yxtweb.zip'."$appName.zip",
 		wwwLocation => 'c:\www',
 		username => 'ci',
 		password => 'P@ss!23',
