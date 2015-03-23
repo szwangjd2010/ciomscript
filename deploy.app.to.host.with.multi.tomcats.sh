@@ -37,7 +37,7 @@ applyAppPackage() {
 
 backup() {
 	timestamp=$(date +%04Y%02m%02d.%02k%02M%02S)
-	execRemoteCmd $host $port "cd $WebappsLocation; tar -czvf $tomcatParent/$AppPackageFile-$timestamp.tgz $appContextName"
+	execRemoteCmd $host $port "cd $WebappsLocation; tar -czvf $tomcatParent/$AppPackageFile-$timestamp.tgz $appContextName; rm -rf $appContextName"
 }
 
 makeAppAsRoot() {
