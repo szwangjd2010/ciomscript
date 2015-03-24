@@ -6,7 +6,7 @@ function log($str) {
 }
 
 function exec($cmd) {
-	#Invoke-Expression "$cmd"
+	Invoke-Expression "$cmd"
 	log($cmd)
 }
 
@@ -34,11 +34,26 @@ function getTimestamp() {
 	return Get-Date -Format 'yyyyMMdd'
 }
 
-
 function getAppCiomJsonFile($appName) {
 	return "Z:\ciom.win.publish\$appName.ciom.json"
 }
 
 function getAppCiomJson($appName) {
 	return (get-content (getAppCiomJsonFile($appName)) -raw) | convertfrom-json
+}
+
+function upload($localURI, $remoteURI, $user, $password) {
+	exec("&('C:\PuTTY\pscp.exe') -scp -l $user -pw `"$password`" `"$localURI`" `"$remoteURI`"")
+}
+
+function download($remoteURI, $localURI, $user, $password) {
+	exec("&('C:\PuTTY\pscp.exe') -scp -l $user -pw `"$password`" `"$remoteURI`" `"$localURI`"")
+}
+
+function extract($zipFile, $extract2Path) {
+	exec("&('C:\Program Files\2345Soft\HaoZip\HaoZipC') x $zipFile -o$extract2Path")
+}
+
+function compress($zipFile, $path) {
+	exec("&('C:\Program Files\2345Soft\HaoZip\HaoZipC') a -tzip $zipFile $path")
 }

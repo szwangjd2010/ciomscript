@@ -49,7 +49,7 @@ function main() {
 	stopSite
 	backup
 	clean
-	downloadAppPackage
+	#downloadAppPackage
 	extractAppPackage
 	startSite
 }

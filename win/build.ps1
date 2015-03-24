@@ -20,6 +20,11 @@ function buildProject($proj) {
 	exec("$MsBuild $srcPath\$proj $projectCF $outputCF=$outputPath")
 }
 
+function package() {
+	$appBuildout = $targetPath
+	compress $packageFile $appBuildout
+}
+
 function main() {
 	foreach ($item in $CIOM.solutionManifest) {
 		if ($item.endswith(".sln")) {
@@ -30,6 +35,8 @@ function main() {
 			buildProject($item)
 		}
 	}
+	
+	package
 }
 
 $CIOM = getAppCiomJson($appName)
@@ -41,5 +48,7 @@ $MsBuild = "&'C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild.exe' --%"
 $solutionCF = "/t:Rebuild /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
 $projectCF = "/t:ResolveReferences;Compile /t:_WPPCopyWebApplication /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
 $outputCF = "/p:WebProjectOutputDir"
+
+$packageFile = "$workspace\${appName}.zip"
 
 main
