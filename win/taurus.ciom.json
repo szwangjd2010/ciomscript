@@ -1,8 +1,0 @@
-{
-	"username": "administrator",
-	"password": "P@ss!23",
-	"appLocation": "C:\\inetpub\\wwwroot",
-	"hosts": [
-		"172.17.128.243"
-	]
-}

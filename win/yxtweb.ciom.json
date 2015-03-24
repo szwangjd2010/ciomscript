@@ -1,0 +1,26 @@
+{
+	"solutionManifest": [
+		"YXT.Taurus.sln",
+		"Web\\Web.csproj",
+		"Web\\Applications\\YXT.Demo\\YXT.Demo.csproj",
+		"Web\\Applications\\YXT.Group\\YXT.Group.csproj",
+		"Web\\Applications\\YXT.Home\\YXT.Home.csproj",
+		"Web\\Applications\\YXT.Kng\\YXT.Kng.csproj"		
+	],
+	
+	"appURIBase": "http://172.17.127.73/",
+	
+	"workspace": "c:\\ciom.workspace",
+	"app3wPath": "C:\\inetpub\\wwwroot",
+	"username": "administrator",
+	"password": "P@ss!23",	
+	
+	"hosts": [
+		{
+			"ip":	"172.17.128.243",
+			"username": "administrator",
+			"password": "P@ss!23",
+			"app3wPath": "C:\\inetpub\\wwwroot"
+		}
+	]
+}
