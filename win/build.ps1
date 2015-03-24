@@ -1,5 +1,5 @@
 param($appName)
-. c:\ciom.win\ciom.win.util.ps1
+. c:\ciom\win\ciom.win.util.ps1
 
 function getOutputPath($str) {
 	if ($str.indexof("\Applications\") -eq -1) {

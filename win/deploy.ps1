@@ -1,5 +1,5 @@
 param($appName)
-. c:\ciom.win\ciom.win.util.ps1
+. c:\ciom\win\ciom.win.util.ps1
 
 $CIOM = getAppCiomJson($appName)
 $appURI = $CIOM.appURIBase + "${appName}.zip"
@@ -16,7 +16,7 @@ foreach ($hostInfo in $CIOM.hosts) {
 	
 	invoke-command `
 	-comp $ip `
-	-FilePath "c:\ciom.win\do.deploy.on.host.ps1" `
+	-FilePath "c:\ciom\win\do.deploy.on.host.ps1" `
 	-argumentlist $timestamp, $appURI, $appName, $app3wPath `
 	-Credential $cred
 }

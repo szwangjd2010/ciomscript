@@ -1,4 +1,0 @@
-cmd, powershell
-enter-pssession, exit-pssession
-(local run, Set-Item WSMan:\localhost\Client\TrustedHosts *)
-enter-psession -computername 172.17.128.241
