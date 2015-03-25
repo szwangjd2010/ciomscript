@@ -8,7 +8,7 @@ LOAD DATA LOCAL INFILE '#LogFile#'
 		pid,
 		actionType,
 		resultType,
-		targert,
+		target,
 		url,
 		description,
 		userAgent,
