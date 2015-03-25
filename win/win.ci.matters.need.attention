@@ -2,3 +2,9 @@
 1. start jenkins, jenkins slave using administrator account
 
 这样在文件操作权限， ssh known host key等方面会减少一些麻烦
+
+
+2. iis site can not place in shared folder, 
+and "C:\inetpub\wwwroot" folder
+
+otherwise it will throw exception
