@@ -35,7 +35,7 @@ function getTimestamp() {
 }
 
 function getAppCiomJsonFile($appName) {
-	return "C:\ciom.workspace\$appName.ciom.json"
+	return "C:\ciom.workspace\$appName\ciom.json"
 }
 
 function getAppCiomJson($appName) {

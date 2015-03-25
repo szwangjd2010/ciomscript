@@ -1,15 +1,18 @@
 #!/bin/bash
 #
 
-WORKSPACE=${WORKSPACE:-$1}
-appName=$2
+appName=$1
 src=$WORKSPACE/$appName
-dst=/home/jenkins/ciom.slave.win.workspace
+dst=/home/jenkins/ciom.slave.win.workspace/$appName
 
 
 main() {
-	rm -rf $dst/$appName
-	/bin/cp -rf $src $dst/
+	rsync -az \
+		--exclude .svn \
+		--exclude packages/* \
+		--delete \
+		--force \
+		$src/ $dst/
 }
 
 main
