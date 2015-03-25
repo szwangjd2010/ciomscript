@@ -13,6 +13,14 @@ function exec($cmd) {
 	log($cmd)
 }
 
+function startIIS() {
+	iisreset /START
+}
+
+function stopIIS() {
+	iisreset /STOP
+}
+
 function startSite() {
 	exec("$IisAppCtl start site /site.name:$siteName")
 }
@@ -51,11 +59,11 @@ function logActionHeader() {
 
 function main() {
 	logActionHeader
-	stopSite
+	stopIIS
 	backup
 	clean
 	extract
-	startSite
+	startIIS
 }
 
 main
