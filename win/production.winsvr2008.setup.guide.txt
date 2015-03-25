@@ -1,7 +1,10 @@
 1. windows server 2008 RC2
-   administrator account name: ci
+   a. create administrator account name: ci for operation & maintaining
 2. install windows server 2008 SP1
 3. install powershell v3
-4. install IIS
-5. install .NET framework 4.5
-6. install bitvise SSH server, and start it
+4. config WinRM and enable winrm https listen en enable powershell connect it with IP
+
+5. install IIS
+	a. set yxtweb(taurus) site
+6. install .NET framework 4.5
+7. install bitvise SSH server, and start it

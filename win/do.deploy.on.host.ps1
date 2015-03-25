@@ -24,33 +24,37 @@ function stopSite() {
 
 function backup() {
 	$appFullPath = "$app3wPath\$appName"
+	if (!$(test-path $appFullPath)) {
+		return
+	}
+	
 	exec("rename-item $appFullPath ${appFullPath}_${timestamp}")
 }
 
 function clean() {
 	$appFullPath = "$app3wPath\$appName"
+	if (!$(test-path $appFullPath)) {
+		return
+	}
+	
 	exec("remove-item -recurse -force $appFullPath")
 }
 
-function extractAppPackage() {
+function extract() {
 	exec("&('C:\Program Files\2345Soft\HaoZip\HaoZipC') x c:\$appName.zip -o$app3wPath")
 }
 
-function downloadAppPackage() {
-	exec("cd c:\")
-	exec("remove-item -force ${appName}.zip")
-	exec("c:\wget.exe $appURI")
+function logActionHeader() {
+	log("============================================")
+	log($timestamp)
 }
 
 function main() {
-	log("============================================")
-	log($timestamp)
-	
+	logActionHeader
 	stopSite
 	backup
 	clean
-	#downloadAppPackage
-	extractAppPackage
+	extract
 	startSite
 }
 
