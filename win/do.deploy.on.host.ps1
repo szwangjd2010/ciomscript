@@ -1,4 +1,4 @@
-param($timestamp,$appURI,$appName,$app3wPath)
+param($timestamp, $appName, $siteName, $app3wPath)
 
 #import content form ciom.win.util.ps1
 $IisAppCtl = "&'c:\Windows\system32\inetsrv\appcmd.exe'"
@@ -14,11 +14,11 @@ function exec($cmd) {
 }
 
 function startSite() {
-	exec("$IisAppCtl start site /site.name:$appName")
+	exec("$IisAppCtl start site /site.name:$siteName")
 }
 
 function stopSite() {
-	exec("$IisAppCtl stop site /site.name:$appName")
+	exec("$IisAppCtl stop site /site.name:$siteName")
 }
 #end
 
@@ -45,7 +45,7 @@ function extract() {
 }
 
 function logActionHeader() {
-	log("============================================")
+	log("===============================================")
 	log($timestamp)
 }
 

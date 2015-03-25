@@ -1,7 +1,7 @@
 param($appName)
 . c:\ciom\win\ciom.win.util.ps1
 
-function getOutputPath($str) {
+function getProjectBuildOutputPath($str) {
 	if ($str.indexof("\Applications\") -eq -1) {
 		return $targetPath
 	}
@@ -16,7 +16,7 @@ function buildSolution($sln) {
 }
 
 function buildProject($proj) {
-	$outputPath = getOutputPath($proj)
+	$outputPath = getProjectBuildOutputPath($proj)
 	exec("$MsBuild $srcPath\$proj $projectCF $outputCF=$outputPath")
 }
 
@@ -25,7 +25,7 @@ function package() {
 	compress $packageFile $appBuildout
 }
 
-function main() {
+function build() {
 	foreach ($item in $CIOM.solutionManifest) {
 		if ($item.endswith(".sln")) {
 			buildSolution($item)
@@ -34,8 +34,11 @@ function main() {
 		if ($item.endswith(".csproj")) {
 			buildProject($item)
 		}
-	}
-	
+	}	
+}
+
+function main() {
+	build
 	package
 }
 

@@ -1,4 +1,7 @@
 {
+	"appName": "yxtweb",
+	"siteName": "yxtweb",
+	
 	"solutionManifest": [
 		"YXT.Taurus.sln",
 		"Web\\Web.csproj",
@@ -7,8 +10,6 @@
 		"Web\\Applications\\YXT.Home\\YXT.Home.csproj",
 		"Web\\Applications\\YXT.Kng\\YXT.Kng.csproj"		
 	],
-	
-	"appURIBase": "http://172.17.127.73/",
 	
 	"workspace": "c:\\ciom.workspace",
 	"app3wPath": "C:\\inetpub\\wwwroot",
