@@ -12,7 +12,7 @@ foreach ($hostInfo in $CIOM.hosts) {
 	$password = $hostInfo.password
 	$app3wPath = $hostInfo.app3wPath
 	
-	upload $packageFile "${ip}:/c:/" "ci" "P@ss!23"
+	upload $packageFile "${ip}:/c:/" $username "$password"
 	
 	$secPassword = 	ConvertTo-SecureString "$password" -AsPlainText -Force
 	$cred = New-Object System.Management.Automation.PSCredential -argumentlist $username,$secPassword

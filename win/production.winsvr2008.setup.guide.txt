@@ -1,5 +1,4 @@
 1. windows server 2008 RC2
-   a. create administrator account name: ci for operation & maintaining
 2. install windows server 2008 SP1
 3. install powershell v3
 4. config WinRM and enable winrm https listen en enable powershell connect it with IP

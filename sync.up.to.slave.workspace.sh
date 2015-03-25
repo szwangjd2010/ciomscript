@@ -1,9 +1,10 @@
 #!/bin/bash
 #
 
-appName=$1
-src=$WORKSPACE/$appName
-dst=/home/jenkins/ciom.slave.win.workspace/$appName
+workspace=$1
+appName=$2
+src="$workspace/$appName"
+dst="/home/jenkins/ciom.slave.win.workspace/$appName"
 
 
 main() {
