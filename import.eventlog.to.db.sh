@@ -27,7 +27,7 @@ logInfo() {
 
 main() {
 	instanceSQLTpl
-	execSQLFile $Ciom_Mysql_Master 3306 root $Ciom_Mysql_Password load.eventlog.to.db.sql yxt
+	execSQLFile $Ciom_Mysql_Master 3306 root $Ciom_Mysql_Password load.eventlog.to.db.sql yxtlog
 	logInfo
 }
 

@@ -15,5 +15,6 @@ LOAD DATA LOCAL INFILE '#LogFile#'
 		clientIp,
 		eventTime,
 		source,
-		operator
+		operator,
+		orgId
 	);
