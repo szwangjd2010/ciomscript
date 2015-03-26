@@ -12,7 +12,7 @@
 	],
 	
 	"workspace": "c:\\ciom.workspace",
-	"app3wPath": "C:\\inetpub\\wwwroot",
+	"app3wPath": "C:\\www",
 	"username": "administrator",
 	"password": "P@ss!23",	
 	
@@ -21,7 +21,7 @@
 			"ip":	"172.17.128.243",
 			"username": "administrator",
 			"password": "P@ss!23",
-			"app3wPath": "C:\\inetpub\\wwwroot"
+			"app3wPath": "C:\\www"
 		}
 	]
 }
