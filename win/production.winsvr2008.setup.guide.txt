@@ -7,3 +7,4 @@
 	a. set yxtweb(taurus) site
 6. install .NET framework 4.5
 7. install bitvise SSH server, and start it
+8. install 2345好压 （C:\Program Files\2345Soft\HaoZip）
