@@ -1,6 +1,5 @@
 param($timestamp, $appName, $siteName, $app3wPath)
 
-#import content form ciom.win.util.ps1
 $IisAppCtl = "&'c:\Windows\system32\inetsrv\appcmd.exe'"
 $logFile = "c:\ciom.log"
 

@@ -1,10 +1,13 @@
 #!/bin/bash
 #
 
-workspace=$1
-appName=$2
+ver=$1
+env=$2
+appName=$3
+workspace=$4
+
 src="$workspace/$appName"
-dst="/home/jenkins/ciom.slave.win.workspace/$appName"
+dst="/home/jenkins/ciom.slave.win.workspace/$ver/$env/$appName"
 
 
 main() {

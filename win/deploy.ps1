@@ -1,9 +1,10 @@
-param($appName)
+param($ver, $env, $appName)
+. c:\ciom\win\ciom.win.ver.env.util.ps1
 . c:\ciom\win\ciom.win.util.ps1
 
-$CIOM = getAppCiomJson($appName)
+$CIOM = getAppCiomJson
 $siteName = $CIOM.siteName
-$packageFile = $CIOM.workspace + "\${appName}.zip"
+$packageFile = getAppPackageFile
 $timestamp = getLongTimestamp
 
 foreach ($hostInfo in $CIOM.hosts) {

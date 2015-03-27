@@ -34,14 +34,6 @@ function getTimestamp() {
 	return Get-Date -Format 'yyyyMMdd'
 }
 
-function getAppCiomJsonFile($appName) {
-	return "C:\ciom.workspace\$appName\ciom.json"
-}
-
-function getAppCiomJson($appName) {
-	return (get-content (getAppCiomJsonFile($appName)) -raw) | convertfrom-json
-}
-
 function upload($localURI, $remoteURI, $user, $password) {
 	exec("&('C:\PuTTY\pscp.exe') -scp -l $user -pw `"$password`" `"$localURI`" `"$remoteURI`"")
 }

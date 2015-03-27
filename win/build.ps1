@@ -1,5 +1,7 @@
-param($appName)
+param($ver, $env, $appName)
+. c:\ciom\win\ciom.win.ver.env.util.ps1
 . c:\ciom\win\ciom.win.util.ps1
+
 
 function getProjectBuildOutputPath($str) {
 	if ($str.indexof("\Applications\") -eq -1) {
@@ -12,12 +14,12 @@ function getProjectBuildOutputPath($str) {
 }
 
 function buildSolution($sln) {
-	exec("$MsBuild $srcPath\$sln $solutionCF")
+	exec("$MsBuild $sourcePath\$sln $solutionCF")
 }
 
 function buildProject($proj) {
 	$outputPath = getProjectBuildOutputPath($proj)
-	exec("$MsBuild $srcPath\$proj $projectCF $outputCF=$outputPath")
+	exec("$MsBuild $sourcePath\$proj $projectCF $outputCF=$outputPath")
 }
 
 function package() {
@@ -42,16 +44,14 @@ function main() {
 	package
 }
 
-$CIOM = getAppCiomJson($appName)
-$workspace = $CIOM.workspace
-$srcPath = "$workspace\$appName"
-$targetPath = "$workspace\build\$appName"
+$CIOM = getAppCiomJson
+$sourcePath = getAppSourcePath
+$targetPath = getAppTargetPath
+$packageFile = getAppPackageFile
 
 $MsBuild = "&'C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild.exe' --%"
 $solutionCF = "/t:Rebuild /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
 $projectCF = "/t:ResolveReferences;Compile /t:_WPPCopyWebApplication /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
 $outputCF = "/p:WebProjectOutputDir"
-
-$packageFile = "$workspace\${appName}.zip"
 
 main
