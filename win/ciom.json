@@ -17,7 +17,7 @@
 	
 	"hosts": [
 		{
-			"ip":	"172.17.128.243",
+			"ip": "172.17.128.243",
 			"username": "administrator",
 			"password": "P@ss!23",
 			"app3wPath": "C:\\www"

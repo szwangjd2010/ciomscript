@@ -7,7 +7,21 @@ $siteName = $CIOM.siteName
 $packageFile = getAppPackageFile
 $timestamp = getLongTimestamp
 
+function nullset($hostInfo, $name) {
+	if ($hostInfo.$name -eq $null) {
+		$hostInfo | add-member $name $CIOM.$name
+	}
+}
+
+function fillHostInfo($hostInfo) {
+	nullset $hostInfo "username"
+	nullset $hostInfo "password"
+	nullset $hostInfo "app3wPath"
+}
+
 foreach ($hostInfo in $CIOM.hosts) {
+	fillHostInfo $hostInfo
+
 	$ip = $hostInfo.ip;
 	$username = $hostInfo.username
 	$password = $hostInfo.password
