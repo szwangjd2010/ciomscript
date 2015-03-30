@@ -21,7 +21,7 @@ function remoteExecUsingKey($ip, $username, $key, $cmd) {
 }
 
 function upload($localURI, $remoteURI, $user, $password) {
-	exec("$SCP -l $user -pw `"$password`" `"$localURI`" `"$remoteURI`"")
+	exec("$SCP -r -l $user -pw `"$password`" `"$localURI`" `"$remoteURI`"")
 }
 function uploadUsingKey($localURI, $remoteURI, $user, $key) {
 	exec("$SCP -l $user -i $key `"$localURI`" `"$remoteURI`"")
