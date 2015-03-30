@@ -8,24 +8,101 @@ use Data::UUID;
 use CiomUtil;
 use String::Buffer;
 
+my $csv_core_org = "/tmp/core_org.csv";
+my $csv_core_orguser = "/tmp/core_orguser.csv";
+my $csv_core_group = "/tmp/core_group.csv";
+my $csv_core_department = "/tmp/core_department.csv";
+my $csv_core_knowledge = "/tmp/core_knowledge.csv";
+my $csv_core_user_department_map = "/tmp/core_user_department_map.csv";
+my $csv_core_user_group_map = "/tmp/core_user_group_map.csv";
+my $csv_core_user_knowledge = "/tmp/core_user_knowledge.csv";
+my $csv_core_user_role_map = "/tmp/core_user_role_map.csv";
 
-my $L1 = 1500;
-my $L2 = 10;
-my $L3 = 10;
-my $L4 = 10;
+my $buf_core_org = String::Buffer->new();
+my $buf_core_orguser = String::Buffer->new();
+my $buf_core_group = String::Buffer->new();
+my $buf_core_department = String::Buffer->new();
+my $buf_core_knowledge = String::Buffer->new();
+my $buf_core_user_department_map = String::Buffer->new();
+my $buf_core_user_group_map = String::Buffer->new();
+my $buf_core_user_knowledge = String::Buffer->new();
+my $buf_core_user_role_map = String::Buffer->new();
 
-my $fileCsv = "/tmp/position.csv";
-my $buf = String::Buffer->new();
-my $pid = 10;
+my $h_core_org;
+my $h_core_orguser;
+my $h_core_group;
+my $h_core_department;
+my $h_core_knowledge;
+my $h_core_user_department_map;
+my $h_core_user_group_map;
+my $h_core_user_knowledge;
+my $h_core_user_role_map;
+
+my $header_core_org = "pid,code,orgName,siteName,domain";
+my $header_core_orguser = "pid,orgId,password,email,fullName,mobile";
+my $header_core_group = "pid,orgId,name,description,type,status";#type: 1, status: 0-1
+my $header_core_department = "pid,orgId,parentId,departmentName";
+my $header_core_knowledge = "pid,orgId,title,kngType,fileType,fileId";#kngType: 1-6, fileType, 1-2
+my $header_core_user_department_map = "pid,orgId,userId,userType,departmentId";
+my $header_core_user_group_map = "pid,groupId,userId,type";
+my $header_core_user_knowledge = "pid,orgId,userId,knowledgeId,kngType";
+my $header_core_user_role_map = "pid,userId,roleId";#roleId: 100001-100005
+
+sub openFile() {
+	if (!open($h_core_org, '>', $csv_core_org)) {
+		output("Can not open $csv_core_org\n");
+		return 1;
+	}
+	if (!open($h_core_orguser, '>', $csv_core_orguser)) {
+		output("Can not open $csv_core_orguser\n");
+		return 2;
+	}
+	if (!open($h_core_group, '>', $csv_core_group)) {
+		output("Can not open $csv_core_group\n");
+		return 3;
+	}
+	if (!open($h_core_department, '>', $csv_core_department)) {
+		output("Can not open $csv_core_department\n");
+		return 4;
+	}
+	if (!open($h_core_knowledge, '>', $csv_core_knowledge)) {
+		output("Can not open $csv_core_knowledge\n");
+		return 5;
+	}
+	if (!open($h_core_user_department_map, '>', $csv_core_user_department_map)) {
+		output("Can not open $csv_core_user_department_map\n");
+		return 6;
+	}
+	if (!open($h_core_user_group_map, '>', $csv_core_user_group_map)) {
+		output("Can not open $csv_core_user_group_map\n");
+		return 7;
+	}
+	if (!open($h_core_user_knowledge, '>', $csv_core_user_knowledge)) {
+		output("Can not open $csv_core_user_knowledge\n");
+		return 8;
+	}
+	if (!open($h_core_user_role_map, '>', $csv_core_user_role_map)) {
+		output("Can not open $csv_core_user_role_map\n");
+		return 9;
+	}
+}
+
+sub closeFile() {
+	close($h_core_org);
+	close($h_core_orguser);
+	close($h_core_group);
+	close($h_core_department);
+	close($h_core_knowledge);
+	close($h_core_user_department_map);
+	close($h_core_user_group_map);
+	close($h_core_user_knowledge);
+	close($h_core_user_role_map);
+}
+
 my $ug = Data::UUID->new();	
-my $hOut;
 
-my $uuid1 = "";
-my $uuid2 = "";
-my $uuid3 = "";
-my $uuid4 = "";
-
-sub newLine($$) {
+sub newLine($$$) {
+	my $buf = shift;
 	my $current = shift;
 	my $next = shift;
 
@@ -38,11 +115,6 @@ sub newLine($$) {
 }
 
 sub generateDataFile() {
-	if (!open($hOut, '>', $fileCsv)) {
-		output("Can not open $fileCsv\n");
-		return 1;
-	}
-
 	my $head = "pid,currentPosition,nextPosition";
 	$buf->writeln($head);
 	for (my $m1 = 0; $m1 < $L1; $m1++) {

@@ -23,7 +23,6 @@ my $CloudHosts = {
 			{host => "192.168.0.125", 	port => "22"}
 		]
 	},
-	
 
 	aliyun_ws1 => {
 		tomcatParent=> "/opt/ws1",
@@ -31,48 +30,6 @@ my $CloudHosts = {
 		basePortDelta => 0,
 		fileJavaOptsTpl => "tomcat.catalina.java.opts.tpl",
 		fileHttpListenTpl => "tomcat.server.xml.http.section.tpl",		
-		hosts => [
-			{host => "121.41.62.20", 	port => "22"},#back
-			{host => "121.40.200.186", 	port => "22"},#api1
-			{host => "121.41.37.12", 	port => "22"},#api2
-			{host => "121.40.202.100", 	port => "22"} #web1
-		]
-	},
-
-	aliyun_ws2 => {
-		tomcatParent=> "/opt/ws2",
-		tomcatAmount => 1,
-		basePortDelta => 10,
-		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
-		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
-		hosts => [
-			{host => "121.41.62.20", 	port => "22"},#back
-			{host => "121.40.200.186", 	port => "22"},#api1
-			{host => "121.41.37.12", 	port => "22"},#api2
-			{host => "121.40.202.100", 	port => "22"} #web1
-		]
-	},
-
-	aliyun_ws3 => {
-		tomcatParent=> "/opt/ws3",
-		tomcatAmount => 1,
-		basePortDelta => 20,
-		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
-		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
-		hosts => [
-			{host => "121.41.62.20", 	port => "22"},#back
-			{host => "121.40.200.186", 	port => "22"},#api1
-			{host => "121.41.37.12", 	port => "22"},#api2
-			{host => "121.40.202.100", 	port => "22"} #web1
-		]
-	},	
-
-	aliyun_ws4 => {
-		tomcatParent=> "/opt/ws4",
-		tomcatAmount => 1,
-		basePortDelta => 30,
-		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
-		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
 		hosts => [
 			{host => "121.41.62.20", 	port => "22"},#back
 			{host => "121.40.200.186", 	port => "22"},#api1

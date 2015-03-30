@@ -35,7 +35,7 @@ toTest() {
 }
 
 toAliyun_ws() {
-	wsTomcatParent="/opt/ws$1"
+	wsTomcatParent="/opt/ws"
 	port=22
 	declare -A hosts=( \
 		["Admin"]="121.41.62.20" \
@@ -61,20 +61,8 @@ main() {
 		toTest
 	fi
 
-	if [ "$cloudId" == "aliyun-ws1" ]; then
-		toAliyun_ws 1
-	fi
-
-	if [ "$cloudId" == "aliyun-ws2" ]; then
-		toAliyun_ws 2
-	fi
-
-	if [ "$cloudId" == "aliyun-ws3" ]; then
-		toAliyun_ws 3
-	fi
-
-	if [ "$cloudId" == "aliyun-ws4" ]; then
-		toAliyun_ws 4
+	if [ "$cloudId" == "aliyun-ws" ]; then
+		toAliyun_ws
 	fi
 }
 
