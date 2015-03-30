@@ -5,7 +5,7 @@ param($ver, $env, $appName)
 $CIOM = getAppCiomJson
 $siteName = $CIOM.siteName
 $packageFile = getAppPackageFile
-$timestamp = getLongTimestamp
+$timestamp = getTimestamp
 
 function nullset($hostInfo, $name) {
 	if ($hostInfo.$name -eq $null) {

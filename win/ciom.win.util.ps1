@@ -58,10 +58,10 @@ function stopSite() {
 	exec("$IisAppCtl stop site /site.name:$appName")
 }
 
-function getLongTimestamp() {
+function getTimestamp() {
 	return Get-Date -Format 'yyyyMMdd-Hmmss'
 }
 
-function getTimestamp() {
+function getDatestamp() {
 	return Get-Date -Format 'yyyyMMdd'
 }
