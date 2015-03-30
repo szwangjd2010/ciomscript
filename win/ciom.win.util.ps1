@@ -59,7 +59,7 @@ function stopSite() {
 }
 
 function getTimestamp() {
-	return Get-Date -Format 'yyyyMMdd-Hmmss'
+	return Get-Date -Format 'yyyyMMdd-HHmmss'
 }
 
 function getDatestamp() {
