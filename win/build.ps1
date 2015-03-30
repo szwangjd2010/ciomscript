@@ -39,7 +39,13 @@ function build() {
 	}	
 }
 
+function clean() {
+	exec("remove-item '$targetPath\*' -recurse -force")
+	exec("remove-item '$packageFile' -force")
+}
+
 function main() {
+	clean
 	build
 	package
 }
