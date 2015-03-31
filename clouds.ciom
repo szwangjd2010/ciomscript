@@ -1,0 +1,24 @@
+our $Clouds = {
+
+	dev => {
+		tomcatParent => '/opt/ws',
+		port => 22,
+
+		hosts => [
+			{ip => "172.17.128.232", port => 22, tomcatParent => '/opt/ws-1'},
+			{ip => "172.17.128.232", port => 22, tomcatParent => '/opt/ws-2'},
+			{ip => "172.17.128.232", port => 22, tomcatParent => '/opt/ws-3'}
+		]
+	},
+	
+	ucloud => {
+		tomcatParent => '/opt/ws',
+		port => 22,
+
+		hosts => [
+			{ip => "172.17.128.232", port => 22, tomcatParent => '/opt/ws-1'},
+			{ip => "172.17.128.232", port => 22, tomcatParent => '/opt/ws-2'},
+			{ip => "172.17.128.232", port => 22, tomcatParent => '/opt/ws-3'}
+		]
+	}
+};

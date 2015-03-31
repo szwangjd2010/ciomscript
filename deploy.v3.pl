@@ -7,35 +7,15 @@ use Data::Dumper;
 use Cwd;
 use CiomUtil;
 
+require './clouds.ciom';
+our $Clouds;
+
 my $cloudId = $ARGV[0];
 my $appName = $ARGV[1];
 my $asRoot = $ARGV[2] || 'NotAsRoot';
-my $ciomUtil = new CiomUtil(1);
+my $ciomUtil = new CiomUtil(0);
 my $OldPwd = getcwd();
 
-my $Clouds = {
-	ucloud => {
-		tomcatParent => '/opt/ws',
-		port => 22,
-
-		hosts => [
-			{ip => "172.17.128.232", port => 22, tomcatParent => '/opt/ws-1'},
-			{ip => "172.17.128.232", port => 22, tomcatParent => '/opt/ws-2'},
-			{ip => "172.17.128.232", port => 22, tomcatParent => '/opt/ws-3'}
-		]
-	},
-
-	dev => {
-		tomcatParent => '/opt/ws',
-		port => 22,
-
-		hosts => [
-			{ip => "172.17.128.232", port => 22, tomcatParent => '/opt/ws-1'},
-			{ip => "172.17.128.232", port => 22, tomcatParent => '/opt/ws-2'},
-			{ip => "172.17.128.232", port => 22, tomcatParent => '/opt/ws-3'}
-		]
-	},
-};
 sub enterWorkspace() {
 	;
 }
