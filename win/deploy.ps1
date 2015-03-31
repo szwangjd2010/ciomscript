@@ -17,6 +17,25 @@ function fillHostInfo($hostInfo) {
 	nullset $hostInfo "username"
 	nullset $hostInfo "password"
 	nullset $hostInfo "app3wPath"
+	nullset $hostInfo "typeRM"
+}
+
+function deployUsingWinRM($ip, $username, $password, $app3wPath) {
+	$secPassword = 	ConvertTo-SecureString "$password" -AsPlainText -Force
+	$cred = New-Object System.Management.Automation.PSCredential -argumentlist $username,$secPassword
+	
+	invoke-command `
+	-comp $ip `
+	-FilePath "c:\ciom\win\do.deploy.on.host.ps1" `
+	-argumentlist $timestamp, $appName, $siteName, $app3wPath `
+	-Credential $cred
+}
+
+function deployUsingSSH($ip, $username, $password, $app3wPath) {
+	upload "c:\ciom\win\do.deploy.on.host.ps1" "${ip}:/c:/" $username "$password"
+	
+	$argus = "-timestamp $timestamp -appName $appName -siteName $siteName -app3wPath $app3wPath"
+	remoteExec $ip $username "$password" "powershell.exe -file c:\do.deploy.on.host.ps1 $argus"
 }
 
 foreach ($hostInfo in $CIOM.hosts) {
@@ -29,12 +48,9 @@ foreach ($hostInfo in $CIOM.hosts) {
 	
 	upload $packageFile "${ip}:/c:/" $username "$password"
 	
-	$secPassword = 	ConvertTo-SecureString "$password" -AsPlainText -Force
-	$cred = New-Object System.Management.Automation.PSCredential -argumentlist $username,$secPassword
-	
-	invoke-command `
-	-comp $ip `
-	-FilePath "c:\ciom\win\do.deploy.on.host.ps1" `
-	-argumentlist $timestamp, $appName, $siteName, $app3wPath `
-	-Credential $cred
+	if ($hostInfo.typeRM -eq "winrm") {
+		deployUsingWinRM $ip $username "$password" $app3wPath
+	} else {
+		deployUsingSSH $ip $username "$password" $app3wPath
+	}
 }

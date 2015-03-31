@@ -1,6 +1,5 @@
 param($timestamp, $appName, $siteName, $app3wPath)
 
-$IisAppCtl = "&'c:\Windows\system32\inetsrv\appcmd.exe'"
 $logFile = "c:\ciom.log"
 
 function log($str) {
@@ -18,14 +17,6 @@ function startIIS() {
 
 function stopIIS() {
 	iisreset /STOP
-}
-
-function startSite() {
-	exec("$IisAppCtl start site /site.name:$siteName")
-}
-
-function stopSite() {
-	exec("$IisAppCtl stop site /site.name:$siteName")
 }
 #end
 

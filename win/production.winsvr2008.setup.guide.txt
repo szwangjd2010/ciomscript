@@ -2,9 +2,10 @@
 2. install windows server 2008 SP1
 3. install powershell v3
 4. config WinRM and enable winrm https listen en enable powershell connect it with IP
+5. in powershell, execute "Set-ExecutionPolicy Unrestricted"
 
 5. install IIS
-	a. set yxtweb(taurus) site
+	a. set yxtweb site
 6. install .NET framework 4.5
 7. install bitvise SSH server, and start it
 8. install 2345好压 （C:\Program Files\2345Soft\HaoZip）
