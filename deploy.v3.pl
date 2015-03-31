@@ -7,13 +7,13 @@ use Data::Dumper;
 use Cwd;
 use CiomUtil;
 
-require './clouds.ciom';
+require "$ENV{JENKINS_HOME}/workspace/ciom/clouds.ciom";
 our $Clouds;
 
 my $cloudId = $ARGV[0];
 my $appName = $ARGV[1];
 my $asRoot = $ARGV[2] || 'NotAsRoot';
-my $ciomUtil = new CiomUtil(0);
+my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
 sub enterWorkspace() {
