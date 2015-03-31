@@ -5,6 +5,17 @@ use Data::Dumper;
 
 use CiomUtil;
 
+print $ARGV[0] || "ARGV[0]";
+print $ARGV[1] || "ARGV[1]";
+print $ARGV[2] || "ARGV[2]";
+
+
+my $cmd =" perl \
+sd\
+sdf
+";
+
+print $cmd;
 my $util = new CiomUtil(0);
 use Data::UUID;
 my $ug = Data::UUID->new();	
