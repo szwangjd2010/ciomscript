@@ -71,7 +71,7 @@ my $Tabs= {
 		counter => 0,
 		file=>'/tmp/core_user_department_map.csv',
 		buf => String::Buffer->new(),
-		cols => 'pid,orgId,userId,userType,departmentId'
+		cols => 'pid,orgId,userId,departmentId'
 	},
 	core_user_group_map => {
 		h => -1,
@@ -115,7 +115,7 @@ sub increaseCounterAndFlush($) {
 }
 
 sub core_org_line($) {
-#cols => 'pid,code,orgName,siteName,domain'
+	#cols => 'pid,code,orgName,siteName,domain'
 	my $orgId = shift;
 
 	my $tab = $Tabs->{core_org};
@@ -124,7 +124,7 @@ sub core_org_line($) {
 }
 
 sub core_orguser_line($$) {
-#cols => 'pid,orgId,password,email,fullName,mobile'
+	#cols => 'pid,orgId,password,email,fullName,mobile'
 	my $orgId = shift;
 	my $userId = shift;
 
@@ -135,7 +135,7 @@ sub core_orguser_line($$) {
 
 my $Role = [100001, 100002, 100003, 100004, 100005];
 sub core_user_role_map_line($$) {
-#cols => 'pid,userId,roleId'
+	#cols => 'pid,userId,roleId'
 	my $pid = shift;
 	my $userId = shift;
 
@@ -146,7 +146,7 @@ sub core_user_role_map_line($$) {
 }
 
 sub core_group_line($$) {
-#cols => 'pid,orgId,name,description,type,status'#type: 1, status: 0-1
+	#cols => 'pid,orgId,name,description,type,status'#type: 1, status: 0-1
 	my $orgId = shift;
 	my $groupId = shift;
 
@@ -157,7 +157,7 @@ sub core_group_line($$) {
 }
 
 sub core_department_line($$) {
-#cols => 'pid,orgId,parentId,departmentName'
+	#cols => 'pid,orgId,parentId,departmentName'
 	my $orgId = shift;
 	my $departmentId = shift;
 	my $parentId = shift || 'NULL';
@@ -168,7 +168,7 @@ sub core_department_line($$) {
 }
 
 sub core_knowledge_line($$) {
-#cols => 'pid,orgId,title,kngType,fileType,fileId'#kngType: 1-6, fileType, 1-2
+	#cols => 'pid,orgId,title,kngType,fileType,fileId'#kngType: 1-6, fileType, 1-2
 	my $orgId = shift;
 	my $knowledgeId = shift;
 	my $fileId = shift;
@@ -182,7 +182,7 @@ sub core_knowledge_line($$) {
 }
 
 sub core_file_info_line($$) {
-#cols => 'pid,name'
+	#cols => 'pid,name'
 	my $fileId = shift;
 
 	my $tab = $Tabs->{core_file_info};
@@ -190,20 +190,112 @@ sub core_file_info_line($$) {
 	increaseCounterAndFlush($tab);		
 }
 
-my $ConvertedFormat = ['pdf', 'html4', 'html5', 'mp4', 'flv'];
-sub core_convert_item_line($$) {
-#cols => 'pid,knowledgeId,fileId,format'
+sub core_convert_item_line($$$$) {
+	#cols => 'pid,knowledgeId,fileId,format'
 	my $itemId = shift;
 	my $knowledgeId = shift;
 	my $fileId = shift;
+	my $format = shift;
 
 	my $tab = $Tabs->{core_convert_item};
-	my $idx = $tab->{counter} % 5;
-	my $format =$ConvertedFormat->[$idx];
 	$tab->{buf}->writeln("$itemId,knowledgeId,$fileId,$format");
 	increaseCounterAndFlush($tab);		
 }
 
+sub core_user_group_map_line($$$$) {
+	#cols => 'pid,groupId,userId,type'
+	my $pid = shift;
+	my $groupId = shift;
+	my $userId = shift;
+	my $type = shift;
+
+	my $tab = $Tabs->{core_user_group_map};
+	$tab->{buf}->writeln("$pid,groupId,$userId,$type");
+	increaseCounterAndFlush($tab);		
+}
+sub generate_core_user_group_map($$) {
+	#cols => 'pid,groupId,userId,type'	
+	my $Users = shift;
+	my $Groups = shift;
+
+	my $groupCnt = $#{$Groups} + 1;
+	my $userCnt = $#{$Users} + 1;
+
+	my $userPerGroup = int($userCnt / $groupCnt);
+
+	for (my $i = 0; $i < $groupCnt; $i++) {
+		for (my $j = 0; $j < $userPerGroup; $j++) {
+			my $pid = $ug->create_str();
+			my $groupId = $Groups->[$i];
+			my $userId = $Users->[$userPerGroup * $i + $j];
+			my $type = ($j > 1 ? 3 : ($j + 1));
+			core_user_group_map_line($pid, $groupId, $userId, $type);
+		}
+	}
+}
+
+sub core_user_department_map_line($$$$) {
+	#cols => 'pid,orgId,userId,userType,departmentId'
+	my $pid = shift;
+	my $orgId = shift;
+	my $userId = shift;
+	my $userType = shift;
+	my $departmentId = shift;
+
+	my $tab = $Tabs->{core_user_department_map};
+	$tab->{buf}->writeln("$pid,orgId,$userId,$userType,$departmentId");
+	increaseCounterAndFlush($tab);		
+}
+sub generate_core_user_department_map($$$$$) {
+	#cols => 'pid,orgId,userId,userType,departmentId'
+	my $orgId = shift;
+	my $Departments_1st = shift;
+	my $Departments_2nd = shift;
+	my $Departments_3rd = shift;
+	my $Users = shift;
+	
+	my $department_1stCnt = $#{$Departments_1st} + 1;
+	my $department_2ndCnt = $#{$Departments_2nd} + 1;
+	my $department_3rdCnt = $#{$Departments_3rd} + 1;
+	my $userCnt = $#{$Users} + 1;
+
+	my $userPerDepartment = int($userCnt / ($department_1stCnt + $department_2ndCnt + $department_3rdCnt));
+	my $userPer1st = 1;
+	my $userPer2nd = 1;
+	my $userPer3rd = $userPerDepartment - 2;
+
+	my $globalIdx = 0;
+	for (my $i = 0; $i < $department_1stCnt; $i++) {
+		my $pid = $ug->create_str();
+		my $userId = $Users->[$globalIdx];
+		my $type = 1;
+		my $departmentId = $Departments_1st->[$i];
+		core_user_department_map_line($pid, $orgId, $userId, $type, $departmentId);
+
+		$globalIdx++;
+	}
+	for (my $i = 0; $i < $department_2ndCnt; $i++) {
+		my $pid = $ug->create_str();
+		my $userId = $Users->[$globalIdx];
+		my $type = 1;
+		my $departmentId = $Departments_2nd->[$i];
+		core_user_department_map_line($pid, $orgId, $userId, $type, $departmentId);
+
+		$globalIdx++;
+	}
+	for (my $i = 0; $i < $department_3rdCnt; $i++) {
+		my $pid = $ug->create_str();
+		my $userId = $Users->[$globalIdx];
+		my $type = $i == 0 ? 0 : 1;
+		my $departmentId = $Departments_2nd->[$i];
+		core_user_department_map_line($pid, $orgId, $userId, $type, $departmentId);
+
+		$globalIdx++;
+	}
+
+}
+
+my $ConvertedFormat = ['pdf', 'html4', 'html5', 'mp4', 'flv'];
 sub generateDataFile() {
 	my $core_org_count = 10000;
 	for (my $idx_core_org = 0; $idx_core_org < $core_org_count; $idx_core_org++) {
@@ -211,13 +303,22 @@ sub generateDataFile() {
 		core_org_line($orgId);
 
 
+		#Begin for maps#
 		my $Groups = [];
+		my $Users = [];
+		my $Departments_1st = [];
+		my $Departments_2nd = [];
+		my $Departments_3rd = [];
+		my $Knowledges = [];
+		#End
+
 		#100 group per org
 		my $core_group_count = 100;
 		for (my $idx_core_group = 0; $idx_core_group < $core_group_count; $idx_core_group++) {
 			my $groupId = $ug->create_str();
-			
 			core_group_line($orgId, $groupId);
+
+			push @{$Groups} $groupId;
 		}
 
 		#1000 user per org
@@ -225,9 +326,11 @@ sub generateDataFile() {
 		for (my $idx_core_orguser = 0; $idx_core_orguser < $core_orguser_count; $idx_core_orguser++) {
 			my $userId = $ug->create_str();	
 			core_orguser_line($orgId, $userId);
-
+			
 			my $userRoleMapId = $ug->create_str();	
 			core_user_role_map_line($userRoleMapId, $userId);
+
+			push @{$Users} $userId;
 		}
 
 		
@@ -241,13 +344,19 @@ sub generateDataFile() {
 			my $departmentId_1st = $ug->create_str();
 			core_department($orgId, $departmentId_1st);
 
+			push @{$Departments_1st} $departmentId_1st;
+
 			for (my $idx_core_department_2nd = 0; $idx_core_department_2nd < $core_department_count_2nd; $idx_core_department_2nd++) {
 				my $departmentId_2nd = $ug->create_str();
 				core_department($orgId, $departmentId_2nd ,$departmentId_1st);
 
+				push @{$Departments_2nd} $departmentId_2nd;
+
 				for (my $idx_core_department_3rd = 0; $idx_core_department_3rd < $core_department_count_3rd; $idx_core_department_3rd++) {
 					my $departmentId_3rd = $ug->create_str();
 					core_department($orgId, $departmentId_3rd ,$departmentId_2nd);
+
+					push @{$Departments_3rd} $departmentId_3rd;
 				}
 			}
 		}
@@ -261,9 +370,13 @@ sub generateDataFile() {
 			my $fileId = $ug->create_str();
 			core_knowledge_line($orgId, $knowledgeId, $fileId);
 			core_file_info_line($fileId);
+
+			push @{$Knowledges} $knowledgeId;
+
 			for (my $idx_core_convert_info = 0; $idx_core_convert_info < $core_convert_item_count; $idx_core_convert_info++) {
 				my $itemId = $ug->create_str();
-				core_convert_item_line($itemId, $knowledgeId, $fileId);
+				my $format = $ConvertedFormat->[$idx_core_convert_info];
+				core_convert_item_line($itemId, $knowledgeId, $fileId, $format);
 			}
 		}
 
