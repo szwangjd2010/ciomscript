@@ -264,14 +264,12 @@ sub generate_core_user_knowledge($$$) {
 	my $knowledgeCnt = $#{$Knowledges} + 1;
 	my $userCnt = $#{$Users} + 1;
 
-print "3333333333333333 $knowledgeCnt - $userCnt\n";
 	my $min = $knowledgeCnt > $userCnt ? $userCnt : $knowledgeCnt;
 
 	for (my $i = 0; $i < $min; $i++) {
 		my $pid = $ug->create_str();
 		my $userId = $Users->[$i];
 		my $knowledgeId = $Knowledges->[$i];
-print "3333333333333333 $knowledgeCnt - $userCnt\n";		
 		core_user_knowledge_line($pid, $orgId, $userId, $knowledgeId);
 	}
 }
