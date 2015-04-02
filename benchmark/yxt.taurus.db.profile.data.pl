@@ -335,7 +335,7 @@ sub generate_core_user_department_map($$$$$) {
 		my $pid= getUuid();
 		my $userId = $Users->[$globalIdx];
 		my $type = $i == 0 ? 0 : 1;
-		my $departmentId = $Departments_2nd->[$i];
+		my $departmentId = $Departments_3rd->[$i];
 		core_user_department_map_line($pid, $orgId, $userId, $type, $departmentId);
 
 		$globalIdx++;
@@ -363,15 +363,15 @@ sub SetCounts() {
 	#1000 knowledge per org
 	#5 differnt convert item file per file
 	our $core_knowledge_count = 300;
-	our $core_convert_item_count = 6;	
+	our $core_convert_item_count = 5;	
 }
 
 sub SetCounts_test() {
 	#org count
-	our $core_org_count = 10;
+	our $core_org_count = 1;
 
 	#100 group per org
-	our $core_group_count = 10;
+	our $core_group_count = 2;
 
 	#1000 user per org
 	our $core_orguser_count = 10;
