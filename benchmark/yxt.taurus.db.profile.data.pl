@@ -89,6 +89,10 @@ my $Tabs= {
 };
 my $ug = Data::UUID->new();	
 
+sub getUuid() {
+	return $ug->create_str();
+}
+
 sub openFile() {
 	while ( my ($k, $v) = each(%{$Tabs}) ) {
         if (!open($v->{h}, '>', $v->{file})) {
@@ -112,17 +116,21 @@ sub initTabHeader2Buf() {
 sub flushBuf2File() {
 	while ( my ($k, $v) = each(%{$Tabs}) ) {
 		my $h = $v->{h};
-        print $h $v->{buf}->flush();
+		my $str = $v->{buf}->flush();
+        if (defined($str)) {
+        	print $h $str;
+        	print "writing $v->{file} - $v->{counter} lines ...\n";
+        }
     }	
 }
 
 sub increaseCounterAndFlush($) {
 	my $tab = shift;
-
 	$tab->{counter}++;
 	if ($tab->{counter} % 100 == 0) {
 		my $h = $tab->{h};
-		print $h $tab->{buf}->flush();
+		print $h $tab->{buf}->flush() || '';
+		print "writing $tab->{file} - $tab->{counter} lines ...\n";
 	}
 }
 
@@ -235,7 +243,7 @@ sub generate_core_user_group_map($$) {
 
 	for (my $i = 0; $i < $groupCnt; $i++) {
 		for (my $j = 0; $j < $userPerGroup; $j++) {
-			my $pid = $ug->create_str();
+			my $pid= getUuid();
 			my $groupId = $Groups->[$i];
 			my $userId = $Users->[$userPerGroup * $i + $j];
 			my $type = ($j > 1 ? 3 : ($j + 1));
@@ -267,7 +275,7 @@ sub generate_core_user_knowledge($$$) {
 	my $min = $knowledgeCnt > $userCnt ? $userCnt : $knowledgeCnt;
 
 	for (my $i = 0; $i < $min; $i++) {
-		my $pid = $ug->create_str();
+		my $pid= getUuid();
 		my $userId = $Users->[$i];
 		my $knowledgeId = $Knowledges->[$i];
 		core_user_knowledge_line($pid, $orgId, $userId, $knowledgeId);
@@ -306,7 +314,7 @@ sub generate_core_user_department_map($$$$$) {
 
 	my $globalIdx = 0;
 	for (my $i = 0; $i < $department_1stCnt; $i++) {
-		my $pid = $ug->create_str();
+		my $pid= getUuid();
 		my $userId = $Users->[$globalIdx];
 		my $type = 1;
 		my $departmentId = $Departments_1st->[$i];
@@ -315,7 +323,7 @@ sub generate_core_user_department_map($$$$$) {
 		$globalIdx++;
 	}
 	for (my $i = 0; $i < $department_2ndCnt; $i++) {
-		my $pid = $ug->create_str();
+		my $pid= getUuid();
 		my $userId = $Users->[$globalIdx];
 		my $type = 1;
 		my $departmentId = $Departments_2nd->[$i];
@@ -324,7 +332,7 @@ sub generate_core_user_department_map($$$$$) {
 		$globalIdx++;
 	}
 	for (my $i = 0; $i < $department_3rdCnt; $i++) {
-		my $pid = $ug->create_str();
+		my $pid= getUuid();
 		my $userId = $Users->[$globalIdx];
 		my $type = $i == 0 ? 0 : 1;
 		my $departmentId = $Departments_2nd->[$i];
@@ -360,10 +368,10 @@ sub SetCounts() {
 
 sub SetCounts_test() {
 	#org count
-	our $core_org_count = 1;
+	our $core_org_count = 10;
 
 	#100 group per org
-	our $core_group_count = 2;
+	our $core_group_count = 10;
 
 	#1000 user per org
 	our $core_orguser_count = 10;
@@ -396,7 +404,7 @@ sub constructFile() {
 	our $core_convert_item_count;	
 
 	for (my $idx_core_org = 0; $idx_core_org < $core_org_count; $idx_core_org++) {
-		my $orgId = $ug->create_str();
+		my $orgId= getUuid();
 		core_org_line($orgId);
 
 
@@ -410,7 +418,7 @@ sub constructFile() {
 		#End
 
 		for (my $idx_core_group = 0; $idx_core_group < $core_group_count; $idx_core_group++) {
-			my $groupId = $ug->create_str();
+			my $groupId= getUuid();
 			my $status = $idx_core_group % 2;
 			core_group_line($orgId, $groupId, $status);
 
@@ -418,10 +426,10 @@ sub constructFile() {
 		}
 
 		for (my $idx_core_orguser = 0; $idx_core_orguser < $core_orguser_count; $idx_core_orguser++) {
-			my $userId = $ug->create_str();	
+			my $userId= getUuid();	
 			core_orguser_line($orgId, $userId);
 			
-			my $pid = $ug->create_str();
+			my $pid= getUuid();
 			my $roleId = $Role->[$idx_core_orguser % 5];
 			core_user_role_map_line($pid, $userId, $roleId);
 
@@ -430,19 +438,19 @@ sub constructFile() {
 
 		
 		for (my $idx_core_department_1st = 0; $idx_core_department_1st < $core_department_count_1st; $idx_core_department_1st++) {
-			my $departmentId_1st = $ug->create_str();
+			my $departmentId_1st= getUuid();
 			core_department_line($orgId, $departmentId_1st, 'NULL');
 
 			push(@{$Departments_1st}, $departmentId_1st);
 
 			for (my $idx_core_department_2nd = 0; $idx_core_department_2nd < $core_department_count_2nd; $idx_core_department_2nd++) {
-				my $departmentId_2nd = $ug->create_str();
+				my $departmentId_2nd= getUuid();
 				core_department_line($orgId, $departmentId_2nd ,$departmentId_1st);
 
 				push(@{$Departments_2nd}, $departmentId_2nd);
 
 				for (my $idx_core_department_3rd = 0; $idx_core_department_3rd < $core_department_count_3rd; $idx_core_department_3rd++) {
-					my $departmentId_3rd = $ug->create_str();
+					my $departmentId_3rd= getUuid();
 					core_department_line($orgId, $departmentId_3rd ,$departmentId_2nd);
 
 					push(@{$Departments_3rd}, $departmentId_3rd);
@@ -451,8 +459,8 @@ sub constructFile() {
 		}
 
 		for (my $idx_core_knowledge = 0; $idx_core_knowledge < $core_knowledge_count; $idx_core_knowledge++) {
-			my $knowledgeId = $ug->create_str();
-			my $fileId = $ug->create_str();
+			my $knowledgeId= getUuid();
+			my $fileId= getUuid();
 			my $kngType = $idx_core_knowledge % 7 || 1;
 			my $fileType = $idx_core_knowledge % 3 || 1;
 
@@ -462,7 +470,7 @@ sub constructFile() {
 			push(@{$Knowledges}, $knowledgeId);
 
 			for (my $idx_core_convert_info = 0; $idx_core_convert_info < $core_convert_item_count; $idx_core_convert_info++) {
-				my $itemId = $ug->create_str();
+				my $itemId= getUuid();
 				my $format = $ConvertedFormat->[$idx_core_convert_info];
 				core_convert_item_line($itemId, $knowledgeId, $fileId, $format);
 			}
@@ -483,7 +491,8 @@ sub importData2Db() {
 }
 
 sub main() {
-	SetCounts_test();
+	#SetCounts_test();
+	SetCounts();
 	initTabHeader2Buf();
 	constructFile();
 }
