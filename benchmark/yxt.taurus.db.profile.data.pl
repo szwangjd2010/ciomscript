@@ -77,7 +77,7 @@ my $Tabs= {
 		counter => 0,
 		file=>'/tmp/ciom/core_user_group_map.csv',
 		buf => String::Buffer->new(),
-		cols => 'pid,groupId,userId,type'
+		cols => 'pid,orgId,groupId,userId,type'
 	},
 	core_user_knowledge => {
 		h => undef,
@@ -220,19 +220,20 @@ sub core_convert_item_line($$$$) {
 	increaseCounterAndFlush($tab);		
 }
 
-sub core_user_group_map_line($$$$) {
-	#cols => 'pid,groupId,userId,type'
+sub core_user_group_map_line($$$$$) {
+	#cols => 'pid,orgId,groupId,userId,type'
 	my $pid = shift;
+	my $orgId = shift;
 	my $groupId = shift;
 	my $userId = shift;
 	my $type = shift;
 
 	my $tab = $Tabs->{core_user_group_map};
-	$tab->{buf}->writeln("$pid,$groupId,$userId,$type");
+	$tab->{buf}->writeln("$pid,$orgId,$groupId,$userId,$type");
 	increaseCounterAndFlush($tab);		
 }
-sub generate_core_user_group_map($$) {
-	#cols => 'pid,groupId,userId,type'	
+sub generate_core_user_group_map($$$) {
+	my $orgId = shift;	
 	my $Users = shift;
 	my $Groups = shift;
 
@@ -247,7 +248,7 @@ sub generate_core_user_group_map($$) {
 			my $groupId = $Groups->[$i];
 			my $userId = $Users->[$userPerGroup * $i + $j];
 			my $type = ($j > 1 ? 3 : ($j + 1));
-			core_user_group_map_line($pid, $groupId, $userId, $type);
+			core_user_group_map_line($pid, $orgId, $groupId, $userId, $type);
 		}
 	}
 }
@@ -476,7 +477,7 @@ sub constructFile() {
 			}
 		}
 
-		generate_core_user_group_map($Users, $Groups);
+		generate_core_user_group_map($orgId, $Users, $Groups);
 		generate_core_user_department_map($orgId, $Departments_1st, $Departments_2nd, $Departments_3rd, $Users);
 		generate_core_user_knowledge($orgId, $Users, $Knowledges);
 	}
@@ -491,8 +492,8 @@ sub importData2Db() {
 }
 
 sub main() {
-	#SetCounts_test();
-	SetCounts();
+	SetCounts_test();
+	#SetCounts();
 	initTabHeader2Buf();
 	constructFile();
 }
