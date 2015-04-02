@@ -113,6 +113,15 @@ sub initTabHeader2Buf() {
     }	
 }
 
+
+sub importCsv2Db() {
+	while ( my ($k, $v) = each(%{$Tabs}) ) {
+        $v->{buf}->writeln("$k - ($v->{cols})");
+    }	
+	system("perl -pE 's|#File#|$v->{file}|mg; s|#Table#|$k|mg; s|#Column#|$v->{cols}|mg;' mysql.load.data.from.file.tpl > _tmp_");
+	system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source ./_tmp_' yxt");
+}
+
 sub flushBuf2File() {
 	while ( my ($k, $v) = each(%{$Tabs}) ) {
 		my $h = $v->{h};
@@ -344,7 +353,7 @@ sub generate_core_user_department_map($$$$$) {
 
 }
 
-sub SetCounts() {
+sub SetCounts_profiling() {
 	#org count
 	our $core_org_count = 10000;
 
@@ -367,7 +376,7 @@ sub SetCounts() {
 	our $core_convert_item_count = 5;	
 }
 
-sub SetCounts_test() {
+sub SetCounts_profiling_verification() {
 	#org count
 	our $core_org_count = 1;
 
@@ -388,6 +397,14 @@ sub SetCounts_test() {
 	#5 differnt convert item file per file
 	our $core_knowledge_count = 3;
 	our $core_convert_item_count = 2;	
+}
+
+sub SetCounts() {
+	if ($ARGV[0] == "0") {
+		SetCounts_profiling_verification();
+	} else {
+		SetCounts_profiling();	
+	}
 }
 
 my $ConvertedFormat = ['pdf', 'html4', 'html5', 'mp4', 'flv'];
@@ -486,14 +503,8 @@ sub constructFile() {
 	closeFile();
 }
 
-sub importData2Db() {
-	system("perl -pE 's|#File#|todo|mg; s|#Table#|core_position_position_map|mg; s|#Column#|pid,currentPosition,nextPosition|mg;' mysql.load.data.from.file.tpl > _tmp_");
-	system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source ./_tmp_' yxt");
-}
-
 sub main() {
-	SetCounts_test();
-	#SetCounts();
+	SetCounts();
 	initTabHeader2Buf();
 	constructFile();
 }
