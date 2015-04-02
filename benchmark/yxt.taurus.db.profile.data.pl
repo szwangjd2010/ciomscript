@@ -116,13 +116,12 @@ sub initTabHeader2Buf() {
 
 sub importCsv2Db() {
 	while ( my ($k, $v) = each(%{$Tabs}) ) {
-        $v->{buf}->writeln("$k - ($v->{cols})");
+		system("perl -pE 's|#File#|$v->{file}|mg; s|#Table#|$k|mg; s|#Column#|$v->{cols}|mg;' mysql.load.data.from.file.tpl > _tmp_");
+		system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source ./_tmp_' yxt");
     }	
-	system("perl -pE 's|#File#|$v->{file}|mg; s|#Table#|$k|mg; s|#Column#|$v->{cols}|mg;' mysql.load.data.from.file.tpl > _tmp_");
-	system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source ./_tmp_' yxt");
 }
 
-sub flushBuf2File() {
+sub flushLeftBuf2File() {
 	while ( my ($k, $v) = each(%{$Tabs}) ) {
 		my $h = $v->{h};
 		my $str = $v->{buf}->flush();
@@ -409,9 +408,7 @@ sub SetCounts() {
 
 my $ConvertedFormat = ['pdf', 'html4', 'html5', 'mp4', 'flv'];
 my $Role = [100001, 100002, 100003, 100004, 100005];
-sub constructFile() {
-	openFile();
-
+sub genTabData2BufAndFlush2File() {
 	our $core_org_count;
 	our $core_group_count;
 	our $core_orguser_count;
@@ -498,15 +495,20 @@ sub constructFile() {
 		generate_core_user_department_map($orgId, $Departments_1st, $Departments_2nd, $Departments_3rd, $Users);
 		generate_core_user_knowledge($orgId, $Users, $Knowledges);
 	}
-
-	flushBuf2File();
-	closeFile();
 }
 
 sub main() {
 	SetCounts();
+
+	openFile();
 	initTabHeader2Buf();
-	constructFile();
+	genTabData2BufAndFlush2File();
+	flushLeftBuf2File();
+	closeFile();
+
+	if (defined($ARGV[1])) {
+		importCsv2Db();
+	}
 }
 
 main();
