@@ -4,7 +4,7 @@
 CiomShare='/data/ciomshare'
 
 mountCiomShare() {
-	mount //10.10.68.205/ciomshare /data/ciomshare -o username=ciom,password=ciomYXT123
+	mount //10.10.68.205/ciomshare /data/ciomshare -o username=root,password=ciomYXT123
 }
 
 changeGateway() {
