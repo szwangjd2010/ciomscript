@@ -3,8 +3,8 @@
 
 CiomShare='/data/ciomshare'
 
-mountCiomShare() {
-	mount //10.10.68.205/ciomshare /data/ciomshare -o username=root,password=ciomYXT123
+addCiomShareMount() {
+	echo 'mount //10.10.68.205/ciomshare /data/ciomshare -o username=root,password=ciomYXT123' >> /etc/rc.local
 }
 
 changeGateway() {
@@ -36,7 +36,7 @@ patchJDK() {
 }
 
 main() {
-	#mountCiomShare
+	addCiomShareMount
 	changeMaxOpenFile
 	changeGateway
 	installJDK

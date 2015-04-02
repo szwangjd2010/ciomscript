@@ -27,7 +27,7 @@ sub setRunMode() {
 sub log() {
 	my $self = shift;
 	my $cmd = shift;
-	system("printf \"$cmd\" | tee -a $self->{Log}");
+	system("printf \"$cmd \n\" | tee -a $self->{Log}");
 }
 
 sub exec() {
