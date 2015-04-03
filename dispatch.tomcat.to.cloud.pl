@@ -12,8 +12,8 @@ my $cloudId = $ARGV[0];
 my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
-my $CloudHosts = {
-	test => {
+my $Clouds = {
+	dev => {
 		tomcatParent => "/opt",
 		tomcatAmount => 2,
 		basePortDelta => 0,
@@ -24,49 +24,34 @@ my $CloudHosts = {
 		]
 	},
 
-	aliyun_ws1 => {
-		tomcatParent=> "/opt/ws1",
-		tomcatAmount => 3,
-		basePortDelta => 0,
-		fileJavaOptsTpl => "tomcat.catalina.java.opts.tpl",
-		fileHttpListenTpl => "tomcat.server.xml.http.section.tpl",		
-		hosts => [
-			{host => "121.41.62.20", 	port => "22"},#back
-			{host => "121.40.200.186", 	port => "22"},#api1
-			{host => "121.41.37.12", 	port => "22"},#api2
-			{host => "121.40.202.100", 	port => "22"} #web1
-		]
-	},
-
-	guoke => {
-		tomcatParent=> "/opt",
+	ucloud => {
+		tomcatParent=> "/opt/ws",
 		tomcatAmount => 4,
 		basePortDelta => 0,
 		fileJavaOptsTpl => "tomcat.catalina.java.opts.tpl",
 		fileHttpListenTpl => "tomcat.server.xml.http.section.tpl",		
 		hosts => [
-			{host => "122.193.22.133", 	port => "50002"},#back
-			{host => "122.193.22.133", 	port => "50003"},#52xiaoxin.api
-			{host => "122.193.22.133", 	port => "50004"},#api1
-			{host => "122.193.22.133", 	port => "50005"},#api2
-			{host => "122.193.22.133", 	port => "50006"} #life.api
+			{host => "10.10.73.181", 	port => "50001"},
+			{host => "10.10.73.181", 	port => "50002"},
+			{host => "10.10.73.181", 	port => "50003"},
+			{host => "10.10.73.181", 	port => "50004"}
 		]
-	}	
+	}
 };
 
 sub generateTomcatInstances() {
 	$ciomUtil->exec(sprintf("%s %s %s %s %s",
 		"$ENV{CIOM_HOME}/generate.tomcat.instance.sh",
-		$CloudHosts->{$cloudId}->{tomcatAmount},
-		$CloudHosts->{$cloudId}->{basePortDelta},
-		$CloudHosts->{$cloudId}->{fileJavaOptsTpl},
-		$CloudHosts->{$cloudId}->{fileHttpListenTpl}
+		$Clouds->{$cloudId}->{tomcatAmount},
+		$Clouds->{$cloudId}->{basePortDelta},
+		$Clouds->{$cloudId}->{fileJavaOptsTpl},
+		$Clouds->{$cloudId}->{fileHttpListenTpl}
 	));
 }
 
 sub dispatch() {
-	my $hosts = $CloudHosts->{$cloudId}->{hosts};
-	my $tomcatParent = $CloudHosts->{$cloudId}->{tomcatParent};
+	my $hosts = $Clouds->{$cloudId}->{hosts};
+	my $tomcatParent = $Clouds->{$cloudId}->{tomcatParent};
 	my $cnt = $#{$hosts} + 1;
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $host = $hosts->[$i];
