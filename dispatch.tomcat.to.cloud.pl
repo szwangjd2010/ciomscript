@@ -13,14 +13,14 @@ my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
 my $Clouds = {
-	dev => {
+	dev_yxtadmin => {
 		tomcatParent => "/opt",
-		tomcatAmount => 2,
+		tomcatAmount => 3,
 		basePortDelta => 0,
 		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
 		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
 		hosts => [
-			{host => "192.168.0.125", 	port => "22"}
+			{host => "172.17.128.234", 	port => "22"}
 		]
 	},
 
