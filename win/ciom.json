@@ -11,18 +11,28 @@
 		"Web\\Applications\\YXT.Kng\\YXT.Kng.csproj"		
 	],
 	
-	"app3wPath": "C:\\www",
-	"username": "administrator",
-	"password": "P@ss!23",
-	"typeRM": "winrm",
+	"username": "ciom",
+	"password": "ciomYXT123",
+	"typeRM": "ssh",
+	"port": 22,
+	"app3wPath": "D:\\www",
 	
 	"hosts": [
 		{
-			"ip": "172.17.128.243",
-			"username": "administrator",
-			"password": "P@ss!23",
-			"app3wPath": "C:\\www",
-			"typeRM": "winrm"
-		}
+			"ip": "123.59.58.39",
+			"port": 50011
+		},
+		{
+			"ip": "123.59.58.39",
+			"port": 50012
+		},
+		{
+			"ip": "123.59.58.39",
+			"port": 50013
+		},
+		{
+			"ip": "123.59.58.39",
+			"port": 50014
+		}						
 	]
 }

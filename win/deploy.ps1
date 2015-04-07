@@ -18,6 +18,7 @@ function fillHostInfo($hostInfo) {
 	nullset $hostInfo "password"
 	nullset $hostInfo "app3wPath"
 	nullset $hostInfo "typeRM"
+	nullset $hostInfo "port"
 }
 
 function deployUsingWinRM($ip, $username, $password, $app3wPath) {
@@ -31,11 +32,11 @@ function deployUsingWinRM($ip, $username, $password, $app3wPath) {
 	-Credential $cred
 }
 
-function deployUsingSSH($ip, $username, $password, $app3wPath) {
-	upload "c:\ciom\win\do.deploy.on.host.ps1" "${ip}:/c:/" $username "$password"
+function deployUsingSSH($ip, $port, $username, $password, $app3wPath) {
+	upload $port "c:\ciom\win\do.deploy.on.host.ps1" "${ip}:/c:/" $username "$password"
 	
 	$argus = "-timestamp $timestamp -appName $appName -siteName $siteName -app3wPath $app3wPath"
-	remoteExec $ip $username "$password" "powershell.exe -file c:\do.deploy.on.host.ps1 $argus"
+	remoteExec $ip $port $username "$password" "powershell.exe -file c:\do.deploy.on.host.ps1 $argus"
 }
 
 foreach ($hostInfo in $CIOM.hosts) {
@@ -45,12 +46,13 @@ foreach ($hostInfo in $CIOM.hosts) {
 	$username = $hostInfo.username
 	$password = $hostInfo.password
 	$app3wPath = $hostInfo.app3wPath
+	$port = $hostInfo.port
 	
-	upload $packageFile "${ip}:/c:/" $username "$password"
+	upload $port $packageFile "${ip}:/c:/" $username "$password"
 	
 	if ($hostInfo.typeRM -eq "winrm") {
 		deployUsingWinRM $ip $username "$password" $app3wPath
 	} else {
-		deployUsingSSH $ip $username "$password" $app3wPath
+		deployUsingSSH $ip $port $username "$password" $app3wPath
 	}
 }
