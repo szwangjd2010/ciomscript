@@ -12,9 +12,14 @@ use CiomUtil;
 use JSON;
 use File::Slurp;
 
-my $ver = $ARGV[0];
-my $env = $ARGV[1];
-my $appName = $ARGV[2];
+#my $ver = $ARGV[0];
+#my $env = $ARGV[1];
+#my $appName = $ARGV[2];
+
+my $ver = 'v1';
+my $env = 'ucloud';
+my $appName = 'yxtweb';
+
 my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
@@ -63,7 +68,6 @@ sub main() {
 	
 	my $json = getAppCiomJson();
 	my $packageFile = getAppPackageFile();
-	print Dumper($json);
 	upload($packageFile, $json->{hosts});
 
 	leaveWorkspace();

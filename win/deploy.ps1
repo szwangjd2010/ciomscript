@@ -48,7 +48,7 @@ foreach ($hostInfo in $CIOM.hosts) {
 	$app3wPath = $hostInfo.app3wPath
 	$port = $hostInfo.port
 	
-	upload $port $packageFile "${ip}:/c:/" $username "$password"
+	#upload $port $packageFile "${ip}:/c:/" $username "$password"
 	
 	if ($hostInfo.typeRM -eq "winrm") {
 		deployUsingWinRM $ip $username "$password" $app3wPath
