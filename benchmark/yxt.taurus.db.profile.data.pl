@@ -325,7 +325,7 @@ sub generate_core_user_department_map($$$$$) {
 	my $globalIdx = 0;
 	for (my $i = 0; $i < $department_1stCnt; $i++) {
 		my $pid= getUuid();
-		my $userId = $Users->[$globalIdx];
+		my $userId = $Users->[$globalIdx] || $Users->[0];
 		my $type = 1;
 		my $departmentId = $Departments_1st->[$i];
 		core_user_department_map_line($pid, $orgId, $userId, $type, $departmentId);
@@ -334,7 +334,7 @@ sub generate_core_user_department_map($$$$$) {
 	}
 	for (my $i = 0; $i < $department_2ndCnt; $i++) {
 		my $pid= getUuid();
-		my $userId = $Users->[$globalIdx];
+		my $userId = $Users->[$globalIdx] || $Users->[0];
 		my $type = 1;
 		my $departmentId = $Departments_2nd->[$i];
 		core_user_department_map_line($pid, $orgId, $userId, $type, $departmentId);
@@ -343,7 +343,7 @@ sub generate_core_user_department_map($$$$$) {
 	}
 	for (my $i = 0; $i < $department_3rdCnt; $i++) {
 		my $pid= getUuid();
-		my $userId = $Users->[$globalIdx];
+		my $userId = $Users->[$globalIdx] || $Users->[0];
 		my $type = $i == 0 ? 0 : 1;
 		my $departmentId = $Departments_3rd->[$i];
 		core_user_department_map_line($pid, $orgId, $userId, $type, $departmentId);
@@ -376,6 +376,29 @@ sub SetCounts_profiling() {
 	our $core_convert_item_count = 5;	
 }
 
+sub SetCounts_profiling_2() {
+	#org count
+	our $core_org_count = 100000;
+
+	#100 group per org
+	our $core_group_count = 20;
+
+	#1000 user per org
+	our $core_orguser_count = 50;
+
+	#10 1st-class department per org
+	#5  2nd-class department per 1st-class department
+	#5  3rd-class department per 2nd-class department
+	our $core_department_count_1st = 10;
+	our $core_department_count_2nd = 3;
+	our $core_department_count_3rd = 3;
+
+	#1000 knowledge per org
+	#5 differnt convert item file per file
+	our $core_knowledge_count = 300;
+	our $core_convert_item_count = 5;
+}
+
 sub SetCounts_profiling_verification() {
 	#org count
 	our $core_org_count = 1;
@@ -403,7 +426,7 @@ sub SetCounts() {
 	if ($ARGV[0] == "0") {
 		SetCounts_profiling_verification();
 	} else {
-		SetCounts_profiling();	
+		SetCounts_profiling_2();	
 	}
 }
 
