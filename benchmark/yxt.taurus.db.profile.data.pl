@@ -70,7 +70,7 @@ my $Tabs= {
 		counter => 0,
 		file=>'/tmp/ciom/core_user_department_map.csv',
 		buf => String::Buffer->new(),
-		cols => 'pid,orgId,userId,departmentId'
+		cols => 'pid,orgId,userId,userType,departmentId'
 	},
 	core_user_group_map => {
 		h => undef,
@@ -116,8 +116,9 @@ sub initTabHeader2Buf() {
 
 sub importCsv2Db() {
 	while ( my ($k, $v) = each(%{$Tabs}) ) {
+		print("import $k ... \n");
 		system("perl -pE 's|#File#|$v->{file}|mg; s|#Table#|$k|mg; s|#Column#|$v->{cols}|mg;' mysql.load.data.from.file.tpl > _tmp_");
-		system("mysql -h 172.17.128.231 -uroot -ppwdasdwx -e 'source ./_tmp_' yxt");
+		system("mysql -h 10.10.71.70 -uyxt -p'passyxtkyoash2015!' -e 'source ./_tmp_' yxt");
     }	
 }
 
@@ -147,7 +148,7 @@ sub core_org_line($) {
 	my $orgId = shift;
 
 	my $tab = $Tabs->{core_org};
-	$tab->{buf}->writeln("$orgId,code-$orgId,orgName-$orgId,siteName-$orgId,domain-$orgId");
+	$tab->{buf}->writeln("'$orgId','code-$orgId','orgName-$orgId','siteName-$orgId','domain-$orgId'");
 	increaseCounterAndFlush($tab);
 }
 
@@ -157,7 +158,7 @@ sub core_orguser_line($$) {
 	my $userId = shift;
 
 	my $tab = $Tabs->{core_orguser};
-	$tab->{buf}->writeln("$userId,$orgId,$UPWD,$userId\@yxt.cn,fullName-$userId,mobile-$userId");
+	$tab->{buf}->writeln("'$userId','$orgId','$UPWD','$userId\@yxt.cn','fullName-$userId','mobile-$userId'");
 	increaseCounterAndFlush($tab);		
 }
 
@@ -168,7 +169,7 @@ sub core_user_role_map_line($$$) {
 	my $roleId = shift;
 
 	my $tab = $Tabs->{core_user_role_map};
-	$tab->{buf}->writeln("$pid,$userId,$roleId");
+	$tab->{buf}->writeln("'$pid','$userId','$roleId'");
 	increaseCounterAndFlush($tab);		
 }
 
@@ -179,7 +180,7 @@ sub core_group_line($$$) {
 	my $status = shift;
 
 	my $tab = $Tabs->{core_group};
-	$tab->{buf}->writeln("$groupId,$orgId,groupName-$groupId,groupDescription-$groupId,1,$status");
+	$tab->{buf}->writeln("'$groupId','$orgId','groupName-$groupId','groupDescription-$groupId',1,$status");
 	increaseCounterAndFlush($tab);		
 }
 
@@ -190,7 +191,7 @@ sub core_department_line($$$) {
 	my $parentId = shift;
 
 	my $tab = $Tabs->{core_department};
-	$tab->{buf}->writeln("$departmentId,$orgId,$parentId,departmentName-$departmentId");
+	$tab->{buf}->writeln("'$departmentId','$orgId','$parentId','departmentName-$departmentId'");
 	increaseCounterAndFlush($tab);	
 }
 
@@ -203,7 +204,7 @@ sub core_knowledge_line($$$$$) {
 	my $fileType = shift;
 
 	my $tab = $Tabs->{core_knowledge};
-	$tab->{buf}->writeln("$knowledgeId,$orgId,title-$knowledgeId,$kngType,$fileType,$fileId");
+	$tab->{buf}->writeln("'$knowledgeId','$orgId','title-$knowledgeId','$kngType','$fileType','$fileId'");
 	increaseCounterAndFlush($tab);		
 }
 
@@ -212,7 +213,7 @@ sub core_file_info_line($) {
 	my $fileId = shift;
 
 	my $tab = $Tabs->{core_file_info};
-	$tab->{buf}->writeln("$fileId,fileName-$fileId");
+	$tab->{buf}->writeln("'$fileId','fileName-$fileId'");
 	increaseCounterAndFlush($tab);		
 }
 
@@ -224,7 +225,7 @@ sub core_convert_item_line($$$$) {
 	my $format = shift;
 
 	my $tab = $Tabs->{core_convert_item};
-	$tab->{buf}->writeln("$itemId,$knowledgeId,$fileId,$format");
+	$tab->{buf}->writeln("'$itemId','$knowledgeId','$fileId','$format'");
 	increaseCounterAndFlush($tab);		
 }
 
@@ -237,7 +238,7 @@ sub core_user_group_map_line($$$$$) {
 	my $type = shift;
 
 	my $tab = $Tabs->{core_user_group_map};
-	$tab->{buf}->writeln("$pid,$orgId,$groupId,$userId,$type");
+	$tab->{buf}->writeln("'$pid','$orgId','$groupId','$userId',$type");
 	increaseCounterAndFlush($tab);		
 }
 sub generate_core_user_group_map($$$) {
@@ -269,7 +270,7 @@ sub core_user_knowledge_line($$$$) {#($pid, $orgId, $userId, $knowledgeId)
 	my $knowledgeId = shift;
 
 	my $tab = $Tabs->{core_user_knowledge};
-	$tab->{buf}->writeln("$pid,$orgId,$userId,$knowledgeId");
+	$tab->{buf}->writeln("'$pid','$orgId','$userId','$knowledgeId'");
 	increaseCounterAndFlush($tab);	
 }
 sub generate_core_user_knowledge($$$) {
@@ -300,7 +301,7 @@ sub core_user_department_map_line($$$$$) {
 	my $departmentId = shift;
 
 	my $tab = $Tabs->{core_user_department_map};
-	$tab->{buf}->writeln("$pid,$orgId,$userId,$userType,$departmentId");
+	$tab->{buf}->writeln("'$pid','$orgId','$userId',$userType,'$departmentId'");
 	increaseCounterAndFlush($tab);		
 }
 sub generate_core_user_department_map($$$$$) {

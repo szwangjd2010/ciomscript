@@ -1,0 +1,15 @@
+1. install 
+https://www.rabbitmq.com/install-rpm.html
+
+
+
+rabbitmqctl add_user admin pwdasdwx
+rabbitmqctl set_user_tags admin administrator
+rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
+
+rabbitmq-plugins enable rabbitmq_management
+
+The web UI is located at: http://server-name:15672/
+
+http://server-name:15672/api/
+http://server-name:15672/cli/ 
