@@ -13,6 +13,12 @@ function getProjectBuildOutputPath($str) {
 	return "$targetPath\$pathSurfix"
 }
 
+function getPackages() {
+	foreach ($item in $CIOM.packageConfigManifest) {
+		exec("NuGet install $sourcePath\$item -OutputDirectory $sourcePath\packages")
+	}		
+}
+
 function buildSolution($sln) {
 	exec("$MsBuild $sourcePath\$sln $SolutionCF $LogCF")
 }
@@ -63,6 +69,7 @@ function isBuildError() {
 
 function main() {
 	clean
+	getPackages
 	build
 	if (isBuildError) {
 		exit 1 #build error
