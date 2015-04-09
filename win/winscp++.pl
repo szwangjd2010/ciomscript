@@ -12,13 +12,9 @@ use CiomUtil;
 use JSON;
 use File::Slurp;
 
-#my $ver = $ARGV[0];
-#my $env = $ARGV[1];
-#my $appName = $ARGV[2];
-
-my $ver = 'v1';
-my $env = 'ucloud';
-my $appName = 'yxtweb';
+my $ver = $ARGV[0];
+my $env = $ARGV[1];
+my $appName = $ARGV[2];
 
 my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();

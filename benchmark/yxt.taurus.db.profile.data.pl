@@ -7,6 +7,7 @@ use Data::Dumper;
 use Data::UUID;
 use String::Buffer;
 
+#echo -n 123456 | sha256sum
 my $UPWD= '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92';
 my $Tabs= {
 	core_org => {
@@ -21,7 +22,7 @@ my $Tabs= {
 		counter => 0,
 		file=>'/tmp/ciom/core_orguser.csv',
 		buf => String::Buffer->new(),
-		cols => 'pid,orgId,password,email,fullName,mobile'
+		cols => 'pid,orgId,password,email,fullName,mobile,status,type,points,loginfailcount,lockstatus'
 	},
 	core_user_role_map => {
 		h => undef,
@@ -153,12 +154,12 @@ sub core_org_line($) {
 }
 
 sub core_orguser_line($$) {
-	#cols => 'pid,orgId,password,email,fullName,mobile'
+	#cols => 'pid,orgId,password,email,fullName,mobile,status,type,points,loginfailcount,lockstatus'
 	my $orgId = shift;
 	my $userId = shift;
 
 	my $tab = $Tabs->{core_orguser};
-	$tab->{buf}->writeln("'$userId','$orgId','$UPWD','$userId\@yxt.cn','fullName-$userId','mobile-$userId'");
+	$tab->{buf}->writeln("'$userId','$orgId','$UPWD','$userId\@yxt.cn','fullName-$userId','mobile-$userId',1,1,0,0,0");
 	increaseCounterAndFlush($tab);		
 }
 
