@@ -9,7 +9,7 @@ use String::Buffer;
 
 #define benchmark data magnitude
 my $profile = $ARGV[0] || 'verification';
-my $CNT = {
+my $ConstMagnitude = {
 	verification => {
 		#org count
 		core_org => 1,
@@ -643,7 +643,7 @@ sub generate_core_user_department_map($$$$$) {
 my $ConvertedFormat = ['pdf', 'html4', 'html5', 'mp4', 'flv'];
 my $Role = [100001, 100002, 100003, 100004, 100005];
 sub genTabData2BufAndFlush2File() {
-	for (my $idx_core_org = 0; $idx_core_org < $CNT->{$profile}->{core_org}; $idx_core_org++) {
+	for (my $idx_core_org = 0; $idx_core_org < $ConstMagnitude->{$profile}->{core_org}; $idx_core_org++) {
 		my $orgId= getUuid();
 		core_org_line($orgId);
 
@@ -657,7 +657,7 @@ sub genTabData2BufAndFlush2File() {
 		my $Knowledges = [];
 		#End
 
-		for (my $idx_core_group = 0; $idx_core_group < $CNT->{$profile}->{core_group}; $idx_core_group++) {
+		for (my $idx_core_group = 0; $idx_core_group < $ConstMagnitude->{$profile}->{core_group}; $idx_core_group++) {
 			my $groupId= getUuid();
 			my $status = $idx_core_group % 2;
 			core_group_line($orgId, $groupId, $status);
@@ -665,7 +665,7 @@ sub genTabData2BufAndFlush2File() {
 			push(@{$Groups}, $groupId);
 		}
 
-		for (my $idx_core_orguser = 0; $idx_core_orguser < $CNT->{$profile}->{core_orguser}; $idx_core_orguser++) {
+		for (my $idx_core_orguser = 0; $idx_core_orguser < $ConstMagnitude->{$profile}->{core_orguser}; $idx_core_orguser++) {
 			my $userId= getUuid();	
 			core_orguser_line($orgId, $userId);
 			
@@ -677,19 +677,19 @@ sub genTabData2BufAndFlush2File() {
 		}
 
 		
-		for (my $idx_core_department_1st = 0; $idx_core_department_1st < $CNT->{$profile}->{core_department_1st}; $idx_core_department_1st++) {
+		for (my $idx_core_department_1st = 0; $idx_core_department_1st < $ConstMagnitude->{$profile}->{core_department_1st}; $idx_core_department_1st++) {
 			my $departmentId_1st= getUuid();
 			core_department_line($orgId, $departmentId_1st, 'NULL');
 
 			push(@{$Departments_1st}, $departmentId_1st);
 
-			for (my $idx_core_department_2nd = 0; $idx_core_department_2nd < $CNT->{$profile}->{core_department_2nd}; $idx_core_department_2nd++) {
+			for (my $idx_core_department_2nd = 0; $idx_core_department_2nd < $ConstMagnitude->{$profile}->{core_department_2nd}; $idx_core_department_2nd++) {
 				my $departmentId_2nd= getUuid();
 				core_department_line($orgId, $departmentId_2nd ,$departmentId_1st);
 
 				push(@{$Departments_2nd}, $departmentId_2nd);
 
-				for (my $idx_core_department_3rd = 0; $idx_core_department_3rd < $CNT->{$profile}->{core_department_3rd}; $idx_core_department_3rd++) {
+				for (my $idx_core_department_3rd = 0; $idx_core_department_3rd < $ConstMagnitude->{$profile}->{core_department_3rd}; $idx_core_department_3rd++) {
 					my $departmentId_3rd= getUuid();
 					core_department_line($orgId, $departmentId_3rd ,$departmentId_2nd);
 
@@ -698,7 +698,7 @@ sub genTabData2BufAndFlush2File() {
 			}
 		}
 
-		for (my $idx_core_knowledge = 0; $idx_core_knowledge < $CNT->{$profile}->{core_knowledge}; $idx_core_knowledge++) {
+		for (my $idx_core_knowledge = 0; $idx_core_knowledge < $ConstMagnitude->{$profile}->{core_knowledge}; $idx_core_knowledge++) {
 			my $knowledgeId= getUuid();
 			my $fileId= getUuid();
 			my $kngType = $idx_core_knowledge % 7 || 1;
@@ -709,7 +709,7 @@ sub genTabData2BufAndFlush2File() {
 
 			push(@{$Knowledges}, $knowledgeId);
 
-			for (my $idx_core_convert_info = 0; $idx_core_convert_info < $CNT->{$profile}->{core_convert_item}; $idx_core_convert_info++) {
+			for (my $idx_core_convert_info = 0; $idx_core_convert_info < $ConstMagnitude->{$profile}->{core_convert_item}; $idx_core_convert_info++) {
 				my $itemId= getUuid();
 				my $format = $ConvertedFormat->[$idx_core_convert_info];
 				core_convert_item_line($itemId, $knowledgeId, $fileId, $format);
