@@ -165,8 +165,7 @@ my $Tabs= {
 		#targetId -> knowledgeId
 		#targetName: targetName
 		#type: 1
-		#status: 1
-		cols => 'pid,orgId,targetId,targetName,creator,updater,type,status'
+		cols => 'pid,orgId,targetId,creator,type'
 	},
 	core_rating => {
 		h => undef,
@@ -177,7 +176,7 @@ my $Tabs= {
 		#targetName: targetName
 		#type: 1
 		#status: 1
-		cols => 'pid,orgId,targetId,targetName,creator,updater,type,status'
+		cols => 'pid,orgId,targetId,creator,updater,type,status'
 	},
 	core_tag_target_map => {
 		h => undef,
@@ -198,8 +197,7 @@ my $Tabs= {
 		#targetId -> knowledgeId
 		#targetName: targetName
 		#type: 1
-		#status: 1
-		cols => 'pid,orgId,targetId,targetName,creator,type,status'
+		cols => 'pid,orgId,targetId,targetName,creator,type'
 	}
 };
 my $ug = Data::UUID->new();	
@@ -229,11 +227,14 @@ sub initTabHeader2Buf() {
 }
 
 
-sub importCsv2Db() {
+sub importCsv2Db($$$) {
+	my $host = shift;
+	my $user = shift;
+	my $pwd = shift;
 	while ( my ($k, $v) = each(%{$Tabs}) ) {
 		print("import $k ... \n");
 		system("perl -pE 's|#File#|$v->{file}|mg; s|#Table#|$k|mg; s|#Column#|$v->{cols}|mg;' mysql.load.data.from.file.tpl > _tmp_");
-		system("mysql -h 10.10.71.70 -uyxt -p'passyxtkyoash2015!' -e 'source ./_tmp_' yxt");
+		system("mysql -h $host -u$user -p'$pwd' -e 'source ./_tmp_' yxt");
     }	
 }
 
@@ -461,7 +462,11 @@ sub core_component_line($$$$$) {
 		$type = 21;
 	}
 	if ($tabName eq "core_browse_history") {
-		$tab->{buf}->writeln("'$pid','$orgId','$targetId','targetName-$pid','$creator',$type,1");
+		$tab->{buf}->writeln("'$pid','$orgId','$targetId','targetName-$pid','$creator',$type");
+	} elsif ($tabName eq "core_praise") {
+		$tab->{buf}->writeln("'$pid','$orgId','$targetId','$creator',$type");	
+	} elsif($tabName eq "core_rating") {
+		$tab->{buf}->writeln("'$pid','$orgId','$targetId','$creator','$creator',$type,1");		
 	} else {
 		$tab->{buf}->writeln("'$pid','$orgId','$targetId','targetName-$pid','$creator','$creator',$type,1");		
 	}
@@ -767,7 +772,7 @@ sub main() {
 	closeFile();
 
 	if (defined($ARGV[1])) {
-		importCsv2Db();
+		importCsv2Db($ARGV[1], $ARGV[2], $ARGV[3]);
 	}
 }
 
