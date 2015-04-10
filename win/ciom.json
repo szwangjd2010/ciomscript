@@ -2,13 +2,23 @@
 	"appName": "yxtweb",
 	"siteName": "yxtweb",
 	
+	"packageConfigManifest": [
+		"YXT.Core\\packages.config",
+		"Web\\packages.config",
+		"Web\\Applications\\YXT.Demo\\packages.config",
+		"Web\\Applications\\YXT.Group\\packages.config",
+		"Web\\Applications\\YXT.Home\\packages.config",
+		"Web\\Applications\\YXT.Kng\\packages.config",
+		"Web\\Applications\\YXT.Study\\packages.config"
+	],
+
 	"solutionManifest": [
 		"YXT.Taurus.sln",
 		"Web\\Web.csproj",
-		"Web\\Applications\\YXT.Demo\\YXT.Demo.csproj",
 		"Web\\Applications\\YXT.Group\\YXT.Group.csproj",
 		"Web\\Applications\\YXT.Home\\YXT.Home.csproj",
-		"Web\\Applications\\YXT.Kng\\YXT.Kng.csproj"		
+		"Web\\Applications\\YXT.Kng\\YXT.Kng.csproj",
+		"Web\\Applications\\YXT.Study\\YXT.Study.csproj"
 	],
 	
 	"username": "ciom",
@@ -19,20 +29,20 @@
 	
 	"hosts": [
 		{
-			"ip": "123.59.58.39",
-			"port": 50011
+			"ip": "10.10.71.44",
+			"port": 22
 		},
 		{
-			"ip": "123.59.58.39",
-			"port": 50012
+			"ip": "10.10.78.74",
+			"port": 22
 		},
 		{
-			"ip": "123.59.58.39",
-			"port": 50013
+			"ip": "10.10.76.185",
+			"port": 22
 		},
 		{
-			"ip": "123.59.58.39",
-			"port": 50014
+			"ip": "10.10.71.187",
+			"port": 22
 		}						
 	]
 }

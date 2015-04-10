@@ -10,6 +10,7 @@ use String::Buffer;
 #echo -n 123456 | sha256sum
 my $UPWD= '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92';
 my $Tabs= {
+	#org, user, group, department, knowledge
 	core_org => {
 		h => undef,
 		counter => 0,
@@ -86,6 +87,119 @@ my $Tabs= {
 		file=>'/tmp/ciom/core_user_knowledge.csv',
 		buf => String::Buffer->new(),
 		cols => 'pid,orgId,userId,knowledgeId'
+	},
+
+	#study 
+	sty_study_plan => {
+		h => undef,
+		counter => 0,
+		file=>'/tmp/ciom/sty_study_plan.csv',
+		buf => String::Buffer->new(),
+		cols => 'pid,orgId,createUserID,planName,status,knowledgeCount,studyHours'		
+	},
+	sty_study_plan_content => {
+		h => undef,
+		counter => 0,
+		file=>'/tmp/ciom/sty_study_plan_content.csv',
+		buf => String::Buffer->new(),
+		cols => 'pid,orgId,studyPlanID,knowledgeID,title'		
+	},
+	sty_user_study_plan => {
+		h => undef,
+		counter => 0,
+		file=>'/tmp/ciom/sty_user_study_plan.csv',
+		buf => String::Buffer->new(),
+		cols => 'pid,orgId,userId,parentPlanID,planName'		
+	},
+
+	#component
+	core_activity => {
+		h => undef,
+		counter => 0,
+		file=>'/tmp/ciom/core_activity.csv',
+		buf => String::Buffer->new(),
+		#targetId -> knowledgeId
+		#targetName: targetName
+		#type: 21
+		#status: 1
+		cols => 'pid,orgId,targetId,targetName,creator,updater,type,status'
+	},	
+	core_comment => {
+		h => undef,
+		counter => 0,
+		file=>'/tmp/ciom/core_comment.csv',
+		buf => String::Buffer->new(),
+		#targetId -> knowledgeId
+		#targetName: targetName
+		#type: 1
+		#status: 1
+		cols => 'pid,orgId,targetId,targetName,creator,updater,type,status'
+	},
+	core_favorite => {
+		h => undef,
+		counter => 0,
+		file=>'/tmp/ciom/core_favorite.csv',
+		buf => String::Buffer->new(),
+		#targetId -> knowledgeId
+		#targetName: targetName
+		#type: 1
+		#status: 1
+		cols => 'pid,orgId,targetId,targetName,creator,updater,type,status'
+	},
+	core_note => {
+		h => undef,
+		counter => 0,
+		file=>'/tmp/ciom/core_note.csv',
+		buf => String::Buffer->new(),
+		#targetId -> knowledgeId
+		#targetName: targetName
+		#type: 1
+		#status: 1
+		cols => 'pid,orgId,targetId,targetName,creator,updater,type,status'
+	},	
+	core_praise => {
+		h => undef,
+		counter => 0,
+		file=>'/tmp/ciom/core_praise.csv',
+		buf => String::Buffer->new(),
+		#targetId -> knowledgeId
+		#targetName: targetName
+		#type: 1
+		#status: 1
+		cols => 'pid,orgId,targetId,targetName,creator,updater,type,status'
+	},
+	core_rating => {
+		h => undef,
+		counter => 0,
+		file=>'/tmp/ciom/core_rating.csv',
+		buf => String::Buffer->new(),
+		#targetId -> knowledgeId
+		#targetName: targetName
+		#type: 1
+		#status: 1
+		cols => 'pid,orgId,targetId,targetName,creator,updater,type,status'
+	},
+	core_tag_target_map => {
+		h => undef,
+		counter => 0,
+		file=>'/tmp/ciom/core_tag_target_map.csv',
+		buf => String::Buffer->new(),
+		#targetId -> knowledgeId
+		#tagId: 0
+		#tagType: 1
+		#tagName: tagName
+		cols => 'pid,orgId,targetId,createUserId,updateUserId,tagId,tagType,tagName'
+	},
+	core_browse_history => {
+		h => undef,
+		counter => 0,
+		file=>'/tmp/ciom/core_browse_history.csv',
+		buf => String::Buffer->new(),
+		#targetId -> knowledgeId
+		#targetName: targetName
+		#type: 1
+		#status: 1
+		cols => 'pid,orgId,targetId,targetName,creator,type,status'
 	}
 };
 my $ug = Data::UUID->new();	
@@ -263,6 +377,125 @@ sub generate_core_user_group_map($$$) {
 	}
 }
 
+
+#begin study
+sub sty_study_plan_line($$$) {
+	#cols => 'pid,orgId,createUserID,planName,status,knowledgeCount,studyHours'
+	my $pid = shift;
+	my $orgId = shift;
+	my $userId = shift;
+
+	my $tab = $Tabs->{sty_study_plan};
+	$tab->{buf}->writeln("'$pid','$orgId','$userId','planName-$pid',-1,3,3");
+	increaseCounterAndFlush($tab);		
+}
+sub sty_study_plan_content_line($$$$) {
+	#cols => 'pid,orgId,studyPlanID,knowledgeID,title'	
+	my $pid = shift;
+	my $orgId = shift;
+	my $studyPlanID = shift;
+	my $knowledgeID = shift;
+
+	my $tab = $Tabs->{sty_study_plan_content};
+	$tab->{buf}->writeln("'$pid','$orgId','$studyPlanID','knowledgeID','title-$pid'");
+	increaseCounterAndFlush($tab);		
+}
+sub sty_user_study_plan_line($$$$) {
+	#cols => 'pid,orgId,userId,parentPlanID,planName'
+	my $pid = shift;
+	my $orgId = shift;
+	my $userId = shift;
+	my $parentPlanID = shift;
+
+	my $tab = $Tabs->{sty_user_study_plan};
+	$tab->{buf}->writeln("'$pid','$orgId','$userId','parentPlanID','planName-$pid'");
+	increaseCounterAndFlush($tab);		
+}
+sub generate_sty_tabs($$$) {
+	my $orgId = shift;	
+	my $Users = shift;
+	my $Knowledges = shift;
+
+	my $userCnt = $#{$Users} + 1;
+	for (my $i = 0; $i < $userCnt; $i++) {
+		my $studyPlanID= getUuid();
+		my $userId = $Users->[$i];
+		sty_study_plan_line($studyPlanID, $orgId, $userId);
+
+		for (my $j = 0; $j < 3; $j++) {
+			my $knowledgeId = $Knowledges->[$i + $j] || $Knowledges->[0];
+			sty_study_plan_content_line(getUuid(), $orgId, $studyPlanID, $knowledgeId);	
+		}
+
+		for (my $j = 0; $j < 10; $j++) {
+			sty_user_study_plan_line(getUuid(), $orgId, $userId, $studyPlanID);		
+		}
+	}
+}
+#End study
+
+
+#start component
+sub core_tag_target_map_line($$$$) {
+	#cols => 'pid,orgId,targetId,createUserId,updateUserId,tagId,tagType,tagName'
+	my $pid = shift;
+	my $orgId = shift;
+	my $targetId = shift;
+	my $creator = shift;
+
+	my $tab = $Tabs->{core_tag_target_map};
+	$tab->{buf}->writeln("'$pid','$orgId','$targetId','$creator','$creator','0',1,'tagName-$pid'");		
+	increaseCounterAndFlush($tab);
+}
+sub core_component_line($$$$$) {
+	#cols => 'pid,orgId,targetId,targetName,creator,updater,type,status'
+	my $pid = shift;
+	my $orgId = shift;
+	my $targetId = shift;
+	my $creator = shift;
+	my $tabName = shift;
+
+	my $tab = $Tabs->{$tabName};
+	my $type = 1;
+	if ($tabName eq "core_activity") {
+		$type = 21;
+	}
+	if ($tabName eq "core_browse_history") {
+		$tab->{buf}->writeln("'$pid','$orgId','$targetId','targetName-$pid','$creator',$type,1");
+	} else {
+		$tab->{buf}->writeln("'$pid','$orgId','$targetId','targetName-$pid','$creator','$creator',$type,1");		
+	}
+	
+	increaseCounterAndFlush($tab);		
+}
+sub generate_component_tabs($$$) {
+	my $orgId = shift;	
+	my $Users = shift;
+	my $Knowledges = shift;
+
+	my $userCnt = $#{$Users} + 1;
+	my $knowledgeCnt = $#{$Knowledges} + 1;
+	my $knowledgePerUser = int($knowledgeCnt / $userCnt);
+	for (my $i = 0; $i < $userCnt; $i++) {
+		my $userId = $Users->[$i];
+		
+		for (my $j = 0; $j < $knowledgePerUser; $j++) {
+			my $knowledgeId = $Knowledges->[$i * $knowledgePerUser + $j];
+			core_component_line(getUuid(), $orgId, $knowledgeId, $userId, 'core_activity');
+			core_component_line(getUuid(), $orgId, $knowledgeId, $userId, 'core_comment');
+			core_component_line(getUuid(), $orgId, $knowledgeId, $userId, 'core_favorite');
+			core_component_line(getUuid(), $orgId, $knowledgeId, $userId, 'core_note');
+			core_component_line(getUuid(), $orgId, $knowledgeId, $userId, 'core_praise');
+			core_component_line(getUuid(), $orgId, $knowledgeId, $userId, 'core_rating');
+			core_component_line(getUuid(), $orgId, $knowledgeId, $userId, 'core_browse_history');
+			core_component_line(getUuid(), $orgId, $knowledgeId, $userId, 'core_activity');
+
+			core_tag_target_map_line(getUuid(), $orgId, $knowledgeId, $userId);
+		}
+	}
+}
+#End component
+
 sub core_user_knowledge_line($$$$) {#($pid, $orgId, $userId, $knowledgeId)
 	#cols => 'pid,orgId,userId,knowledgeId'
 	my $pid = shift;
@@ -408,7 +641,7 @@ sub SetCounts_profiling_verification() {
 	our $core_group_count = 2;
 
 	#1000 user per org
-	our $core_orguser_count = 10;
+	our $core_orguser_count = 2;
 
 	#10 1st-class department per org
 	#5  2nd-class department per 1st-class department
@@ -419,7 +652,7 @@ sub SetCounts_profiling_verification() {
 
 	#1000 knowledge per org
 	#5 differnt convert item file per file
-	our $core_knowledge_count = 3;
+	our $core_knowledge_count = 5;
 	our $core_convert_item_count = 2;	
 }
 
@@ -519,6 +752,8 @@ sub genTabData2BufAndFlush2File() {
 		generate_core_user_group_map($orgId, $Users, $Groups);
 		generate_core_user_department_map($orgId, $Departments_1st, $Departments_2nd, $Departments_3rd, $Users);
 		generate_core_user_knowledge($orgId, $Users, $Knowledges);
+		generate_sty_tabs($orgId, $Users, $Knowledges);
+		generate_component_tabs($orgId, $Users, $Knowledges);
 	}
 }
 
