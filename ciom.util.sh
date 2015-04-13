@@ -53,7 +53,7 @@ startTomcats() {
 	download $host $port "/opt/_ciom_tomcats" "."
 	for tomcat in $(cat _ciom_tomcats); do
 		execRemoteCmd $host $port "export JRE_HOME='/usr/java/jdk1.7.0_76'; $tomcat/bin/startup.sh"
-		sleep 10
+		sleep 20
 	done
 }
 

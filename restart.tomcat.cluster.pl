@@ -1,4 +1,4 @@
-\#!/usr/bin/perl -W
+#!/usr/bin/perl -W
 # 
 #
 use strict;
@@ -25,10 +25,11 @@ my $Tomcats = {
 
 sub main() {
 	my $hosts = $Tomcats->{$cloud};
-
-	my $cnt = $#{$tomcats} + 1;
+	my $cnt = $#{$hosts} + 1;
+	
 	for (my $i = 0; $i < $cnt; $i++) {
-		system("$ENV{CIOM_HOME}/restart.tomcat.on.host.sh $tomcats->[$i]->{host} $tomcats->[$i]->{port} $tomcats->[$i]->{tomcatParent}");
+		my $host = $hosts->[$i];
+		system("$ENV{CIOM_HOME}/restart.tomcat.on.host.sh $host->{host} $host->{port} $host->{tomcatParent}");
 	}
 }
 
