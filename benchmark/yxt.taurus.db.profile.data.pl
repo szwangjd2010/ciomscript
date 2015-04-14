@@ -73,7 +73,7 @@ my $Tabs= {
 		counter => 0,
 		file=>'/tmp/ciom/core_orguser.csv',
 		buf => String::Buffer->new(),
-		cols => 'pid,orgId,password,email,fullName,mobile,status,type,points,loginfailcount,lockstatus'
+		cols => 'pid,orgId,password,email,fullName,mobile,status,type,points,loginfailcount,lockstatus,gendar'
 	},
 	core_user_role_map => {
 		h => undef,
@@ -319,12 +319,12 @@ sub core_org_line($) {
 }
 
 sub core_orguser_line($$) {
-	#cols => 'pid,orgId,password,email,fullName,mobile,status,type,points,loginfailcount,lockstatus'
+	#cols => 'pid,orgId,password,email,fullName,mobile,status,type,points,loginfailcount,lockstatus,gendar'
 	my $orgId = shift;
 	my $userId = shift;
 
 	my $tab = $Tabs->{core_orguser};
-	$tab->{buf}->writeln("'$userId','$orgId','$UPWD','$userId\@yxt.cn','fullName-$userId','mobile-$userId',1,1,0,0,0");
+	$tab->{buf}->writeln("'$userId','$orgId','$UPWD','$userId\@yxt.cn','fullName-$userId','mobile-$userId',1,1,0,0,0,1");
 	increaseCounterAndFlush($tab);		
 }
 
