@@ -543,7 +543,6 @@ sub generate_component_tabs($$$) {
 			core_component_line(getUuid(), $orgId, $knowledgeId, $userId, 'core_praise');
 			core_component_line(getUuid(), $orgId, $knowledgeId, $userId, 'core_rating');
 			core_component_line(getUuid(), $orgId, $knowledgeId, $userId, 'core_browse_history');
-			core_component_line(getUuid(), $orgId, $knowledgeId, $userId, 'core_activity');
 
 			core_tag_target_map_line(getUuid(), $orgId, $knowledgeId, $userId);
 		}
