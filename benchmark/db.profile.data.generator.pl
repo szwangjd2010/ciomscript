@@ -369,6 +369,7 @@ sub generate_core_user_group_map($$$) {
 			my $groupId = $Groups->[$i];
 			my $userId = $Users->[$userPerGroup * $i + $j];
 			my $type = ($j > 1 ? 3 : ($j + 1));
+
 			new_tab_line('core_user_group_map', {
 				pid => $pid,
 				orgId => $orgId,
@@ -391,6 +392,7 @@ sub generate_sty_tabs($$$) {
 	for (my $i = 0; $i < $userCnt; $i++) {
 		my $studyPlanID= getUuid();
 		my $userId = $Users->[$i];
+		
 		new_tab_line('sty_study_plan', {
 			pid => $studyPlanID,
 			orgId => $orgId,
