@@ -392,7 +392,7 @@ sub generate_sty_tabs($$$) {
 	for (my $i = 0; $i < $userCnt; $i++) {
 		my $studyPlanID= getUuid();
 		my $userId = $Users->[$i];
-		
+
 		new_tab_line('sty_study_plan', {
 			pid => $studyPlanID,
 			orgId => $orgId,
@@ -428,6 +428,12 @@ sub generate_component_tabs($$$) {
 	my $Users = shift;
 	my $Knowledges = shift;
 
+	my $fnRefreshUuid = sub($) {
+		my $pms = shift;
+		$pms->{pid} = getUuid();
+		return $pms
+	};
+
 	my $userCnt = $#{$Users} + 1;
 	my $knowledgeCnt = $#{$Knowledges} + 1;
 	my $knowledgePerUser = int($knowledgeCnt / $userCnt);
@@ -436,54 +442,20 @@ sub generate_component_tabs($$$) {
 		
 		for (my $j = 0; $j < $knowledgePerUser; $j++) {
 			my $knowledgeId = $Knowledges->[$i * $knowledgePerUser + $j];
-			new_tab_line('core_activity', {
-				pid => getUuid(),
+			my $pms = {
 				orgId => $orgId,
 				targetId => $knowledgeId,
 				creator => $userId
-			});
-			new_tab_line('core_comment', {
-				pid => getUuid(),
-				orgId => $orgId,
-				targetId => $knowledgeId,
-				creator => $userId
-			});
-			new_tab_line('core_favorite', {
-				pid => getUuid(),
-				orgId => $orgId,
-				targetId => $knowledgeId,
-				creator => $userId
-			});						
-			new_tab_line('core_note', {
-				pid => getUuid(),
-				orgId => $orgId,
-				targetId => $knowledgeId,
-				creator => $userId
-			});
-			new_tab_line('core_praise', {
-				pid => getUuid(),
-				orgId => $orgId,
-				targetId => $knowledgeId,
-				creator => $userId
-			});
-			new_tab_line('core_rating', {
-				pid => getUuid(),
-				orgId => $orgId,
-				targetId => $knowledgeId,
-				creator => $userId
-			});
-			new_tab_line('core_browse_history', {
-				pid => getUuid(),
-				orgId => $orgId,
-				targetId => $knowledgeId,
-				creator => $userId
-			});
-			new_tab_line('core_tag_target_map', {
-				pid => getUuid(),
-				orgId => $orgId,
-				targetId => $knowledgeId,
-				createUserId => $userId
-			});			
+			};
+
+			new_tab_line('core_activity', 		$fnRefreshUuid->($pms));
+			new_tab_line('core_comment', 		$fnRefreshUuid->($pms));
+			new_tab_line('core_favorite', 		$fnRefreshUuid->($pms));						
+			new_tab_line('core_note', 			$fnRefreshUuid->($pms));
+			new_tab_line('core_praise', 		$fnRefreshUuid->($pms));
+			new_tab_line('core_rating', 		$fnRefreshUuid->($pms));
+			new_tab_line('core_browse_history', $fnRefreshUuid->($pms));
+			new_tab_line('core_tag_target_map', $fnRefreshUuid->($pms));			
 		}
 	}
 }

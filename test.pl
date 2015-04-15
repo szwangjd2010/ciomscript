@@ -7,14 +7,16 @@ use Data::Dumper;
 my $a = 6 % 7 || 1;
 
 my $aa = {
-	a => 0
+	a => 0,
+	b => 1,
+	c => 2
 };
 
-my $names =[];
-my $a = { vals => "'#pid#','#orgId#','#userId#','#userType#','#departmentId#'"};
-my $aa = $a->{vals};
-my $pid = "pid";
-$aa =~ s/#$pid#/11111/g;
+sub f($) {
+	my $a = shift;
+	print Dumper(shift);
+}
 
-print $aa . "\n";
-print Dumper($a);
+f(($aa->{a} = 100);
+
+print Dumper($aa);
