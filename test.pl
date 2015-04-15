@@ -2,8 +2,12 @@
 use strict;
 use English;
 use Data::Dumper;
+use Data::UUID;
+my $ug = Data::UUID->new();	
 
-
+sub getUuid() {
+	return $ug->create_str();
+}
 my $a = 6 % 7 || 1;
 
 my $aa = {
@@ -12,11 +16,17 @@ my $aa = {
 	c => 2
 };
 
-sub f($) {
-	my $a = shift;
-	print Dumper(shift);
-}
+my $fnRefreshUuid = sub($) {
+	my $pms = shift;
+	$pms->{pid} = getUuid();
+	return $pms
+};
+my $pms = {
+	orgId => '$orgId',
+	targetId => '$knowledgeId',
+	creator => '$userId'
+};
 
-f(($aa->{a} = 100);
-
-print Dumper($aa);
+print Dumper($fnRefreshUuid->($pms));
+print Dumper($fnRefreshUuid->($pms));
+print Dumper($fnRefreshUuid->($pms));
