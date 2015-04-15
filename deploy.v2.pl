@@ -28,9 +28,10 @@ sub leaveWorkspace() {
 }
 
 sub deploy() {
+	my $shDeploy2Host = "$ENV{JENKINS_HOME}/workspace/ciom/deploy.app.to.host.with.multi.tomcats.sh";
+	
 	my $hosts = $Cloud->{hosts};
 	my $cnt = $#{$hosts} + 1;
-	my $shDeploy2Host = "$ENV{JENKINS_HOME}/workspace/ciom/deploy.app.to.host.with.multi.tomcats.sh";
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $cmd = sprintf("%s %s %s %s %s %s",
 				$shDeploy2Host,
