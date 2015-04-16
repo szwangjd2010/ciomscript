@@ -290,6 +290,7 @@ sub openFile() {
 	while ( my ($k, $v) = each(%{$Tabs}) ) {
         if (!open($v->{h}, '>', $v->{file})) {
         	print("Can not open $v->{file} \n");
+        	exit 1;
         }
     }
 }
