@@ -1,0 +1,17 @@
+add epel repos
+
+yum install -y erlang
+yum install -y rrdtool
+yum install -y cpan
+
+
+extract tsung package
+./configure
+make && make install
+
+
+cpan install Template
+
+
+
+
