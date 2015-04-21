@@ -50,6 +50,7 @@ function logActionHeader() {
 function main() {
 	logActionHeader
 	stopIIS
+	sleep 5
 	backup
 	clean
 	extract
