@@ -12,7 +12,8 @@ fi
 cloudId=$1
 password=$2
 sha256Password=$(echo -n $(echo -n $password | sha256sum | awk {'print $1'}))
+cmdSetRootPwd="echo -n $sha256Password | passwd --stdin root"
 
 for host in $(cat "$cloudId.hosts"); do
-	execRemoteCmd $host 22 "echo -n $sha256Password | passwd --stdin root"
+	execRemoteCmd $host 22 "$cmdSetRootPwd"
 done
