@@ -41,11 +41,13 @@ backup() {
 }
 
 clean() {
-	execRemoteCmd $host $port "cd $WebappsLocation; rm -rf $appContextName"	
+	execRemoteCmd $host $port "cd $WebappsLocation; rm -rf $appContextName ROOT"	
 }
 
-makeAppAsRoot() {
-	execRemoteCmd $host $port "rm -rf $WebappsLocation/ROOT; mv $WebappsLocation/$appContextName $WebappsLocation/ROOT"
+setAppContextName() {
+	if [ $asRoot == "AsRoot" ]; then
+		appContextName='ROOT'
+	fi
 }
 
 preDeployApp() {
@@ -53,14 +55,11 @@ preDeployApp() {
 }
 
 postDeployApp() {
-	if [ $asRoot == "AsRoot" ]; then
-		makeAppAsRoot
-	fi
-	
 	startTomcats $host $port $tomcatParent
 }
 
 main() {
+	setAppContextName
 	enterWorkspace
 	preDeployApp
 	backup

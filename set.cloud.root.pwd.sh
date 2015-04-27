@@ -2,12 +2,15 @@
 #
 source $CIOM_HOME/ciom.util.sh
 
-setMode 0
-
 if [ $# -lt 2 ]; then
-	echo "usage: $0 %cloudId %password"
+	echo "usage:"
+	echo "$0 %cloudId %password %runMode"
+	echo "if runMode is omit, default is 0"
 	exit 0
-fi 
+fi
+
+runMode=${3:-0}
+setMode $runMode
 
 cloudId=$1
 password=$2
