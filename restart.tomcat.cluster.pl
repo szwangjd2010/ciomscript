@@ -7,7 +7,7 @@ use Data::Dumper;
 
 sub main();
 
-my $TomcatCluster = $ARGV[0];
+my $TomcatClusterName = $ARGV[0];
 
 my $Tomcats = {
 	'test' => [
@@ -15,23 +15,23 @@ my $Tomcats = {
 		{host => "192.168.0.125", 	port => "22", tomcatHome=> "/opt/test1/tomcat7-2"}
 	],
 	
-	'uTomcatCluster-api' => [
+	'ucloud-api' => [
 		{host => "10.10.73.235", 	port => "22", tomcatParent => "/opt/ws"},
 		{host => "10.10.76.73", 	port => "22", tomcatParent => "/opt/ws"},
 		{host => "10.10.75.138", 	port => "22", tomcatParent => "/opt/ws"}
 	],
 
-	'uTomcatCluster-admin' => [
+	'ucloud-admin' => [
 		{host => "10.10.74.158", 	port => "22", tomcatParent => "/opt/ws2"}
 	],
 
-	'uTomcatCluster-adminapi' => [
+	'ucloud-adminapi' => [
 		{host => "10.10.75.138", 	port => "22", tomcatParent => "/opt/ws1"}
 	]
 };
 
 sub main() {
-	my $hosts = $Tomcats->{$TomcatCluster};
+	my $hosts = $Tomcats->{$TomcatClusterName};
 	my $cnt = $#{$hosts} + 1;
 	
 	for (my $i = 0; $i < $cnt; $i++) {
