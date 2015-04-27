@@ -1,14 +1,8 @@
 #!/bin/bash
 # 
 #
-if [ "$Password" == "woyaobusuXX" ]; then
-	touch "$WORKSPACE/__auth_success"
+if [ "$CiomPassphrase" == "bushuYXTduang" ]; then
+	exit 0
 fi
 
-if [ "$Passwordv2" == "woyaobusuXXXXv2" ]; then
-	touch "$WORKSPACE/__auth_success"
-fi
-
-if [ "$PasswordRestartTomcat" == "woyaorestarttomcat" ]; then
-	touch "$WORKSPACE/__auth_success"
-fi
+exit 1

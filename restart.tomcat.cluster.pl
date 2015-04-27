@@ -15,22 +15,19 @@ my $Tomcats = {
 		{host => "192.168.0.125", 	port => "22", tomcatHome=> "/opt/test1/tomcat7-2"}
 	],
 	
-	'ucloud' => [
+	'ucloud-api' => [
 		{host => "10.10.73.235", 	port => "22", tomcatParent => "/opt/ws"},
-		{host => "10.10.76.73", 	port => "22", tomcatParent => "/opt/ws"}
-	],
-
-	'ucloud-admin' => [
-		{host => "10.10.74.158", 	port => "22", tomcatParent => "/opt/ws1"}
-	],
-
-	'ucloud-nodbproxy' => [
+		{host => "10.10.76.73", 	port => "22", tomcatParent => "/opt/ws"},
 		{host => "10.10.75.138", 	port => "22", tomcatParent => "/opt/ws"}
 	],
 
-	'ucloud-admin-nodbproxy' => [
+	'ucloud-admin' => [
 		{host => "10.10.74.158", 	port => "22", tomcatParent => "/opt/ws2"}
-	]	
+	],
+
+	'ucloud-adminapi' => [
+		{host => "10.10.75.138", 	port => "22", tomcatParent => "/opt/ws1"}
+	]
 };
 
 sub main() {
