@@ -7,7 +7,7 @@ source ./ciom.mysql.util.sh
 logFileYMD=$(date -d '1 days ago' +%04Y%02m%02d)
 
 getEventLogFile() {
-	echo -n "/data/logs/yxt/event.log.$logFileYMD"
+	echo -n "/data/logs/yxt/event.$logFileYMD.log"
 }
 
 instanceSQLTpl() {
