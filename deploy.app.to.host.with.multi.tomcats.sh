@@ -41,7 +41,7 @@ backup() {
 }
 
 clean() {
-	execRemoteCmd $host $port "cd $WebappsLocation; rm -rf $appName ROOT"	
+	execRemoteCmd $host $port "cd $WebappsLocation; rm -rf $appContextName $appName"	
 }
 
 setAppContextName() {
