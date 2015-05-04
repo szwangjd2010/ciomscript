@@ -12,4 +12,7 @@ grant select on *.* to readonly@'%' identified by 'readonly';
 grant select on *.* to nagios@'%' identified by 'nagios';
 flush privileges;
 
+set password for 'yxt'@'10.10.%' = password('hzyxtDUANG2015');
+
+
 CREATE DATABASE yxt DEFAULT CHARACTER SET utf8;
