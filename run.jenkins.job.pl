@@ -6,28 +6,30 @@ use English;
 use Data::Dumper;
 use CiomUtil;
 
-my $job = $ARGV[0];
+my $Alias2JobName = {
+	web => 'ucloud.env-yxt.web.deploy',
+	api => 'ucloud.env-yxt.api.deploy',
+	admin => 'ucloud.env-yxt.admin.deploy',
+	adminapi => 'ucloud.env-yxt.adminapi.deploy',
+};
+
 my $JobParameters = {
-	'__dev.env-yxt.web.deploy.to.host' => {
-		'ciomHost' => '172.17.128.243',
-		'ciomUserName' => 'ci',
-		'ciomUserPassword' => 'P@ss!23',
-		'ciomAppPackageFile' => 'C:\ciom.workspace\yxtweb.zip',
-		'ciomAppDeployedLocation' => 'C:\iis'
-	}
+	'CiomPassphrase' => 'YXTduang2015'
 };
 
 sub help() {
-	my @jobs = keys %{$JobParameters};
+	my @jobs = keys %{$Alias2JobName};
 	my $jobList = join("\n", @jobs);
 	print <<"HELP";
-usage: $0 %jobName
+usage: 
+$0 %jobAlias
 
-available jobName: 
+available alias: 
 $jobList
 
 HELP
 }
+
 
 sub main() {
 	if ($#ARGV < 0) {
@@ -35,9 +37,12 @@ sub main() {
 		return;
 	}
 	
+	my $alias = $ARGV[0];
+	my $job = $Alias2JobName->{$alias};
 	my $util = new CiomUtil(1);
+
 	#$util->runJenkinsJob($job, $JobParameters->{$job});
-	print $util->constructJenkinsJobCmd($job, $JobParameters->{$job});
+	print $util->constructJenkinsJobCmd($job, $JobParameters);
 }
 
 main();
