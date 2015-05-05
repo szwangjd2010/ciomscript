@@ -41,8 +41,8 @@ sub main() {
 	my $job = $Alias2JobName->{$alias};
 	my $util = new CiomUtil(1);
 
-	#$util->runJenkinsJob($job, $JobParameters->{$job});
-	print $util->constructJenkinsJobCmd($job, $JobParameters);
+	$util->runJenkinsJob($job, $JobParameters->{$job});
+	#print $util->constructJenkinsJobCmd($job, $JobParameters);
 }
 
 main();
