@@ -85,7 +85,7 @@ $targetPath = getAppTargetPath
 $packageFile = getAppPackageFile
 
 $MsBuild = "&'C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild.exe' --%"
-$SolutionCF = "/t:Rebuild /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
+$SolutionCF = "/t:Clean;Build /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
 $ProjectCF = "/t:ResolveReferences;Compile /t:_WPPCopyWebApplication /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
 $OutputCF = "/p:WebProjectOutputDir"
 $LogCF = getBuildLogCF
