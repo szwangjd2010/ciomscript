@@ -2,16 +2,15 @@
 # 
 #
 
-instanceAmount=$1
-basePortDelta=${2:-0}
-fileJavaOptsTpl=$CIOM_HOME/${3:-tomcat.catalina.java.opts.tpl}
-fileHttpListenTpl=$CIOM_HOME/${4:-tomcat.server.xml.http.section.tpl}
+TomcatSeed=$1
+instanceAmount=$2
+basePortDelta=${3:-0}
+
+fileJavaOptsTpl=$CIOM_HOME/${4:-tomcat.catalina.java.opts.tpl}
+fileHttpListenTpl=$CIOM_HOME/${5:-tomcat.server.xml.http.section.tpl}
 
 echo $fileJavaOptsTpl
 echo $fileHttpListenTpl
-
-
-TomcatSeed="tomcat7"
 
 
 clean() {

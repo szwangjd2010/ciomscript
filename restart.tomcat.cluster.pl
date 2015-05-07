@@ -22,11 +22,11 @@ my $Tomcats = {
 	],
 
 	'ucloud-admin' => [
-		{host => "10.10.74.158", 	port => "22", tomcatParent => "/opt/ws2"}
+		{host => "10.10.74.158", 	port => "22", tomcatParent => "/opt/ws1"}
 	],
 
 	'ucloud-adminapi' => [
-		{host => "10.10.75.138", 	port => "22", tomcatParent => "/opt/ws1"}
+		{host => "10.10.74.158", 	port => "22", tomcatParent => "/opt/ws1"}
 	]
 };
 

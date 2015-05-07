@@ -25,7 +25,7 @@ extractTomcats(){
 }
 
 cleanTomcats(){
-	execRemoteCmd $host $port "rm -rf $tomcatParent/tomcat7-* $tomcatParent/webapps tomcats.bz2"
+	execRemoteCmd $host $port "rm -rf $tomcatParent/tomcat[678]-[1-9] $tomcatParent/webapps tomcats.bz2"
 }
 
 main() {

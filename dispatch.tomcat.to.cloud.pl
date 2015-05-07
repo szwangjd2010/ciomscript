@@ -14,6 +14,7 @@ my $OldPwd = getcwd();
 
 my $Clouds = {
 	dev_yxtadmin => {
+		tomcatSeed => 'tomcat7',
 		tomcatParent => "/opt",
 		tomcatAmount => 3,
 		basePortDelta => 0,
@@ -25,6 +26,7 @@ my $Clouds = {
 	},
 
 	ucloud => {
+		tomcatSeed => 'tomcat7',
 		tomcatParent=> "/opt/ws",
 		tomcatAmount => 4,
 		basePortDelta => 0,
@@ -40,8 +42,9 @@ my $Clouds = {
 };
 
 sub generateTomcatInstances() {
-	$ciomUtil->exec(sprintf("%s %s %s %s %s",
+	$ciomUtil->exec(sprintf("%s %s %s %s %s %s",
 		"$ENV{CIOM_HOME}/generate.tomcat.instance.sh",
+		$Clouds->{$cloudId}->{tomcatSeed},
 		$Clouds->{$cloudId}->{tomcatAmount},
 		$Clouds->{$cloudId}->{basePortDelta},
 		$Clouds->{$cloudId}->{fileJavaOptsTpl},
