@@ -33,9 +33,10 @@ sub log() {
 sub exec() {
 	my $self = shift;
 	my $cmd = shift;
+	my $mode = shift || 0;
 	
 	$self->log($cmd);
-	if ($self->{RunMode} == 1) {
+	if ($self->{RunMode} == 1 || $mode == 1) {
 		system("$cmd");
 	}
 }
@@ -54,7 +55,7 @@ sub write() {
 	my $file = shift;
 	my $content = shift;
 	my $h;
-	if (!open($h, '>', $file)) {
+	if (!open($h, '>:utf8', $file)) {
 		print "open $file failed!\n";
 		return -1
 	}

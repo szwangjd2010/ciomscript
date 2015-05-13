@@ -27,6 +27,23 @@ my $pms = {
 	creator => '$userId'
 };
 
-print Dumper($fnRefreshUuid->($pms));
-print Dumper($fnRefreshUuid->($pms));
-print Dumper($fnRefreshUuid->($pms));
+
+my $orgCodes = "aaa,bbb,ccc";
+
+my $key = "aaa";
+$key = "aaa";
+
+my $re = '(^|,)'.$key.'($|,)';
+print $orgCodes =~ m/$re/ ? 1 : 0;
+
+$key = "bbb";
+$re = '(^|,)'.$key.'($|,)';
+print $orgCodes =~ m/$re/ ? 1 : 0;
+
+$key = "ccc";
+$re = '(^|,)'.$key.'($|,)';
+print $orgCodes =~ m/$re/ ? 1 : 0;
+
+$key = "ddd";
+$re = '(^|,)'.$key.'($|,)';
+print $orgCodes =~ m/$re/ ? 1 : 0;
