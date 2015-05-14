@@ -1,0 +1,8 @@
+our $Cloud = {
+	tomcatParent => '/opt',
+	port => 22,
+
+	hosts => [
+		{ip => "172.17.128.234"}
+	]
+};

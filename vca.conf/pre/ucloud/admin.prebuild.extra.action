@@ -1,0 +1,11 @@
+#!/bin/bash
+# ciom prebuild extra action
+#
+
+perl -0 -i -pE \
+'s|(?<g1>var adminServer = ")(?<g2>[^"]*)(?<g3>";)|$+{g1}http://admin.yxt.com$+{g3}|sg' \
+$WORKSPACE/admin/web/static/js/common/common.js
+
+perl -0 -i -pE \
+'s|(?<g1>var adminContextPath = ")(?<g2>[^"]*)(?<g3>";)|$+{g1}/adminapi$+{g3}|sg' \
+$WORKSPACE/admin/web/static/js/common/common.js

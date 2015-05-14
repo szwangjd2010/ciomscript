@@ -1,0 +1,15 @@
+#!/bin/bash
+# ciom prebuild extra action
+#
+
+perl -0 -i -pE \
+'s|(?<g1><add key="api:baseurl" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}http://172.17.128.232:8080/api/v1/$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config
+
+perl -0 -i -pE \
+'s|(?<g1><add key="cache:RedisWriteHost" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}foobared\@172.17.128.231:6379$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config
+
+perl -0 -i -pE \
+'s|(?<g1><add key="cache:RedisReadHost" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}foobared\@172.17.128.231:6379$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config

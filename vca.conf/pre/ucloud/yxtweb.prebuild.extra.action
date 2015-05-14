@@ -1,0 +1,43 @@
+#!/bin/bash
+# ciom prebuild extra action
+#
+
+perl -0 -i -pE \
+'s|(?<g1><add key="api:baseurl" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}http://api.yxt.com/v1/$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config
+
+perl -0 -i -pE \
+'s|(?<g1><add key="cache:RedisWriteHost" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}8cc3fbeea7a8ec58f550f2eb31ec8a071e1ae077971a7a470f7e36f8f4ba8437\@10.10.69.210:6379$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config
+
+perl -0 -i -pE \
+'s|(?<g1><add key="cache:RedisReadHost" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}8cc3fbeea7a8ec58f550f2eb31ec8a071e1ae077971a7a470f7e36f8f4ba8437\@10.10.69.210:6379$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config
+
+perl -0 -i -pE \
+'s|(?<g1><add key="qiniu.openbucket.name" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}tauruso$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config
+
+perl -0 -i -pE \
+'s|(?<g1><add key="qiniu.encryptbucket.name" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}tauruse$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config
+
+perl -0 -i -pE \
+'s|(?<g1><add key="qiniu.openbucket.baseurl" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}http://pic.yxt.com/$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config
+
+perl -0 -i -pE \
+'s|(?<g1><add key="qiniu.encryptbucket.baseurl" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}http://stream.yxt.com/$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config
+
+perl -0 -i -pE \
+'s|(?<g1><add key="qiniu.ak" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}luVv7W86nKkuT1ejixSEigkGrDkKVNvU4OqA-fd2$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config
+
+perl -0 -i -pE \
+'s|(?<g1><add key="qiniu.sk" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}M8wlhbmmLositiOhhPAy3yHW0Pb7IZ0CIS558Rxz$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config
+
+perl -0 -i -pE \
+'s|(?<g1><add key="CustomErrors" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}true$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config

@@ -100,5 +100,12 @@ sub runJenkinsJob() {
 	$self->exec($cmd);
 }
 
+sub prettyPath() {
+	my $self = shift;
+	my $path = shift;
+	$path =~ s|/{1,}|/|g;
+	return $path;
+}
+
 1;
 __END__

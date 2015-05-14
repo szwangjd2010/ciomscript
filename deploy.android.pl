@@ -8,24 +8,26 @@ use Cwd;
 use CiomUtil;
 use JSON::Parse 'json_file_to_perl';
 use String::Escape 'escape';
+use open ":encoding(utf8)";
+use open IN => ":encoding(utf8)", OUT => ":utf8";
 
 my $version = $ARGV[0];
 my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
 my $orgCodes = $ARGV[3] || '*';
 
-my $ciomUtil = new CiomUtil(0);
+my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
 my $Ciom_VCA_Home = "$ENV{JENKINS_HOME}/workspace/ver.env.specific/$version/pre/$cloudId/$appName";
+my $ApkPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/apk";
 my $CiomData = json_file_to_perl("$Ciom_VCA_Home/ciom.json");
 
-#print Dumper($CiomData);
 sub enterWorkspace();
 sub leaveWorkspace();
 sub getCustomizedResourcePath($$);
 sub handleOrgs();
-sub pullCodes();
+sub checkout();
 sub replaceOrgCustomizedFiles($);
 sub streameditOrgConfs($);
 sub streamedit4All();
@@ -37,7 +39,8 @@ sub main();
 
 
 sub enterWorkspace() {
-	;
+	my $appWorkspace = $ENV{WORKSPACE} || "/var/lib/jenkins/workspace/mobile.andriod-eschool";
+	chdir($appWorkspace);
 }
 
 sub leaveWorkspace() {
@@ -65,19 +68,22 @@ sub handleOrgs() {
 }
 
 sub build() {
-	$ciomUtil->exec("ant -f Eschool/build.xml release");
+	$ciomUtil->exec("ant -f Eschool/build.xml clean release");
 }
 
+sub makeApkDirectory() {
+	$ciomUtil->exec("mkdir $ApkPath");
+}
 sub renameAPKFile($) {
 	my $code = $_[0];
-	$ciomUtil->exec("mv /tmp/ciom.android/Elearning-release.apk $Ciom_VCA_Home/apk/eschool_android_$code.apk");
+	$ciomUtil->exec("/bin/cp -rf /tmp/ciom.android/Elearning-release.apk $ApkPath/eschool_android_$code.apk");
 }
 
 sub clean() {
 	$ciomUtil->exec("rm -rf /tmp/ciom.android/*");
 }
 
-sub pullCodes() {
+sub checkout() {
 	my $repos = $CiomData->{scm}->{repos};
 	my $username = $CiomData->{scm}->{username};
 	my $password = $CiomData->{scm}->{password};
@@ -91,7 +97,7 @@ sub pullCodes() {
 		if (! -d $name) {
 			$ciomUtil->exec("$cmdSvnPrefix co $url $name");
 		} else {
-			$ciomUtil->exec("$cmdSvnPrefix revert $name");
+			$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
 			$ciomUtil->exec("$cmdSvnPrefix update $name");
 		}
 	}
@@ -112,7 +118,7 @@ sub _streamedit($) {
 	my $items = $_[0];
 
 	my $cmds = "";
-	my $CmdStreameditTpl = "perl -i -pE 's|%s|%s|mg' %s";
+	my $CmdStreameditTpl = "perl -CSDL -i -pE 's|%s|%s|mg' %s";
 	for my $file (keys %{$items}) {
 		my $v = $items->{$file};
 		my $cnt = $#{$v} + 1;
@@ -144,12 +150,22 @@ sub streamedit4All() {
 	_streamedit($streameditItems);
 }
 
+sub outputApkurl() {
+	my $url = "$ENV{BUILD_URL}/apk";
+	$url =~ s|:8080||;
+	$url =~ s|(/\d+/)|/builds/${1}|;
+	$url = $ciomUtil->prettyPath($url);
+	$ciomUtil->log("\n\n$url\n\n);
+}
+
 
 sub main() {
 	enterWorkspace();
-	pullCodes();
+	makeApkDirectory();
+	checkout();
 	streamedit4All();
 	handleOrgs();
+	outputApkurl();
 	leaveWorkspace();
 }
 

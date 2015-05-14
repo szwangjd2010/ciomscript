@@ -1,0 +1,12 @@
+#!/bin/bash
+# ciom prebuild extra action
+#
+
+perl -0 -i -pE \
+'s|(?<g1><add key="api:baseurl" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}http://172.17.128.232:8083/api/v1/$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config
+
+perl -0 -i -pE \
+'s|(?<g1><add key="app:defaultorg" value=")(?<g2>[^<>]+)(?<g3>"\s*/>)|$+{g1}hz$+{g3}|sg' \
+$WORKSPACE/yxtweb/Web/Web.config
+
