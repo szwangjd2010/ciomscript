@@ -155,7 +155,7 @@ sub outputApkurl() {
 	$url =~ s|:8080||;
 	$url =~ s|(/\d+/)|/builds/${1}|;
 	$url = $ciomUtil->prettyPath($url);
-	$ciomUtil->log("\n\n$url\n\n);
+	$ciomUtil->log("\n\n$url\n\n");
 }
 
 
