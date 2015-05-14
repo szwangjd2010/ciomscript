@@ -22,7 +22,6 @@ my $OldPwd = getcwd();
 my $Ciom_VCA_Home = "$ENV{JENKINS_HOME}/workspace/ver.env.specific/$version/pre/$cloudId/$appName";
 my $ApppkgPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/app";
 my $CiomData = json_file_to_perl("$Ciom_VCA_Home/ciom.json");
-my $PlatformSpecialFile = "_$cloudId.special.pl";
 
 sub enterWorkspace();
 sub leaveWorkspace();
@@ -38,8 +37,6 @@ sub outputApppkgUrl();
 sub build();
 sub clean();
 sub main();
-
-do $PlatformSpecialFile;
 
 sub enterWorkspace() {
 	my $appWorkspace = $ENV{WORKSPACE} || "/var/lib/jenkins/workspace/mobile.android-eschool";
@@ -68,7 +65,25 @@ sub handleOrgs() {
 	}	
 }
 
-#platform special
+sub build() {
+	$ciomUtil->exec("ant -f Eschool/build.xml clean release");
+}
+
+sub moveApppkgFile($) {
+	my $code = $_[0];
+	$ciomUtil->exec("/bin/cp -rf /tmp/ciom.android/Elearning-release.apk $ApppkgPath/eschool_android_$code.apk");
+}
+
+sub clean() {
+	$ciomUtil->exec("rm -rf /tmp/ciom.android/*");
+}
+
+sub replaceOrgCustomizedFiles($) {
+	my $code = $_[0];
+
+	my $orgCustomizedHome = "$Ciom_VCA_Home/resource/$code/Eschool";
+	$ciomUtil->exec("/bin/cp -rf $orgCustomizedHome/* Eschool/");
+}
 
 sub checkout() {
 	my $repos = $CiomData->{scm}->{repos};
