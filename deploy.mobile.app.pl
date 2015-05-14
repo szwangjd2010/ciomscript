@@ -25,18 +25,16 @@ my $CiomData = json_file_to_perl("$Ciom_VCA_Home/ciom.json");
 
 sub enterWorkspace();
 sub leaveWorkspace();
-sub getCustomizedResourcePath($$);
 sub handleOrgs();
 sub checkout();
 sub replaceOrgCustomizedFiles($);
 sub streameditOrgConfs($);
 sub streamedit4All();
-sub _streamedit($);
+sub streamedit($);
 sub renameAPKFile($);
 sub build();
 sub clean();
 sub main();
-
 
 sub enterWorkspace() {
 	my $appWorkspace = $ENV{WORKSPACE} || "/var/lib/jenkins/workspace/mobile.andriod-eschool";
@@ -45,12 +43,6 @@ sub enterWorkspace() {
 
 sub leaveWorkspace() {
 	chdir($OldPwd);
-}
-
-sub getCustomizedResourcePath($$) {
-	my $code = $_[0];
-	my $fileName = $_[1];
-	return "$Ciom_VCA_Home/resource/$code/$fileName";
 }
 
 sub handleOrgs() {
@@ -105,16 +97,12 @@ sub checkout() {
 
 sub replaceOrgCustomizedFiles($) {
 	my $code = $_[0];
-	my $customizedItems = $CiomData->{orgs}->{$code}->{customizedItems};
 
-	for my $name (keys %{$customizedItems}) {
-		my $srcFile = getCustomizedResourcePath($code, $name);
-		my $dstFile = $customizedItems->{$name};
-		$ciomUtil->exec("/bin/cp -rf $srcFile $dstFile");
-	}	
+	my $orgCustomizedHome = "$Ciom_VCA_Home/resource/$code/Eschool";
+	$ciomUtil->exec("/bin/cp -rf $orgCustomizedHome/* Eschool/");
 }
 
-sub _streamedit($) {
+sub streamedit($) {
 	my $items = $_[0];
 
 	my $cmds = "";
@@ -133,7 +121,7 @@ sub _streamedit($) {
 		}
 	}
 
-	my $fileSE = "_streamedit.ciom";	
+	my $fileSE = "streamedit.ciom";	
 	$ciomUtil->write("$fileSE", $cmds);
 	$ciomUtil->exec("bash $fileSE");
 	$ciomUtil->exec("cat $fileSE", 1);
@@ -142,12 +130,12 @@ sub _streamedit($) {
 sub streameditOrgConfs($) {
 	my $code = $_[0];
 	my $streameditItems = $CiomData->{orgs}->{$code}->{streameditItems};
-	_streamedit($streameditItems);
+	streamedit($streameditItems);
 }
 
 sub streamedit4All() {
 	my $streameditItems = $CiomData->{streameditItems};
-	_streamedit($streameditItems);
+	streamedit($streameditItems);
 }
 
 sub outputApkurl() {
