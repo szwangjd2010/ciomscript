@@ -37,7 +37,7 @@ sub clean();
 sub main();
 
 sub enterWorkspace() {
-	my $appWorkspace = $ENV{WORKSPACE} || "/var/lib/jenkins/workspace/mobile.andriod-eschool";
+	my $appWorkspace = $ENV{WORKSPACE} || "/var/lib/jenkins/workspace/mobile.android-eschool";
 	chdir($appWorkspace);
 }
 
