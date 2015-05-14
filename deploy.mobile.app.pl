@@ -16,11 +16,13 @@ my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
 my $orgCodes = $ARGV[3] || '*';
 
-my $ciomUtil = new CiomUtil(1);
-my $OldPwd = getcwd();
+our $ciomUtil = new CiomUtil(1);
+our $Ciom_VCA_Home = "$ENV{JENKINS_HOME}/workspace/ver.env.specific/$version/pre/$cloudId/$appName";
+our $ApppkgPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/app";
 
-my $Ciom_VCA_Home = "$ENV{JENKINS_HOME}/workspace/ver.env.specific/$version/pre/$cloudId/$appName";
-my $ApppkgPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/app";
+require 'android.special.pl';
+
+my $OldPwd = getcwd();
 my $CiomData = json_file_to_perl("$Ciom_VCA_Home/ciom.json");
 
 sub enterWorkspace();
