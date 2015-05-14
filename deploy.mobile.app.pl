@@ -20,7 +20,7 @@ my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
 my $Ciom_VCA_Home = "$ENV{JENKINS_HOME}/workspace/ver.env.specific/$version/pre/$cloudId/$appName";
-my $ApkPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/apk";
+my $ApppkgPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/app";
 my $CiomData = json_file_to_perl("$Ciom_VCA_Home/ciom.json");
 
 sub enterWorkspace();
@@ -31,7 +31,9 @@ sub replaceOrgCustomizedFiles($);
 sub streameditOrgConfs($);
 sub streamedit4All();
 sub streamedit($);
-sub renameAPKFile($);
+sub moveApppkgFile($);
+sub makeApppkgDirectory();
+sub outputApppkgUrl();
 sub build();
 sub clean();
 sub main();
@@ -45,6 +47,10 @@ sub leaveWorkspace() {
 	chdir($OldPwd);
 }
 
+sub makeApppkgDirectory() {
+	$ciomUtil->exec("mkdir $ApppkgPath");
+}
+
 sub handleOrgs() {
 	my $orgs = $CiomData->{orgs};
 	for my $code (keys %{$orgs}) {
@@ -53,7 +59,7 @@ sub handleOrgs() {
 			replaceOrgCustomizedFiles($code);
 			streameditOrgConfs($code);
 			build();
-			renameAPKFile($code);
+			moveApppkgFile($code);
 			clean();
 		}
 	}	
@@ -63,16 +69,20 @@ sub build() {
 	$ciomUtil->exec("ant -f Eschool/build.xml clean release");
 }
 
-sub makeApkDirectory() {
-	$ciomUtil->exec("mkdir $ApkPath");
-}
-sub renameAPKFile($) {
+sub moveApppkgFile($) {
 	my $code = $_[0];
-	$ciomUtil->exec("/bin/cp -rf /tmp/ciom.android/Elearning-release.apk $ApkPath/eschool_android_$code.apk");
+	$ciomUtil->exec("/bin/cp -rf /tmp/ciom.android/Elearning-release.apk $ApppkgPath/eschool_android_$code.apk");
 }
 
 sub clean() {
 	$ciomUtil->exec("rm -rf /tmp/ciom.android/*");
+}
+
+sub replaceOrgCustomizedFiles($) {
+	my $code = $_[0];
+
+	my $orgCustomizedHome = "$Ciom_VCA_Home/resource/$code/Eschool";
+	$ciomUtil->exec("/bin/cp -rf $orgCustomizedHome/* Eschool/");
 }
 
 sub checkout() {
@@ -93,13 +103,6 @@ sub checkout() {
 			$ciomUtil->exec("$cmdSvnPrefix update $name");
 		}
 	}
-}
-
-sub replaceOrgCustomizedFiles($) {
-	my $code = $_[0];
-
-	my $orgCustomizedHome = "$Ciom_VCA_Home/resource/$code/Eschool";
-	$ciomUtil->exec("/bin/cp -rf $orgCustomizedHome/* Eschool/");
 }
 
 sub streamedit($) {
@@ -138,8 +141,8 @@ sub streamedit4All() {
 	streamedit($streameditItems);
 }
 
-sub outputApkurl() {
-	my $url = "$ENV{BUILD_URL}/apk";
+sub outputApppkgUrl() {
+	my $url = "$ENV{BUILD_URL}/app";
 	$url =~ s|:8080||;
 	$url =~ s|(/\d+/)|/builds/${1}|;
 	$url = $ciomUtil->prettyPath($url);
@@ -149,11 +152,11 @@ sub outputApkurl() {
 
 sub main() {
 	enterWorkspace();
-	makeApkDirectory();
+	makeApppkgDirectory();
 	checkout();
 	streamedit4All();
 	handleOrgs();
-	outputApkurl();
+	outputApppkgUrl();
 	leaveWorkspace();
 }
 
