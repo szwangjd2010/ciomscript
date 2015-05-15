@@ -1,27 +1,29 @@
-
-
 our $ciomUtil;
-our $Ciom_VCA_Home;
+our $CiomVcaHome;
 our $ApppkgPath;
+our $Pms;
+
+sub fillPms() {
+	$Pms->{CFBundleShortVersionString} = $ENV{CFBundleShortVersionString};
+	$Pms->{CFBundleVersion} = $ENV{CFBundleVersion};
+}
 
 sub build() {
-	$ciomUtil->exec("ant -f Eschool/build.xml clean release");
+	$ciomUtil->log("ios build");
 }
 
 sub moveApppkgFile($) {
 	my $code = $_[0];
-	$ciomUtil->exec("/bin/cp -rf /tmp/ciom.android/Elearning-release.apk $ApppkgPath/eschool_android_$code.apk");
+	$ciomUtil->log("ios moveApppkgFile");
 }
 
 sub clean() {
-	$ciomUtil->exec("rm -rf /tmp/ciom.android/*");
+	$ciomUtil->log("ios clean");
 }
 
 sub replaceOrgCustomizedFiles($) {
 	my $code = $_[0];
 
-	my $orgCustomizedHome = "$Ciom_VCA_Home/resource/$code/Eschool";
-	$ciomUtil->exec("/bin/cp -rf $orgCustomizedHome/* Eschool/");
+	my $orgCustomizedHome = "$CiomVcaHome/resource/$code/WebSchool";
+	$ciomUtil->exec("/bin/cp -rf $orgCustomizedHome/* WebSchool/");
 }
-
-1;

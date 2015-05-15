@@ -17,17 +17,16 @@ my $appName = $ARGV[2];
 my $orgCodes = $ARGV[3] || '*';
 
 our $ciomUtil = new CiomUtil(1);
-our $Ciom_VCA_Home = "$ENV{JENKINS_HOME}/workspace/ver.env.specific/$version/pre/$cloudId/$appName";
+our $CiomVcaHome = "$ENV{JENKINS_HOME}/workspace/ver.env.specific/$version/pre/$cloudId/$appName";
 our $ApppkgPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/app";
 our $Pms = {};
 
 my $ShellStreamedit = "_streamedit.ciom";
 my $OldPwd = getcwd();
-my $CiomData = json_file_to_perl("$Ciom_VCA_Home/ciom.json");
+my $CiomData = json_file_to_perl("$CiomVcaHome/ciom.json");
 
 require "$cloudId.special.pl";
 
-print Dumper(%ENV);
 sub enterWorkspace() {
 	my $appWorkspace = $ENV{WORKSPACE} || "/var/lib/jenkins/workspace/mobile.$cloudId-eschool";
 	chdir($appWorkspace);

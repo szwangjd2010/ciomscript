@@ -1,7 +1,5 @@
-
-
 our $ciomUtil;
-our $Ciom_VCA_Home;
+our $CiomVcaHome;
 our $ApppkgPath;
 our $Pms;
 
@@ -26,6 +24,6 @@ sub clean() {
 sub replaceOrgCustomizedFiles($) {
 	my $code = $_[0];
 
-	my $orgCustomizedHome = "$Ciom_VCA_Home/resource/$code/Eschool";
+	my $orgCustomizedHome = "$CiomVcaHome/resource/$code/Eschool";
 	$ciomUtil->exec("/bin/cp -rf $orgCustomizedHome/* Eschool/");
 }
