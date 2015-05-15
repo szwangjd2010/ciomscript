@@ -41,6 +41,17 @@ sub exec() {
 	}
 }
 
+sub execWithReturn() {
+	my $self = shift;
+	my $cmd = shift;
+	my $mode = shift || 0;
+	
+	$self->log($cmd);
+	if ($self->{RunMode} == 1 || $mode == 1) {
+		readpipe("$cmd");
+	}
+}
+
 sub remoteExec() {
 	my $self = shift;
 	my $host = shift;

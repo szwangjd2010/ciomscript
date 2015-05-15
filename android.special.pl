@@ -3,6 +3,12 @@
 our $ciomUtil;
 our $Ciom_VCA_Home;
 our $ApppkgPath;
+our $Pms;
+
+sub fillPms() {
+	$Pms->{versionCode} = $ENV{versionCode};
+	$Pms->{versionName} = $ENV{versionName};
+}
 
 sub build() {
 	$ciomUtil->exec("ant -f Eschool/build.xml clean release");
@@ -23,5 +29,3 @@ sub replaceOrgCustomizedFiles($) {
 	my $orgCustomizedHome = "$Ciom_VCA_Home/resource/$code/Eschool";
 	$ciomUtil->exec("/bin/cp -rf $orgCustomizedHome/* Eschool/");
 }
-
-1;

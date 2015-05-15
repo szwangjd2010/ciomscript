@@ -19,29 +19,17 @@ my $orgCodes = $ARGV[3] || '*';
 our $ciomUtil = new CiomUtil(1);
 our $Ciom_VCA_Home = "$ENV{JENKINS_HOME}/workspace/ver.env.specific/$version/pre/$cloudId/$appName";
 our $ApppkgPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/app";
+our $Pms = {};
 
-require 'android.special.pl';
-
+my $ShellStreamedit = "_streamedit.ciom";
 my $OldPwd = getcwd();
 my $CiomData = json_file_to_perl("$Ciom_VCA_Home/ciom.json");
 
-sub enterWorkspace();
-sub leaveWorkspace();
-sub handleOrgs();
-sub checkout();
-sub replaceOrgCustomizedFiles($);
-sub streameditOrgConfs($);
-sub streamedit4All();
-sub streamedit($);
-sub moveApppkgFile($);
-sub makeApppkgDirectory();
-sub outputApppkgUrl();
-sub build();
-sub clean();
-sub main();
+require "$cloudId.special.pl";
 
+print Dumper(%ENV);
 sub enterWorkspace() {
-	my $appWorkspace = $ENV{WORKSPACE} || "/var/lib/jenkins/workspace/mobile.android-eschool";
+	my $appWorkspace = $ENV{WORKSPACE} || "/var/lib/jenkins/workspace/mobile.$cloudId-eschool";
 	chdir($appWorkspace);
 }
 
@@ -53,39 +41,7 @@ sub makeApppkgDirectory() {
 	$ciomUtil->exec("mkdir $ApppkgPath");
 }
 
-sub handleOrgs() {
-	my $orgs = $CiomData->{orgs};
-	for my $code (keys %{$orgs}) {
-		my $re = '(^|,)' . $code . '($|,)';
-		if ($orgCodes eq '*' || $orgCodes =~ m/$re/) {
-			replaceOrgCustomizedFiles($code);
-			streameditOrgConfs($code);
-			build();
-			moveApppkgFile($code);
-			clean();
-		}
-	}	
-}
-
-sub build() {
-	$ciomUtil->exec("ant -f Eschool/build.xml clean release");
-}
-
-sub moveApppkgFile($) {
-	my $code = $_[0];
-	$ciomUtil->exec("/bin/cp -rf /tmp/ciom.android/Elearning-release.apk $ApppkgPath/eschool_android_$code.apk");
-}
-
-sub clean() {
-	$ciomUtil->exec("rm -rf /tmp/ciom.android/*");
-}
-
-sub replaceOrgCustomizedFiles($) {
-	my $code = $_[0];
-
-	my $orgCustomizedHome = "$Ciom_VCA_Home/resource/$code/Eschool";
-	$ciomUtil->exec("/bin/cp -rf $orgCustomizedHome/* Eschool/");
-}
+#platform special#
 
 sub checkout() {
 	my $repos = $CiomData->{scm}->{repos};
@@ -107,17 +63,19 @@ sub checkout() {
 	}
 }
 
-sub streamedit($) {
+sub generateStreameditFile($) {
 	my $items = $_[0];
 
 	my $cmds = "";
-	my $CmdStreameditTpl = "perl -CSDL -i -pE 's|%s|%s|mg' %s";
+	my $CmdStreameditTpl = "perl -CSDL %s-i -pE 's|%s|%s|mg' %s";
 	for my $file (keys %{$items}) {
 		my $v = $items->{$file};
 		my $cnt = $#{$v} + 1;
 		
 		for (my $i = 0; $i < $cnt; $i++) {
-			$cmds .= sprintf($CmdStreameditTpl, 
+			my $lineMode = defined($v->[$i]->{single}) ? '-0 ' : '';
+			$cmds .= sprintf($CmdStreameditTpl,
+				$lineMode,
 				$v->[$i]->{re},
 				$v->[$i]->{to},
 				$file
@@ -126,20 +84,44 @@ sub streamedit($) {
 		}
 	}
 
-	my $fileSE = "streamedit.ciom";	
-	$ciomUtil->write("$fileSE", $cmds);
-	$ciomUtil->exec("bash $fileSE");
-	$ciomUtil->exec("cat $fileSE", 1);
+	$ciomUtil->write("$ShellStreamedit", $cmds);
+}
+
+sub replacePmsInShellStreamedit() {
+	for my $key (keys %{$Pms}) {
+		my $nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciompm>$key</ciompm>' $ShellStreamedit");
+		if ($nCiompmCnt == 0) {
+			next;
+		}
+
+		my $v = $Pms->{$key};
+		$ciomUtil->log("\n\ninstantiate $key ...");
+		$ciomUtil->exec("cat $ShellStreamedit", 1);
+		$ciomUtil->exec("perl -CSDL -i -pE 's|<ciompm>$key</ciompm>|$v|mg' $ShellStreamedit");
+	}	
+}
+
+sub streamedit($) {
+	my $items = $_[0];
+	generateStreameditFile($items);
+	replacePmsInShellStreamedit();
+	
+	$ciomUtil->exec("bash $ShellStreamedit");
+	$ciomUtil->exec("cat $ShellStreamedit", 1);
+	$ciomUtil->exec("cat $ShellStreamedit >> _streamedit.ciom.all");
 }
 
 sub streameditOrgConfs($) {
 	my $code = $_[0];
 	my $streameditItems = $CiomData->{orgs}->{$code}->{streameditItems};
+	$ciomUtil->exec("echo '$code' >> _streamedit.ciom.all");
 	streamedit($streameditItems);
 }
 
 sub streamedit4All() {
 	my $streameditItems = $CiomData->{streameditItems};
+	$ciomUtil->exec("\n\n\necho '$ENV{BUILD_NUMBER} - $orgCodes' >> _streamedit.ciom.all");
+	$ciomUtil->exec("echo ciom.global >> _streamedit.ciom.all");
 	streamedit($streameditItems);
 }
 
@@ -148,14 +130,30 @@ sub outputApppkgUrl() {
 	$url =~ s|:8080||;
 	$url =~ s|(/\d+/)|/builds/${1}|;
 	$url = $ciomUtil->prettyPath($url);
-	$ciomUtil->log("\n\n$url\n\n");
+	$ciomUtil->log("\n\nclick to get build out packages:");
+	$ciomUtil->log("<a href=\"$url\">$url</a>");
+	$ciomUtil->log("\n\n");
 }
 
+sub handleOrgs() {
+	my $orgs = $CiomData->{orgs};
+	for my $code (keys %{$orgs}) {
+		my $re = '(^|,)' . $code . '($|,)';
+		if ($orgCodes eq '*' || $orgCodes =~ m/$re/) {
+			replaceOrgCustomizedFiles($code);
+			streameditOrgConfs($code);
+			build();
+			moveApppkgFile($code);
+			clean();
+		}
+	}	
+}
 
 sub main() {
 	enterWorkspace();
 	makeApppkgDirectory();
 	checkout();
+	fillPms();
 	streamedit4All();
 	handleOrgs();
 	outputApppkgUrl();
