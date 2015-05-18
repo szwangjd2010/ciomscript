@@ -33,8 +33,6 @@ sub main() {
 	my $cnt = $#{$Hosts} + 1;
 	for (my $i = 0; $i < $cnt; $i++) {
 		$coimUtil->log("init host - $Hosts->[$i] ... ");
-		#$coimUtil->remoteExec($Hosts->[$i], 22, "/data/ciomshare/init.host.sh");
-		#$coimUtil->remoteExec($Hosts->[$i], 22, "echo");
 		$coimUtil->log("init host - $Hosts->[$i] ... done");
 	}
 }

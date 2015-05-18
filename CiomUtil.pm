@@ -54,11 +54,13 @@ sub execWithReturn() {
 
 sub remoteExec() {
 	my $self = shift;
-	my $host = shift;
-	my $port = shift;
-	my $cmd = shift;
+	my $info = shift;
+	my $host = $info->{host};
+	my $port = $info->{port} || 22;
+	my $user = $info->{user} || 'root';
+	my $cmd = $info->{cmd};
 	
-	$self->exec("ssh -p $port root\@$host \"$cmd\"");
+	$self->exec("ssh -p $port $user\@$host '$cmd'");
 }
 
 sub write() {

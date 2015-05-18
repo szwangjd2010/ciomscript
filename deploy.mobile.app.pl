@@ -10,11 +10,13 @@ use JSON::Parse 'json_file_to_perl';
 use String::Escape 'escape';
 use open ":encoding(utf8)";
 use open IN => ":encoding(utf8)", OUT => ":utf8";
+use IO::Handle;
+STDOUT->autoflush(1);
 
-my $version = $ARGV[0];
-my $cloudId = $ARGV[1];
-my $appName = $ARGV[2];
-my $orgCodes = $ARGV[3] || '*';
+our $version = $ARGV[0];
+our $cloudId = $ARGV[1];
+our $appName = $ARGV[2];
+our $orgCodes = $ARGV[3] || '*';
 
 our $ciomUtil = new CiomUtil(1);
 our $CiomVcaHome = "$ENV{JENKINS_HOME}/workspace/ver.env.specific/$version/pre/$cloudId/$appName";
@@ -28,7 +30,11 @@ my $CiomData = json_file_to_perl("$CiomVcaHome/ciom.json");
 require "$cloudId.special.pl";
 
 sub enterWorkspace() {
-	my $appWorkspace = $ENV{WORKSPACE} || "/var/lib/jenkins/workspace/mobile.$cloudId-eschool";
+	my $appWorkspace = "$ENV{WORKSPACE}/$appName" || "/var/lib/jenkins/workspace/mobile.$cloudId-eschool/$appName";
+	if (! -d $appWorkspace) {
+		$ciomUtil->exec("mkdir -p $appWorkspace");
+	}
+
 	chdir($appWorkspace);
 }
 
@@ -129,12 +135,12 @@ sub outputApppkgUrl() {
 	$url =~ s|:8080||;
 	$url =~ s|(/\d+/)|/builds/${1}|;
 	$url = $ciomUtil->prettyPath($url);
-	$ciomUtil->log("\n\nclick to get build out packages:");
-	$ciomUtil->log("<a href=\"$url\">$url</a>");
+	$ciomUtil->log("\n\nbuild out packages url:");
+	$ciomUtil->log($url);
 	$ciomUtil->log("\n\n");
 }
 
-sub handleOrgs() {
+sub iterateOrgsAndBuildEligibles() {
 	my $orgs = $CiomData->{orgs};
 	for my $code (keys %{$orgs}) {
 		my $re = '(^|,)' . $code . '($|,)';
@@ -154,7 +160,9 @@ sub main() {
 	checkout();
 	fillPms();
 	streamedit4All();
-	handleOrgs();
+	extraPreAction();
+	iterateOrgsAndBuildEligibles();
+	extraPostAction();
 	outputApppkgUrl();
 	leaveWorkspace();
 }

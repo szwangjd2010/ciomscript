@@ -3,6 +3,9 @@ our $CiomVcaHome;
 our $ApppkgPath;
 our $Pms;
 
+sub extraPreAction() {}
+sub extraPostAction() {}
+
 sub fillPms() {
 	$Pms->{versionCode} = $ENV{versionCode};
 	$Pms->{versionName} = $ENV{versionName};
