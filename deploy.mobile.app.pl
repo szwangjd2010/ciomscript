@@ -133,7 +133,7 @@ sub streamedit4All() {
 sub outputApppkgUrl() {
 	my $url = "$ENV{BUILD_URL}/app";
 	$url =~ s|:8080||;
-	$url =~ s|(/\d+/)|/builds/${1}|;
+	$url =~ s|(/\d+/)|/builds/lastStableBuild|;
 	$url = $ciomUtil->prettyPath($url);
 	$ciomUtil->log("\n\nbuild out packages url:");
 	$ciomUtil->log($url);

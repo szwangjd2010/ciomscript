@@ -42,7 +42,9 @@ sub moveApppkgFile($) {
 	#sleep for fixing following issue
 	#/bin/cp -rf WebSchool/eschool.ipa /var/lib/jenkins/jobs/mobile.ios-eschool/builds/37/app/eschool_ios_barcotest.ipa 
 	#/bin/cp: skipping file `WebSchool/eschool.ipa', as it was replaced while being copied
-	$ciomUtil->exec("sleep 5; /bin/cp -rf WebSchool/eschool.ipa $ApppkgPath/eschool_ios_$code.ipa");
+	$ciomUtil->exec("sleep 5");
+	$ciomUtil->exec("/bin/cp -rf WebSchool/eschool.ipa $ApppkgPath/eschool_ios_$code.ipa");
+	$ciomUtil->exec("/bin/cp -rf WebSchool/eschool.ipa $ApppkgPath/eschool_ios_$code.ipa");
 }
 
 sub clean() {
