@@ -3,7 +3,9 @@ our $CiomVcaHome;
 our $ApppkgPath;
 our $Pms;
 
-sub extraPreAction() {}
+sub extraPreAction() {
+	clean();
+}
 sub extraPostAction() {}
 
 sub fillPms() {

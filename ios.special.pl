@@ -14,7 +14,9 @@ my $SshInfo = {
 	user => 'ciom'
 };
 
-sub extraPreAction() {}
+sub extraPreAction() {
+	clean();
+}
 sub extraPostAction() {}
 
 sub fillPms() {
