@@ -13,19 +13,43 @@ my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
 my $Clouds = {
-	dev_yxtadmin => {
+	'dev-v0' => {
 		tomcatSeed => 'tomcat7',
-		tomcatParent => "/opt",
-		tomcatAmount => 3,
+		tomcatParent => "/opt/ws-1",
+		tomcatAmount => 2,
 		basePortDelta => 0,
 		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
 		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
 		hosts => [
-			{host => "172.17.128.234", 	port => "22"}
+			{host => "172.17.128.232", 	port => "22"}
 		]
 	},
 
-	ucloud => {
+	'dev-v1' => {
+		tomcatSeed => 'tomcat7',
+		tomcatParent => "/opt/ws-2",
+		tomcatAmount => 2,
+		basePortDelta => 2,
+		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
+		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
+		hosts => [
+			{host => "172.17.128.232", 	port => "22"}
+		]
+	},
+
+	'dev-bvt' => {
+		tomcatSeed => 'tomcat7',
+		tomcatParent => "/opt/ws-3",
+		tomcatAmount => 1,
+		basePortDelta => 4,
+		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
+		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
+		hosts => [
+			{host => "172.17.128.232", 	port => "22"}
+		]
+	},	
+
+	'ucloud' => {
 		tomcatSeed => 'tomcat7',
 		tomcatParent=> "/opt/ws",
 		tomcatAmount => 4,
