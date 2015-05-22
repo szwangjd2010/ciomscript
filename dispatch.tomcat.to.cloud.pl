@@ -13,30 +13,52 @@ my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
 my $Clouds = {
-	'dev-v0' => {
+	'dev-234-1' => {
 		tomcatSeed => 'tomcat7',
 		tomcatParent => "/opt/ws-1",
-		tomcatAmount => 2,
+		tomcatAmount => 1,
 		basePortDelta => 0,
 		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
 		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
 		hosts => [
-			{host => "172.17.128.232", 	port => "22"}
+			{host => "172.17.128.234", 	port => "22"}
 		]
 	},
-
-	'dev-v1' => {
+	'dev-234-2' => {
 		tomcatSeed => 'tomcat7',
 		tomcatParent => "/opt/ws-2",
-		tomcatAmount => 2,
+		tomcatAmount => 1,
+		basePortDelta => 1,
+		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
+		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
+		hosts => [
+			{host => "172.17.128.234", 	port => "22"}
+		]
+	},	
+
+	'dev-234-3' => {
+		tomcatSeed => 'tomcat7',
+		tomcatParent => "/opt/ws-3",
+		tomcatAmount => 1,
 		basePortDelta => 2,
 		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
 		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
 		hosts => [
-			{host => "172.17.128.232", 	port => "22"}
+			{host => "172.17.128.234", 	port => "22"}
 		]
 	},
 
+	'dev-234-4' => {
+		tomcatSeed => 'tomcat7',
+		tomcatParent => "/opt/ws-4",
+		tomcatAmount => 1,
+		basePortDelta => 3,
+		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
+		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
+		hosts => [
+			{host => "172.17.128.234", 	port => "22"}
+		]
+	},
 	'dev-bvt' => {
 		tomcatSeed => 'tomcat7',
 		tomcatParent => "/opt/ws-3",
