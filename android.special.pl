@@ -2,10 +2,11 @@ our $ciomUtil;
 our $CiomVcaHome;
 our $ApppkgPath;
 our $Pms;
+our $CiomData;
 
-sub extraPreAction() {
-	clean();
-}
+my $appMainModuleName = getAppMainModuleName();
+
+sub extraPreAction() {}
 sub extraPostAction() {}
 
 sub fillPms() {
@@ -14,16 +15,14 @@ sub fillPms() {
 }
 
 sub build() {
-	my $fileBuildXml = getAppPrimaryModuleName() . "/build.xml";
+	my $fileBuildXml = "$appMainModuleName/build.xml";
 	$ciomUtil->exec("ant -f $fileBuildXml clean release");
 }
 
 sub moveApppkgFile($) {
 	my $code = $_[0];
-	my $appPrimaryModuleName = getAppPrimaryModuleName();
-	$ciomUtil->exec("/bin/cp -f /tmp/ciom.android/$appPrimaryModuleName-release.apk $ApppkgPath/$appPrimaryModuleName_android_$code.apk");
+	$ciomUtil->exec("mv -f /tmp/ciom.android/${appMainModuleName}-release.apk $ApppkgPath/${appMainModuleName}_android_$code.apk");
 }
 
-sub clean() {
-	$ciomUtil->exec("rm -rf /tmp/ciom.android/$appPrimaryModuleName*");
+sub cleanAfterOrgBuild() {
 }

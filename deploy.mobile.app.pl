@@ -27,8 +27,13 @@ our $CiomData = json_file_to_perl("$CiomVcaHome/ciom.json");
 my $ShellStreamedit = "_streamedit.ciom";
 my $OldPwd = getcwd();
 
+sub getAppMainModuleName() {
+	return $CiomData->{scm}->{repos}->[0]->{name};
+}
 
-require "$cloudId.special.pl";
+sub doPlatformDependencyInjection() {
+	require "$cloudId.special.pl";	
+}
 
 sub enterWorkspace() {
 	my $appWorkspace = "$ENV{WORKSPACE}/$appName" || "/var/lib/jenkins/workspace/mobile.$cloudId-eschool/$appName";
@@ -47,13 +52,10 @@ sub makeApppkgDirectory() {
 	$ciomUtil->exec("mkdir $ApppkgPath");
 }
 
-sub getAppPrimaryModuleName() {
-	return $CiomData->{scm}->{repos}->[0]->{name};
-}
-
 #platform special#
 
-sub checkout() {
+sub checkout($) {
+	my $doRevert = shift || 0;
 	my $repos = $CiomData->{scm}->{repos};
 	my $username = $CiomData->{scm}->{username};
 	my $password = $CiomData->{scm}->{password};
@@ -64,6 +66,11 @@ sub checkout() {
 		my $name = $repos->[$i]->{name};
 		my $url = $repos->[$i]->{url};
 
+		if ($doRevert == 1) {
+			$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
+			next;
+		}
+
 		if (! -d $name) {
 			$ciomUtil->exec("$cmdSvnPrefix co $url $name");
 		} else {
@@ -71,6 +78,10 @@ sub checkout() {
 			$ciomUtil->exec("$cmdSvnPrefix update $name");
 		}
 	}
+}
+
+sub revert() {
+	checkout(1);
 }
 
 sub replaceOrgCustomizedFiles($) {
@@ -104,8 +115,13 @@ sub generateStreameditFile($) {
 }
 
 sub replacePmsInShellStreamedit() {
+	my $nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciompm>' $ShellStreamedit");
+	if ($nCiompmCnt == 0) {
+		return;
+	}
+
 	for my $key (keys %{$Pms}) {
-		my $nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciompm>$key</ciompm>' $ShellStreamedit");
+		$nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciompm>$key</ciompm>' $ShellStreamedit");
 		if ($nCiompmCnt == 0) {
 			next;
 		}
@@ -127,14 +143,14 @@ sub streamedit($) {
 	$ciomUtil->exec("cat $ShellStreamedit >> _streamedit.ciom.all");
 }
 
-sub streameditOrgConfs($) {
+sub streameditConfs4Org($) {
 	my $code = $_[0];
 	my $streameditItems = $CiomData->{orgs}->{$code}->{streameditItems};
 	$ciomUtil->exec("echo '$code' >> _streamedit.ciom.all");
 	streamedit($streameditItems);
 }
 
-sub streamedit4All() {
+sub streameditConfs4AllOrgs() {
 	my $streameditItems = $CiomData->{streameditItems};
 	$ciomUtil->exec("\n\n\necho '$ENV{BUILD_NUMBER} - $orgCodes' >> _streamedit.ciom.all");
 	$ciomUtil->exec("echo ciom.global >> _streamedit.ciom.all");
@@ -151,26 +167,33 @@ sub outputApppkgUrl() {
 	$ciomUtil->log("\n\n");
 }
 
+sub revertAfterOrgBuild() {
+	$ciomUtil->exec("svn revert -R Eschool/assets/");
+	$ciomUtil->exec("svn revert -R Eschool/res/drawable-hdpi/");
+}
+
 sub iterateOrgsAndBuildEligibles() {
 	my $orgs = $CiomData->{orgs};
 	for my $code (keys %{$orgs}) {
 		my $re = '(^|,)' . $code . '($|,)';
 		if ($orgCodes eq '*' || $orgCodes =~ m/$re/) {
+			revert();
 			replaceOrgCustomizedFiles($code);
-			streameditOrgConfs($code);
+			streameditConfs4AllOrgs();
+			streameditConfs4Org($code);
 			build();
 			moveApppkgFile($code);
-			clean();
+			cleanAfterOrgBuild();
 		}
 	}	
 }
 
 sub main() {
+	doPlatformDependencyInjection();
 	enterWorkspace();
 	makeApppkgDirectory();
-	checkout();
+	checkout(0);
 	fillPms();
-	streamedit4All();
 	extraPreAction();
 	iterateOrgsAndBuildEligibles();
 	extraPostAction();
