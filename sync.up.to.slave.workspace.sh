@@ -7,7 +7,7 @@ appName=$3
 workspace=$4
 
 src="$workspace/$appName"
-dst="/home/jenkins/ciom.slave.win.workspace/$ver/$env/$appName"
+dst="/var/lib/jenkins/ci.slave.win/$ver/$env/$appName"
 
 
 main() {

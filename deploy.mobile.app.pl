@@ -22,10 +22,11 @@ our $ciomUtil = new CiomUtil(1);
 our $CiomVcaHome = "$ENV{JENKINS_HOME}/workspace/ver.env.specific/$version/pre/$cloudId/$appName";
 our $ApppkgPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/app";
 our $Pms = {};
+our $CiomData = json_file_to_perl("$CiomVcaHome/ciom.json");
 
 my $ShellStreamedit = "_streamedit.ciom";
 my $OldPwd = getcwd();
-my $CiomData = json_file_to_perl("$CiomVcaHome/ciom.json");
+
 
 require "$cloudId.special.pl";
 
@@ -44,6 +45,10 @@ sub leaveWorkspace() {
 
 sub makeApppkgDirectory() {
 	$ciomUtil->exec("mkdir $ApppkgPath");
+}
+
+sub getAppPrimaryModuleName() {
+	return $CiomData->{scm}->{repos}->[0]->{name};
 }
 
 #platform special#
@@ -66,6 +71,12 @@ sub checkout() {
 			$ciomUtil->exec("$cmdSvnPrefix update $name");
 		}
 	}
+}
+
+sub replaceOrgCustomizedFiles($) {
+	my $code = $_[0];
+	my $orgCustomizedHome = "$CiomVcaHome/resource/$code";
+	$ciomUtil->exec("/bin/cp -rf $orgCustomizedHome/* ./");
 }
 
 sub generateStreameditFile($) {

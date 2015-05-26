@@ -14,21 +14,16 @@ sub fillPms() {
 }
 
 sub build() {
-	$ciomUtil->exec("ant -f Eschool/build.xml clean release");
+	my $fileBuildXml = getAppPrimaryModuleName() . "/build.xml";
+	$ciomUtil->exec("ant -f $fileBuildXml clean release");
 }
 
 sub moveApppkgFile($) {
 	my $code = $_[0];
-	$ciomUtil->exec("/bin/cp -rf /tmp/ciom.android/Elearning-release.apk $ApppkgPath/eschool_android_$code.apk");
+	my $appPrimaryModuleName = getAppPrimaryModuleName();
+	$ciomUtil->exec("/bin/cp -f /tmp/ciom.android/$appPrimaryModuleName-release.apk $ApppkgPath/$appPrimaryModuleName_android_$code.apk");
 }
 
 sub clean() {
-	$ciomUtil->exec("rm -rf /tmp/ciom.android/*");
-}
-
-sub replaceOrgCustomizedFiles($) {
-	my $code = $_[0];
-
-	my $orgCustomizedHome = "$CiomVcaHome/resource/$code/Eschool";
-	$ciomUtil->exec("/bin/cp -rf $orgCustomizedHome/* Eschool/");
+	$ciomUtil->exec("rm -rf /tmp/ciom.android/$appPrimaryModuleName*");
 }

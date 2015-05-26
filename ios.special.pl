@@ -51,10 +51,3 @@ sub moveApppkgFile($) {
 sub clean() {
 	$ciomUtil->exec("rm -rf WebSchool/build/*");
 }
-
-sub replaceOrgCustomizedFiles($) {
-	my $code = $_[0];
-
-	my $orgCustomizedHome = "$CiomVcaHome/resource/$code/WebSchool";
-	$ciomUtil->exec("/bin/cp -rf $orgCustomizedHome/* WebSchool/");
-}
