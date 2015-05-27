@@ -54,7 +54,7 @@ sub makeApppkgDirectory() {
 
 #platform special#
 
-sub checkout($) {
+sub updateCode($) {
 	my $doRevert = shift || 0;
 	my $repos = $CiomData->{scm}->{repos};
 	my $username = $CiomData->{scm}->{username};
@@ -80,8 +80,8 @@ sub checkout($) {
 	}
 }
 
-sub revert() {
-	checkout(1);
+sub revertCode() {
+	updateCode(1);
 }
 
 sub replaceOrgCustomizedFiles($) {
@@ -127,7 +127,7 @@ sub replacePmsInShellStreamedit() {
 		}
 
 		my $v = $Pms->{$key};
-		$ciomUtil->log("\n\ninstantiate $key ...");
+		$ciomUtil->log("\n\ninstancing $key ...");
 		$ciomUtil->exec("cat $ShellStreamedit", 1);
 		$ciomUtil->exec("perl -CSDL -i -pE 's|<ciompm>$key</ciompm>|$v|mg' $ShellStreamedit");
 	}	
@@ -167,17 +167,12 @@ sub outputApppkgUrl() {
 	$ciomUtil->log("\n\n");
 }
 
-sub revertAfterOrgBuild() {
-	$ciomUtil->exec("svn revert -R Eschool/assets/");
-	$ciomUtil->exec("svn revert -R Eschool/res/drawable-hdpi/");
-}
-
 sub iterateOrgsAndBuildEligibles() {
 	my $orgs = $CiomData->{orgs};
 	for my $code (keys %{$orgs}) {
 		my $re = '(^|,)' . $code . '($|,)';
 		if ($orgCodes eq '*' || $orgCodes =~ m/$re/) {
-			revert();
+			revertCode();
 			replaceOrgCustomizedFiles($code);
 			streameditConfs4AllOrgs();
 			streameditConfs4Org($code);
@@ -192,7 +187,7 @@ sub main() {
 	doPlatformDependencyInjection();
 	enterWorkspace();
 	makeApppkgDirectory();
-	checkout(0);
+	updateCode(0);
 	fillPms();
 	extraPreAction();
 	iterateOrgsAndBuildEligibles();

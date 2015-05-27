@@ -1,3 +1,7 @@
+our $version;
+our $cloudId;
+our $appName;
+
 our $ciomUtil;
 our $CiomVcaHome;
 our $ApppkgPath;
@@ -21,8 +25,9 @@ sub build() {
 
 sub moveApppkgFile($) {
 	my $code = $_[0];
-	$ciomUtil->exec("mv -f /tmp/ciom.android/${appMainModuleName}-release.apk $ApppkgPath/${appMainModuleName}_android_$code.apk");
+	$ciomUtil->exec("mv -f /tmp/ciom.android/$appName/${appMainModuleName}-release.apk $ApppkgPath/${appMainModuleName}_android_$code.apk");
 }
 
 sub cleanAfterOrgBuild() {
+	$ciomUtil->exec("rm -rf /tmp/ciom.android/$appName/*");	
 }
