@@ -9,4 +9,5 @@ print Dumper(%ENV);
 
 my $a = readpipe("grep -c replacePmsInShellStreamedit deploy.mobile.app.pl");
 
-print $a;
+my $b = "| grep '^?' | awk '{print \$2}' | xargs -I{} rm -rf '{}'";
+print $b;

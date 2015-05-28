@@ -62,20 +62,22 @@ sub updateCode($) {
 	my $cnt = $#{$repos} + 1;
 
 	my $cmdSvnPrefix = "svn --non-interactive --username $username --password '$password'";
+	my $cmdRmUnversionedTpl = "$cmdSvnPrefix status %s | grep '^?' | awk '{print \$2}' | xargs -I{} rm -rf '{}'";
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $name = $repos->[$i]->{name};
 		my $url = $repos->[$i]->{url};
 
 		if ($doRevert == 1) {
-			$ciomUtil->execWithoutLogCmdline("$cmdSvnPrefix revert -R $name");
-			next;
-		}
-
-		if (! -d $name) {
-			$ciomUtil->execWithoutLogCmdline("$cmdSvnPrefix co $url $name");
+			$ciomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
+			$ciomUtil->execNotLogCmd("$cmdSvnPrefix revert -R $name");
 		} else {
-			$ciomUtil->execWithoutLogCmdline("$cmdSvnPrefix revert -R $name");
-			$ciomUtil->execWithoutLogCmdline("$cmdSvnPrefix update $name");
+			if (! -d $name) {
+				$ciomUtil->execNotLogCmd("$cmdSvnPrefix co $url $name");
+			} else {
+				$ciomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
+				$ciomUtil->execNotLogCmd("$cmdSvnPrefix revert -R $name");
+				$ciomUtil->execNotLogCmd("$cmdSvnPrefix update $name");
+			}			
 		}
 	}
 }

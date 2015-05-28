@@ -44,7 +44,7 @@ sub exec() {
 	}
 }
 
-sub execWithoutLogCmdline() {
+sub execNotLogCmd() {
 	my $self = shift;
 	my $cmd = shift;
 	$self->exec($cmd, 0);
