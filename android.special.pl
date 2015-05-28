@@ -25,11 +25,10 @@ sub build() {
 
 sub getAppFinalPkgName($) {
 	my $code = $_[0];
-	my $prefix = $CiomData->{pkgPrefix};
-	my $suffix = $CiomData->{orgs}->{$code}->{pkgSuffix} || $CiomData->{pkgSuffix};
-	$suffix =~ s|#code#|$code|;
+	my $pkgName = $CiomData->{orgs}->{$code}->{pkgName} || $CiomData->{pkgName};
+	$pkgName =~ s|#code#|$code|;
 
-	return "${prefix}${suffix}.apk";
+	return "${pkgName}.apk";
 }
 
 sub moveApppkgFile($) {
