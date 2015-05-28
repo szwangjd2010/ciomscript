@@ -40,6 +40,11 @@ sub build() {
 	$ciomUtil->remoteExec($SshInfo);
 }
 
+sub getAppFinalPkgName($) {
+	my $code = $_[0];
+	return "$code.ipa";
+}
+
 sub moveApppkgFile($) {
 	my $code = $_[0];
 
@@ -47,7 +52,8 @@ sub moveApppkgFile($) {
 	#/bin/cp -rf WebSchool/eschool.ipa /var/lib/jenkins/jobs/mobile.ios-eschool/builds/37/app/eschool_ios_barcotest.ipa 
 	#/bin/cp: skipping file `WebSchool/eschool.ipa', as it was replaced while being copied
 	$ciomUtil->exec("sleep 5");
-	$ciomUtil->exec("mv $appMainModuleName/${xcodeTarget}.ipa $ApppkgPath/$code.ipa");
+	my $appFinalPkgName = getAppFinalPkgName($code);
+	$ciomUtil->exec("mv $appMainModuleName/${xcodeTarget}.ipa $ApppkgPath/$appFinalPkgName");
 }
 
 sub cleanAfterOrgBuild() {

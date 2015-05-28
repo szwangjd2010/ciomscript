@@ -69,14 +69,14 @@ sub updateCode($) {
 
 		if ($doRevert == 1) {
 			$ciomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
-			$ciomUtil->execNotLogCmd("$cmdSvnPrefix revert -R $name");
+			$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
 		} else {
 			if (! -d $name) {
-				$ciomUtil->execNotLogCmd("$cmdSvnPrefix co $url $name");
+				$ciomUtil->exec("$cmdSvnPrefix co $url $name");
 			} else {
 				$ciomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
-				$ciomUtil->execNotLogCmd("$cmdSvnPrefix revert -R $name");
-				$ciomUtil->execNotLogCmd("$cmdSvnPrefix update $name");
+				$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
+				$ciomUtil->exec("$cmdSvnPrefix update $name");
 			}			
 		}
 	}
@@ -113,7 +113,7 @@ sub generateStreameditFile($) {
 		}
 	}
 
-	$ciomUtil->write("$ShellStreamedit", $cmds);
+	$ciomUtil->writeToFile("$ShellStreamedit", $cmds);
 }
 
 sub replacePmsInShellStreamedit() {
@@ -196,6 +196,7 @@ sub main() {
 	extraPostAction();
 	outputApppkgUrl();
 	leaveWorkspace();
+	return 0;
 }
 
-main();
+exit main();

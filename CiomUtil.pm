@@ -27,7 +27,10 @@ sub setRunMode() {
 sub log() {
 	my $self = shift;
 	my $cmd = shift;
-	system("printf \"$cmd \n\" | tee -a $self->{Log}");
+	
+	my $out = "$cmd\n";
+	print $out;
+	$self->appendToFile($self->{Log}, $out);
 }
 
 sub exec() {
@@ -40,7 +43,7 @@ sub exec() {
 	}
 
 	if ($self->{RunMode} == 1) {
-		system("$cmd");
+		system($cmd);
 	}
 }
 
@@ -57,7 +60,7 @@ sub execWithReturn() {
 	
 	$self->log($cmd);
 	if ($self->{RunMode} == 1 || $mode == 1) {
-		readpipe("$cmd");
+		readpipe($cmd);
 	}
 }
 
@@ -72,12 +75,28 @@ sub remoteExec() {
 	$self->exec("ssh -p $port $user\@$host '$cmd'");
 }
 
-sub write() {
+sub writeToFile() {
 	my $self = shift;
 	my $file = shift;
 	my $content = shift;
 	my $h;
 	if (!open($h, '>:utf8', $file)) {
+		print "open $file failed!\n";
+		return -1
+	}
+
+	print $h $content;
+	close($h);
+	
+	return 0;
+}
+
+sub appendToFile() {
+	my $self = shift;
+	my $file = shift;
+	my $content = shift;
+	my $h;
+	if (!open($h, '>>:utf8', $file)) {
 		print "open $file failed!\n";
 		return -1
 	}
