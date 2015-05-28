@@ -47,7 +47,7 @@ sub moveApppkgFile($) {
 	#/bin/cp -rf WebSchool/eschool.ipa /var/lib/jenkins/jobs/mobile.ios-eschool/builds/37/app/eschool_ios_barcotest.ipa 
 	#/bin/cp: skipping file `WebSchool/eschool.ipa', as it was replaced while being copied
 	$ciomUtil->exec("sleep 5");
-	$ciomUtil->exec("mv $appMainModuleName/${xcodeTarget}.ipa $ApppkgPath/${xcodeTarget}_ios_$code.ipa");
+	$ciomUtil->exec("mv $appMainModuleName/${xcodeTarget}.ipa $ApppkgPath/$code.ipa");
 }
 
 sub cleanAfterOrgBuild() {

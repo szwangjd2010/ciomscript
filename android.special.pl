@@ -25,7 +25,12 @@ sub build() {
 
 sub moveApppkgFile($) {
 	my $code = $_[0];
-	$ciomUtil->exec("mv -f /tmp/ciom.android/$appName/${appMainModuleName}-release.apk $ApppkgPath/${appMainModuleName}_android_$code.apk");
+
+	my $finalPkgName = "${appMainModuleName}_android_$code.apk";
+	if ($code eq "elearning" || $code eq "eschool") {
+		$finalPkgName = "${appMainModuleName}_android.apk";
+	}
+	$ciomUtil->exec("mv -f /tmp/ciom.android/$appName/${appMainModuleName}-release.apk $ApppkgPath/$finalPkgName");
 }
 
 sub cleanAfterOrgBuild() {

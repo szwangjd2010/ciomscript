@@ -33,12 +33,21 @@ sub log() {
 sub exec() {
 	my $self = shift;
 	my $cmd = shift;
-	my $mode = shift || 0;
+	my $log = shift || 1;
 	
-	$self->log($cmd);
-	if ($self->{RunMode} == 1 || $mode == 1) {
+	if ($log == 1) {
+		$self->log($cmd);
+	}
+
+	if ($self->{RunMode} == 1) {
 		system("$cmd");
 	}
+}
+
+sub execWithoutLogCmdline() {
+	my $self = shift;
+	my $cmd = shift;
+	$self->exec($cmd, 0);
 }
 
 sub execWithReturn() {

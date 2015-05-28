@@ -67,15 +67,15 @@ sub updateCode($) {
 		my $url = $repos->[$i]->{url};
 
 		if ($doRevert == 1) {
-			$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
+			$ciomUtil->execWithoutLogCmdline("$cmdSvnPrefix revert -R $name");
 			next;
 		}
 
 		if (! -d $name) {
-			$ciomUtil->exec("$cmdSvnPrefix co $url $name");
+			$ciomUtil->execWithoutLogCmdline("$cmdSvnPrefix co $url $name");
 		} else {
-			$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
-			$ciomUtil->exec("$cmdSvnPrefix update $name");
+			$ciomUtil->execWithoutLogCmdline("$cmdSvnPrefix revert -R $name");
+			$ciomUtil->execWithoutLogCmdline("$cmdSvnPrefix update $name");
 		}
 	}
 }
@@ -128,7 +128,7 @@ sub replacePmsInShellStreamedit() {
 
 		my $v = $Pms->{$key};
 		$ciomUtil->log("\n\ninstancing $key ...");
-		$ciomUtil->exec("cat $ShellStreamedit", 1);
+		$ciomUtil->exec("cat $ShellStreamedit");
 		$ciomUtil->exec("perl -CSDL -i -pE 's|<ciompm>$key</ciompm>|$v|mg' $ShellStreamedit");
 	}	
 }
@@ -139,7 +139,7 @@ sub streamedit($) {
 	replacePmsInShellStreamedit();
 	
 	$ciomUtil->exec("bash $ShellStreamedit");
-	$ciomUtil->exec("cat $ShellStreamedit", 1);
+	$ciomUtil->exec("cat $ShellStreamedit");
 	$ciomUtil->exec("cat $ShellStreamedit >> _streamedit.ciom.all");
 }
 
