@@ -41,3 +41,9 @@ sub moveApppkgFile($) {
 sub cleanAfterOrgBuild() {
 	$ciomUtil->exec("rm -rf /tmp/ciom.android/$appName/*");	
 }
+
+sub getBuildError() {
+	my $logFile = getBuildLogFile();
+	my $buildFailedCnt = $ciomUtil->execWithReturn("grep -c 'BUILD FAILED' $logFile");
+	return $buildFailedCnt - 1;
+}

@@ -59,3 +59,9 @@ sub moveApppkgFile($) {
 sub cleanAfterOrgBuild() {
 	$ciomUtil->exec("rm -rf $appMainModuleName/build/*");
 }
+
+sub getBuildError() {
+	my $logFile = getBuildLogFile();
+	my $buildFailedCnt = $ciomUtil->execWithReturn("grep -c 'BUILD FAILED' $logFile");
+	return 0;	
+}

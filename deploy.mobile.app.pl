@@ -31,6 +31,10 @@ sub getAppMainModuleName() {
 	return $CiomData->{scm}->{repos}->[0]->{name};
 }
 
+sub getBuildLogFile() {
+	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
+}
+
 sub doPlatformDependencyInjection() {
 	require "$cloudId.special.pl";	
 }
@@ -196,7 +200,8 @@ sub main() {
 	extraPostAction();
 	outputApppkgUrl();
 	leaveWorkspace();
-	return 0;
+
+	return getBuildError();
 }
 
 exit main();
