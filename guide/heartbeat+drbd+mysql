@@ -1,1 +1,200 @@
 http://blog.chinaunix.net/uid-20639775-id-3337484.html
+
+ mysql高可用探究(五)Heartbeat+DRBD+mysql高可用方案 2012-09-04 16:54:02
+分类： Mysql/postgreSQL
+ Heartbeat+DRBD+mysql高可用方案
+1.1  方案简介
+本方案采用Heartbeat双机热备软件来保证数据库的高稳定性和连续性，数据的一致性由DRBD这个工具来保证。默认情况下只有一台mysql在工作，当主mysql服务器出现问题后，系统将自动切换到备机上继续提供服务，当主数据库修复完毕，又将服务切回继续由主mysql提供服务。
+1.2  方案优缺点
+优点：安全性高、稳定性高、可用性高，出现故障自动切换，
+缺点：只有一台服务器提供服务，成本相对较高。不方便扩展。可能会发生脑裂。
+1.3  方案架构图
+
+1.4  方案适用场景
+本方案适用于数据库访问量不太大，短期内访问量增长不会太快，对数据库可用性要求非常高的场景。
+1.5  方案实战
+1.5.1 实战环境介绍
+主机名
+Ip
+系统
+DRBD磁盘
+Heartbeat版本
+dbserver1
+10.1.1.113
+Centos 5.5 64bit
+/dev/sdb1
+2.1.3
+dbserver2
+10.1.1.108
+Centos 5.5 64bit
+/dev/sdb1
+2.1.3
+ 
+1.5.2 DRBD的安装
+官网的说法，如果系统内核（linux）版本低于2.6.33，在安装软件之前需要加载DRBD模块，我的内核版本是2.6.18的，安装后会自动加载drbd模块。安装命令如下：
+yum install -y drbd83 kmod-drbd83
+安装后使用lsmod | grep drbd命令查看是否加载drbd模块，如果没有加载需要手动运行命令加载，命令如下：
+insmod drbd/drbd.ko 或者 modprobe drbd
+1.5.3 DRBD的配置
+配置之前需要先使用fdisk对/dev/sdb进行分区。
+对于DRBD的配置，只需要配置/etc/drbd.conf和hosts文件即可，dbserver1和dbserver2的hosts添加的内容如下：
+10.1.1.113 dbserver1
+10.1.1.108 dbserver2
+我的/etc/drbd.conf文件的内容如下(dbserver1和dbserver2的配置一样)：
+global { usage-count yes; }
+common { syncer { rate 10M; } }
+resource r0 {
+        protocol C;
+        startup {
+        }
+        disk {
+                on-io-error detach;
+                #size 1G;
+        }
+        net {
+        }
+        on dbserver1 {
+                device /dev/drbd0;
+                disk /dev/sdb1;
+                address 10.1.1.113:7888;
+                meta-disk internal;
+        }
+        on dbserver2 {
+                device /dev/drbd0;
+                disk /dev/sdb1;
+                address 10.1.1.108:7888;
+                meta-disk internal;
+        }
+}
+1.5.4 DRBD的管理维护
+Ø  创建DRBD资源
+配置好drbd以后，就需要使用命令在dbserver1和dbserver2上创建配置的drbd资源，使用如下命令：
+drbdadm create-md r0   # r0为配置文件中定义的资源名
+Ø  DRBD的启动和停止
+/etc/rc.d/init.d/drbd start    #启动drbd
+/etc/rc.d/init.d/drbd stop    #停止drbd
+/etc/rc.d/init.d/drbd restart  #重启drbd
+Ø  查看DRBD状态
+watch -n 1 cat /proc/drbd
+/etc/init.d/drbd status
+以上两种方式都可以查看drbd的状态
+Ø  设置当前节点为主节点，并进行格式化和挂载
+drbdadm -- --overwrite-data-of-peer primary all
+mkfs.ext3 /dev/drbd0
+mkdir /drbd
+mount /dev/drbd0 /drbd  
+挂在后可以往/drbd目录写入一些测试数据，看看是否能同步到从节点上。
+Ø  迁移mysql的数据到drdb(假设你的mysql已经在该服务器上安装好了)
+DRBD已经安装并且能正常同步了，那么我们接下来要做的就是将本机的已安装的mysql的数据迁移到drbd上，这里为了简单就不考虑新安装数据库的情形了，因为新安装的时候只需要将数据目录指定到drbd中并将my.cnf配置文件放到drbd中即可。具体的数据迁移步骤如下：
+a)         关闭dbserver1和dbserver2的mysql，/etc/rc.d/init.d/mysqld stop
+b)         在dbserver1上创建存放数据库数据的目录：mkdir /drbd/dbdata
+c)         在dbserver1将配置文件放到drbd目录中：
+mv /etc/my.cnf /drbd/dbdata/
+删除dbserver2上的/etc/my.cnf，rm -f /etc/my.cnf
+在dbserver1和dbserver2上执行如下命令创建软链接。
+ln -s /drbd/dbdata/my.cnf /etc/my.cnf
+d)         修改/etc/my.cnf的数据目录指向/drbd/dbdata
+e)         将原来的mysql数据文件移动到/drbd/dbdata
+f)          执行chown -R mysql.mysql /drbd/dbdata
+g)         启动mysql
+ 
+Ø  手工切换DRBD
+在没有安装配置drbd之前，drbd是不能自动切换的，我们可以写出过程来加深对drbd的理解，也更能明白heartbeat的工作流程，下面是手工切换的步骤：
+a)         在dbserver1上停止mysql，/etc/rc.d/init.d/mysqld stop。
+b)         在dbserver1上执行umount  /dev/drbd0。
+c)         在dbserver1上执行drbdadm secondary all切换到从模式。当两个节点都是secondary模式的时候才可以将dbserver2设置成primary。
+d)         在dbserver2上执行drbdadm  primary all，将dbserver2提升为主模式，并观察/proc/drbd是否正常。
+e)         在dbserver2上执行mount /dev/drbd0 /drbd挂在文件系统。
+f)          启动dbserver2的mysql，/etc/rc.d/init.d/mysqld start。
+注意：dbserver1和dbserver2上的mysql用户的uid和gid要一样。不然切换后会导致mysql数据目录的属主不正确而启动失败。
+Ø  主从切换
+主切换成从，需要先卸载文件系统，再执行降级为从的命令：
+umount /dev/drbd0
+drbdadm secondary all
+从切换成主，要先执行升级成主的命令然后挂在文件系统：
+drbdadm  primary all 如果不成功drbdsetup /dev/drbd0 primary -o
+mount /dev/drbd0 /drbd/
+Ø  DRBD脑裂后的处理
+当DRBD出现脑裂后，会导致drbd两边的磁盘不一致，处理方法如下：
+在确定要作为从的节点上切换成secondary，并放弃该资源的数据：
+drbdadm secondary r0
+drbdadm -- --discard-my-data connect r0
+在要作为primary的节点重新连接secondary（如果这个节点当前的连接状态为WFConnection的话，可以省略），使用如下命令连接：
+drbdadm connect r0
+ 
+1.5.5 Heartbeat的安装
+在DRBD调试没有问题之后，就可以开始安装和配置heartbeat了，Master和backup服务器都需要安装heardheat软件。下面两种安装方式任选其一。
+Ø  Rpm包的安装方式
+yum -y install heartbeat-*
+Ø  源代码编译安装方式
+wget http://www.ultramonkey.org/download/heartbeat/2.1.3/heartbeat-2.1.3.tar.gz
+tar xzvf heartbeat-2.1.3.tar.gz
+cd heartbeat-2.1.3
+./configure
+ Make
+ make install
+1.5.6 Heartbeat的配置
+Hearbeat的配置主要包括三个配置文件，authkeys，ha.cf和haresources的配置，下面就分别来看！
+Ø  Hosts文件的配置
+需要在hosts文件中添加master和backup主机，加快节点间的通信
+Master和backup的hosts节点添加的内容一样，我的配置添加如下内容：
+vim /etc/hosts
+# dbserver1和dbserver2是我的master和backup的主机名
+10.1.1.113 dbserver1
+10.1.1.108 dbserver2
+Ø  Authkerys的配置
+这个文件用来配置密码认证方式，支持3种认证方式，crc，md5和sha1，从左到右安全性越来越高，消耗的资源也越多。因此如果heartbeat运行在安全的网路之上，比如私网，那么可以将验证方式设置成crc，master和backup的authkeys配置一样。我的authkeys文件配置如下：
+vim /etc/ha.d/authkeys
+auth 1
+1 crc
+Ø  ha.cf的配置
+master(dbserver1)的ha.cf的配置
+vim /etc/ha.d/ha.cf
+logfile /var/log/ha-log
+logfacility     local0
+keepalive 2
+deadtime 30
+warntime 10
+initdead 60
+udpport 694
+ucast eth0 10.1.1.108
+auto_failback on
+node    dbserver1
+node    dbserver2
+ping 10.1.1.1
+respawn hacluster /usr/lib64/heartbeat/ipfail
+backup(dbserver2)的ha.cf的配置
+vim /etc/ha.d/ha.cf
+logfile /var/log/ha-log
+logfacility     local0
+keepalive 2
+deadtime 30
+warntime 10
+initdead 60
+udpport 694
+ucast eth0 10.1.1.113
+auto_failback on
+node    dbserver1
+node    dbserver2
+ping 10.1.1.1
+respawn hacluster /usr/lib64/heartbeat/ipfail
+Ø  haresources的配置
+haresources用来设置master的主机名、虚拟IP、服务以及磁盘挂载等，master和backup的配置是一样的，下面的mysqld需要做成服务，放在/etc/rc.d/init.d/目录下，配置配置如下：
+vim /etc/ha.d/haresources
+dbserver1 IPaddr::10.1.1.176/24/eth0:1 drbddisk::r0 Filesystem::/dev/drbd0::/drbd::ext3 mysqld
+1.5.7 Heartbeat的管理
+配置好heartbeat之后，需要将mysql从自启动服务器中去掉，因为主heartbeat启动的时候会挂载drdb文件系统以及启动mysql，切换的时候会将主上的mysql停止并卸载文件系统，从上会挂载文件系统，并启动mysql。因此需要做如下操作：
+chkconfig mysqld off
+chkconfig --add heartbeat
+chkconfig heartbeat on
+或者将heartbeat的启动命令你写到/etc/rc.local启动文件中去。
+1.5.8 Heartbeat+DRBD测试
+环境搭建好以后，就需要进行周密的测试，看是否实现了预期的功能：
+Ø  停掉master上的mysqld，看看是否切换(因为heartheat不检查服务的可用性，因此需要你通过而外的脚本来实现，方法前面已经描述)。
+Ø  停掉master的heartheat看看是否能正常切换。
+Ø  停掉master的网络或者直接将master系统shutdown，看看能否正常切换。
+Ø  启动master的heartbeat看看是否能正常切换回来。
+Ø  重新启动master看看能否切换过程是否OK。
+注意：这里说的切换是不是已经将mysql停掉、是否卸载了文件系统等等。
+1.5.9 Heartbeat+DRBD监控
+由于heartbeat不能监控mysql的可用性，因此需要通过其他的方式来实现，对于mysql可用性的监控是必须的，如果发生切换，需要第一时间知道是什么原因导致的切换，使用nagios能很好的监控那些网络、mysql、系统等的可用性。

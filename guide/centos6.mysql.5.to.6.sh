@@ -16,3 +16,7 @@ set password for 'yxt'@'10.10.%' = password('hzyxtDUANG2015');
 
 
 CREATE DATABASE yxt DEFAULT CHARACTER SET utf8;
+
+SHOW GRANTS FOR 'rfc'@'localhost';
+REVOKE UPDATE, DELETE ON classicmodels.*  FROM 'rfc'@'localhost';
+REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'rfc'@'localhost';

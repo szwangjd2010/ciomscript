@@ -13,27 +13,27 @@ my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
 my $Clouds = {
-	'dev-232-5' => {
+	'dev-221-4' => {
 		tomcatSeed => 'tomcat7',
-		tomcatParent => "/opt/ws-5",
+		tomcatParent => "/opt/ws-4",
+		tomcatAmount => 1,
+		basePortDelta => 3,
+		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
+		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
+		hosts => [
+			{host => "172.17.128.221", 	port => "22"}
+		]
+	},
+
+	'dev-234-6' => {
+		tomcatSeed => 'tomcat7',
+		tomcatParent => "/opt/ws-6",
 		tomcatAmount => 1,
 		basePortDelta => 6,
 		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
 		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
 		hosts => [
-			{host => "172.17.128.232", 	port => "22"}
-		]
-	},
-
-	'dev-232-6' => {
-		tomcatSeed => 'tomcat7',
-		tomcatParent => "/opt/ws-6",
-		tomcatAmount => 1,
-		basePortDelta => 5,
-		fileJavaOptsTpl => "tomcat.catalina.java.opts-1.tpl",
-		fileHttpListenTpl => "tomcat.server.xml.http.section-1.tpl",		
-		hosts => [
-			{host => "172.17.128.232", 	port => "22"}
+			{host => "172.17.128.234", 	port => "22"}
 		]
 	},
 	'dev-bvt' => {
