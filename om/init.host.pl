@@ -14,15 +14,10 @@ my $MAX_OPEN_FILES = 102400;
 my $ciomUtil = new CiomUtil(1);
 
 sub setMaxOpenFile() {
-	my $cmds = [
-		"echo '*''soft nofile $MAX_OPEN_FILES' >> /etc/security/limits.conf",
-		"echo '*''hard nofile $MAX_OPEN_FILES' >> /etc/security/limits.conf",
-		"echo 'session    required     pam_limits.so' >> /etc/pam.d/login"
-	];
-
+	$ciomUtil->exec("scp ./om/set.max.open.file.sh $host:/root/");
 	$ciomUtil->remoteExec({
 		host => $host,
-		cmd => $cmds
+		cmd => "bash /root/set.max.open.file.sh"
 	});
 }
 
