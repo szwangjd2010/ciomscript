@@ -72,7 +72,14 @@ sub remoteExec() {
 	my $user = $info->{user} || 'root';
 	my $cmd = $info->{cmd};
 	
-	$self->exec("ssh -p $port $user\@$host '$cmd'");
+	if (ref($cmd) eq 'ARRAY') {
+		for (my $i = 0; $i <= $#{$cmd}; $i++) {
+			my $idxCmd = $cmd->[$i];
+			$self->exec("ssh -p $port $user\@$host '$idxCmd'");
+		}
+	} else {
+		$self->exec("ssh -p $port $user\@$host '$cmd'");
+	}
 }
 
 sub writeToFile() {

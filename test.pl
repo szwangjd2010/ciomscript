@@ -10,10 +10,10 @@ my $suffix = "_android_#code#";
 my $code = "1smart";
 $suffix =~ s|#code#|$code|;
 
-print $suffix;
-sub main() {
-	exit 3;
-	return 2;
+my $var = [1, 2];
+$var="111";
+if(ref($var) eq 'ARRAY') {
+	print "array";
+} else {
+	print "not array";
 }
-
-main();
