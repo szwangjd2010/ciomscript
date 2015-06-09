@@ -5,7 +5,7 @@ if [ "$JENKINS_HOME" == "" ]; then
 	source $CIOM_HOME/ciom.util.sh
 	simulateJenkinsContainer
 else 
-	source $JENKINS_HOME/workspace/ciom/ciom.util.sh
+	source /opt/ciom/ciom.util.sh
 fi
 
 deployToEnv=$1
@@ -14,7 +14,7 @@ version=${3:-v1}
 
 AppPackageFile="$appName.war"
 Adworkspace="$WORKSPACE/$appName/target"
-CnfLocation="$JENKINS_HOME/workspace/ver.env.specific/$version/post/$deployToEnv"
+CnfLocation="$ENV{CIOM_HOME}/ciom/ciomvca/$version/post/$deployToEnv"
 
 enterWorkspace() {
 	execCmd "cd $Adworkspace"

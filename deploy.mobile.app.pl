@@ -1,4 +1,4 @@
-#!/usr/bin/perl -W -I /var/lib/jenkins/workspace/ciom
+#!/usr/bin/perl -W -I /opt/ciom/ciom
 # 
 #
 use strict;
@@ -19,7 +19,7 @@ our $appName = $ARGV[2];
 our $orgCodes = $ARGV[3] || '*';
 
 our $ciomUtil = new CiomUtil(1);
-our $CiomVcaHome = "$ENV{JENKINS_HOME}/workspace/ver.env.specific/$version/pre/$cloudId/$appName";
+our $CiomVcaHome = "$ENV{CIOM_HOME}/ciomvca/$version/pre/$cloudId/$appName";
 our $ApppkgPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/app";
 our $Pms = {};
 our $CiomData = json_file_to_perl("$CiomVcaHome/ciom.json");

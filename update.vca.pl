@@ -1,4 +1,4 @@
-#!/usr/bin/perl -W -I /var/lib/jenkins/workspace/ciom
+#!/usr/bin/perl -W -I /opt/ciom/ciom
 # 
 #
 use strict;
@@ -12,11 +12,11 @@ my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
 
 my $ciomUtil = new CiomUtil(1);
-my $AppVcaHome="$ENV{JENKINS_HOME}/workspace/ver.env.specific/$version/pre/$cloudId/$appName";
+my $AppVcaHome="$ENV{CIOM_HOME}/ciomvca/$version/pre/$cloudId/$appName";
 
 sub main() {
 	chdir($AppVcaHome);
-	$ciomUtil->exec("svn revert -R");
+	$ciomUtil->exec("svn revert -R *");
 	$ciomUtil->exec("svn update");
 }
 

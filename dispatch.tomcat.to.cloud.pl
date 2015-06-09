@@ -1,4 +1,4 @@
-#!/usr/bin/perl -W -I /var/lib/jenkins/workspace/ciom
+#!/usr/bin/perl -W -I /opt/ciom/ciom
 # 
 #
 

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -W -I /var/lib/jenkins/workspace/ciom
+#!/usr/bin/perl -W -I /opt/ciom/ciom
 # 
 #
 use strict;
@@ -15,7 +15,7 @@ my $asRoot = $ARGV[3] || 'NotAsRoot';
 my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
-my $AppCiomFile="$ENV{JENKINS_HOME}/workspace/ver.env.specific/$version/pre/$cloudId/$appName.ciom";
+my $AppCiomFile="$ENV{CIOM_HOME}/ciomvca/$version/pre/$cloudId/$appName.ciom";
 require $AppCiomFile;
 our $Cloud;
 
@@ -28,7 +28,7 @@ sub leaveWorkspace() {
 }
 
 sub deploy() {
-	my $shDeploy2Host = "$ENV{JENKINS_HOME}/workspace/ciom/deploy.app.to.host.with.multi.tomcats.sh";
+	my $shDeploy2Host = "$ENV{CIOM_HOME}/ciom/deploy.app.to.host.with.multi.tomcats.sh";
 	
 	my $hosts = $Cloud->{hosts};
 	my $cnt = $#{$hosts} + 1;

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -I /var/lib/jenkins/workspace/ciom
+#!/usr/bin/perl -I /opt/ciom/ciom
 use strict;
 use English;
 use Data::Dumper;

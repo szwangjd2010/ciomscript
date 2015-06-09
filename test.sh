@@ -15,7 +15,7 @@ toGuoke() {
 	for key in "${!ports[@]}"; do
 		if [ "${!key}" == "YES" ]; then
 			port=${ports["$key"]}
-			$JENKINS_HOME/workspace/ciom/deploy.app.to.host.with.multi.tomcats.sh $appName $host $port /opt $asRoot
+			/opt/ciom/deploy.app.to.host.with.multi.tomcats.sh $appName $host $port /opt $asRoot
 		fi
 	done	
 }
@@ -33,7 +33,7 @@ toAliyun_ws() {
 	for key in "${!hosts[@]}"; do
 		if [ "${!key}" == "YES" ]; then
 			host=${hosts["$key"]}
-			$JENKINS_HOME/workspace/ciom/deploy.app.to.host.with.multi.tomcats.sh $appName $host $port $wsTomcatParent $asRoot
+			/opt/ciom/deploy.app.to.host.with.multi.tomcats.sh $appName $host $port $wsTomcatParent $asRoot
 		fi
 	done	
 }

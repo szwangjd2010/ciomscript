@@ -1,4 +1,4 @@
-#!/usr/bin/perl -W -I /var/lib/jenkins/workspace/ciom
+#!/usr/bin/perl -W -I /opt/ciom/ciom
 # 
 # add this for windows scp, 
 # cause windows ssh client scp speed is very slow
@@ -19,14 +19,14 @@ my $appName = $ARGV[2];
 my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
-my $AppWorkspace = "/var/lib/jenkins/ci.slave.win/$ver/$env";
+my $AppWorkspace = "/opt/ciom/ci.slave.win/$ver/$env";
 
 sub enterWorkspace() {
 	;
 }
 
 sub getAppWorkspace() {
-	return "/var/lib/jenkins/ci.slave.win/$ver/$env"
+	return "/opt/ciom/ci.slave.win/$ver/$env"
 }
 
 sub getAppCiomJsonFile() {
