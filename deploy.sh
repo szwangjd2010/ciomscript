@@ -23,7 +23,7 @@ deployTo() {
 		interval=1
 	fi
 	
-	execCmd "/opt/ciom/deploy.app.to.sh $appName $host $port $tomcatHome"
+	execCmd "$CIOM_HOME/ciom/deploy.app.to.sh $appName $host $port $tomcatHome"
 }
 
 toGuoke() {

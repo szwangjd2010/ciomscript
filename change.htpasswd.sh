@@ -1,11 +1,7 @@
 #!/bin/bash
 # 
 #
-if [ "$JENKINS_HOME" == "" ]; then
-	source $CIOM_HOME/ciom.util.sh
-else 
-	source /opt/ciom/ciom.util.sh
-fi
+source $CIOM_HOME/ciom/ciom.util.sh
 
 accountName=${AccountName:-$1}
 oldPassword=${OldPassword:-$2}

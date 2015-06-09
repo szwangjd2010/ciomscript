@@ -6,8 +6,8 @@ TomcatSeed=$1
 instanceAmount=$2
 basePortDelta=${3:-0}
 
-fileJavaOptsTpl=$CIOM_HOME/${4:-tomcat.catalina.java.opts.tpl}
-fileHttpListenTpl=$CIOM_HOME/${5:-tomcat.server.xml.http.section.tpl}
+fileJavaOptsTpl=$CIOM_HOME/ciom/${4:-tomcat.catalina.java.opts.tpl}
+fileHttpListenTpl=$CIOM_HOME/ciom/${5:-tomcat.server.xml.http.section.tpl}
 
 echo $fileJavaOptsTpl
 echo $fileHttpListenTpl
@@ -24,7 +24,7 @@ modifyTomcatUsersXml() {
 	tomcatHome=$1
 	
 	fileUserSection="tomcat.users.section"
-	fileUserSectionTpl="$CIOM_HOME/tomcat.users.section.tpl"
+	fileUserSectionTpl="$CIOM_HOME/ciom/tomcat.users.section.tpl"
 	/bin/cp -rf $fileUserSectionTpl $fileUserSection
 
 	user="admin"
@@ -69,7 +69,7 @@ createOrignalWebapps() {
 modifyTomcatRealm() {
 	tomcatHome=$1
 	serverXml="$tomcatHome/conf/server.xml"
-	fileHostRealm="$CIOM_HOME/tomcat.server.xml.realm.tpl"
+	fileHostRealm="$CIOM_HOME/ciom/tomcat.server.xml.realm.tpl"
 	sed -i "/unpackWARs=\"true\" autoDeploy=\"true\"/ r $fileHostRealm" $serverXml
 }
 
