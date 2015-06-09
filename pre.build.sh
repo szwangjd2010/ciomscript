@@ -11,7 +11,7 @@ deployToEnv=$2
 appName=$3
 
 
-CnfLocation="$ENV{CIOM_HOME}/ciom/ciomvca/$version/pre/$deployToEnv"
+CnfLocation="$CIOM_HOME/ciomvca/$version/pre/$deployToEnv"
 
 
 enterWorkspace() {
