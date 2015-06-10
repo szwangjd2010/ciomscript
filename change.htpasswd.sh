@@ -7,8 +7,8 @@ accountName=${AccountName:-$1}
 oldPassword=${OldPassword:-$2}
 newPassword=${NewPassword:-$3}
 
-#FileHtpasswd='/var/www/svn/passwd'
-FileHtpasswd='/opt/ciom/72htpasswd'
+FileHtpasswd='/var/www/svn/passwd'
+#FileHtpasswd='/opt/ciom/72htpasswd'
 SolidSalt='lle'
 
 getUserCnt() {
