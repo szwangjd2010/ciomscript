@@ -1,0 +1,1 @@
+//172.17.128.242/ciom.workspace /opt/ciom/ci.slave.win 	cifs 	noauto,credentials=/opt/ciom/ciom/win/smb.credential,uid=496,gid=492 	0 0
