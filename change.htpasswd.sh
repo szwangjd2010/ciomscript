@@ -8,17 +8,17 @@ oldPassword=${OldPassword:-$2}
 newPassword=${NewPassword:-$3}
 
 #FileHtpasswd='/var/www/svn/passwd'
-FileHtpasswd='/tech/72htpasswd'
+FileHtpasswd='/opt/ciom/72htpasswd'
 SolidSalt='lle'
 
-checkUser() {
-	execCmd "grep -c '$accountName:' $FileHtpasswd > /tmp/_tmp.ciom"
+getUserCnt() {
+	echo -n $(grep -c "$accountName:" $FileHtpasswd)
 }
 
-checkUserEntry() {
-	userSalt=$(grep "$accountName" $FileHtpasswd |  awk -F\$ '{print $3}')
+getUserMatchPasswdCnt() {
+	userSalt=$(grep "$accountName:" $FileHtpasswd | awk -F\$ '{print $3}')
 	accountEntry=$(getAccountEntry $accountName $oldPassword $userSalt)
-	execCmd "grep -c '$accountEntry' $FileHtpasswd > /tmp/_tmp.ciom"
+	echo -n $(grep -c "$accountEntry" $FileHtpasswd)
 }
 
 updatePasswd() {
@@ -39,28 +39,19 @@ getAccountEntry() {
 	echo -n "$name:$(getPasswd $password $salt)"
 }
 
-getCheckResult() {
-	echo -n $(cat /tmp/_tmp.ciom)
-}
-
 main() {
-	checkUser
-	bUserExists=$(getCheckResult)
-	if [ "$bUserExists" == "0" ]; then
+	if [ "$(getUserCnt)" == "0" ]; then
 		echo "user does not exist!"
 		exit 1
 	fi
 
-	checkUserEntry
-	bValidPasswd=$(getCheckResult)
-	if [ "$bValidPasswd" == "0" ]; then
+	if [ "$(getUserMatchPasswdCnt)" == "0" ]; then
 		echo "user password is not correct!"
 		exit 2
 	fi
 
 	updatePasswd
 	echo "password updated successfully!"
-	
 }
 
 main
