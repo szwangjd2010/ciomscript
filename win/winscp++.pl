@@ -19,14 +19,14 @@ my $appName = $ARGV[2];
 my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
-my $AppWorkspace = "$CIOM_HOME/ci.slave.win/$ver/$env";
+my $AppWorkspace = "$ENV{CIOM_HOME}/ci.slave.win/$ver/$env";
 
 sub enterWorkspace() {
 	;
 }
 
 sub getAppWorkspace() {
-	return "$CIOM_HOME/ci.slave.win/$ver/$env"
+	return "$ENV{CIOM_HOME}/ci.slave.win/$ver/$env"
 }
 
 sub getAppCiomJsonFile() {

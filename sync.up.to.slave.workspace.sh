@@ -4,9 +4,8 @@
 ver=$1
 env=$2
 appName=$3
-workspace=$4
 
-src="$workspace/$appName"
+src="$WORKSPACE/$appName"
 dst="/opt/ciom/ci.slave.win/$ver/$env/$appName"
 
 

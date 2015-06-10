@@ -14,7 +14,7 @@ my $MAX_OPEN_FILES = 102400;
 my $ciomUtil = new CiomUtil(1);
 
 sub setMaxOpenFile() {
-	$ciomUtil->exec("scp $CIOM_HOME/ciom/om/set.max.open.file.sh $host:/root/");
+	$ciomUtil->exec("scp $ENV{CIOM_HOME}/ciom/om/set.max.open.file.sh $host:/root/");
 	$ciomUtil->remoteExec({
 		host => $host,
 		cmd => "bash /root/set.max.open.file.sh"
