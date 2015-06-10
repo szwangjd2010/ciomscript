@@ -7,7 +7,7 @@ appName=$3
 workspace=$4
 
 src="$workspace/$appName"
-dst="/opt/ciom/ci.slave.win/$ver/$env/$appName"
+dst="$CIOM_HOME/ci.slave.win/$ver/$env/$appName"
 
 
 main() {

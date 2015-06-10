@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-source ./ciom.util.sh
-source ./ciom.mysql.util.sh
+source $CIOM_HOME/ciom/ciom.util.sh
+source $CIOM_HOME/ciom/ciom.mysql.util.sh
 
 
 logFileYMD=$(date -d '1 days ago' +%04Y%02m%02d)

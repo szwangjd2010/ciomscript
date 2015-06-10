@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./ciom.mysql.util.sh
+source $CIOM_HOME/ciom/ciom.mysql.util.sh
 
 isSyncDbData=${1:-0}
 isFirstTime=${2:-0}
