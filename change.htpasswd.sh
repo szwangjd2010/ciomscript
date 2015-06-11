@@ -15,7 +15,7 @@ getUserCnt() {
 	echo -n $(grep -c "$accountName:" $FileHtpasswd)
 }
 
-getUserMatchPasswdCnt() {
+getNameAndPasswdMatchedUserCnt() {
 	userSalt=$(grep "$accountName:" $FileHtpasswd | awk -F\$ '{print $3}')
 	accountEntry=$(getAccountEntry $accountName $oldPassword $userSalt)
 	echo -n $(grep -c "$accountEntry" $FileHtpasswd)
@@ -45,7 +45,7 @@ main() {
 		exit 1
 	fi
 
-	if [ "$(getUserMatchPasswdCnt)" == "0" ]; then
+	if [ "$(getNameAndPasswdMatchedUserCnt)" == "0" ]; then
 		echo "user password is not correct!"
 		exit 2
 	fi
