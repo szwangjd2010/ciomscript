@@ -49,23 +49,24 @@ function build() {
 function clean() {
 	exec("remove-item '$targetPath\*' -recurse -force")
 	exec("remove-item '$packageFile' -force")
+
+	exec("remove-item '$CommonLogFile' -force")
+	exec("remove-item '$ErrorLogFile' -force")
+	exec("remove-item '$WarningLogFile' -force")
 }
 
 function getBuildLogCF() {
-	$commonLog = getAppBuildLogFile("common")
-	$errorLog = getAppBuildLogFile("error")
-	$warningLog = getAppBuildLogFile("warning")
-
-	$logCF = "/flp1:errorsonly;logfile=$errorLog;Append /flp2:warningsonly;logfile=$warningLog;Append /flp3:logfile=$commonLog;Append"
-	
+	$logCF = "/flp1:errorsonly;logfile=$ErrorLogFile;Append /flp2:warningsonly;logfile=$WarningLogFile;Append /flp3:logfile=$CommonLogFile;Append"
 	return $logCF
 }
 
 function isBuildError() {
-	$errorLog = getAppBuildLogFile("error")
-	$errorLines = $(gc $errorLog | measure-object -line).lines
-	
+	$errorLines = $(gc $ErrorLogFile | measure-object -line).lines
 	return $errorLines -gt 0
+}
+
+function outputError() {
+	write-output $(get-content "$ErrorLogFile")
 }
 
 function main() {
@@ -73,6 +74,7 @@ function main() {
 	getPackages
 	build
 	if (isBuildError) {
+		outputError
 		exit 1 #build error
 	}
 	
@@ -88,6 +90,11 @@ $MsBuild = "&'C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild.exe' --%"
 $SolutionCF = "/t:Clean;Build /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
 $ProjectCF = "/t:ResolveReferences;Compile /t:_WPPCopyWebApplication /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
 $OutputCF = "/p:WebProjectOutputDir"
+
+$CommonLogFile = getAppBuildLogFile("common")
+$ErrorLogFile = getAppBuildLogFile("error")
+$WarningLogFile = getAppBuildLogFile("warning")
+
 $LogCF = getBuildLogCF
 
 main
