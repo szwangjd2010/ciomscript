@@ -56,7 +56,7 @@ function getBuildLogCF() {
 	$errorLog = getAppBuildLogFile("error")
 	$warningLog = getAppBuildLogFile("warning")
 
-	$logCF = "/flp1:errorsonly;logfile=$errorLog /flp2:warningsonly;logfile=$warningLog /flp3:logfile=$commonLog"
+	$logCF = "/flp1:errorsonly;logfile=$errorLog;Append /flp2:warningsonly;logfile=$warningLog;Append /flp3:logfile=$commonLog;Append"
 	
 	return $logCF
 }

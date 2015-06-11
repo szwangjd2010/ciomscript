@@ -23,7 +23,7 @@ getNameAndPasswdMatchedUserCnt() {
 
 updatePasswd() {
 	accountNewEntry=$(getAccountEntry $accountName $newPassword $SolidSalt)
-	execCmd "sed -i 's|^$accountName:.*|$accountNewEntry|g' $FileHtpasswd"
+	sed -i "s|^$accountName:.*|$accountNewEntry|g" $FileHtpasswd
 }
 
 getPasswd() {
