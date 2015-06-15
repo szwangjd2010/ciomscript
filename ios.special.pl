@@ -12,7 +12,7 @@ my $SlaveVcaHome = "/Users/ciom/ciomws/$version/$cloudId/$appName";
 my $appMainModuleName = getAppMainModuleName();
 my $xcodeTarget = $CiomData->{scm}->{repos}->[0]->{xcodeTarget};
 my $SshInfo = {
-	host => '172.17.127.57',
+	host => '172.17.125.248',
 	port => '22',
 	user => 'ciom'
 };
