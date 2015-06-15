@@ -1,0 +1,3 @@
+iptables -A INPUT -s 172.17.125.0/24 -j DROP
+iptables -I INPUT -s 172.17.125.249 -j ACCEPT
+iptables -I INPUT -m mac --mac-source 64:f6:9d:b9:57:ce -j ACCEPT
