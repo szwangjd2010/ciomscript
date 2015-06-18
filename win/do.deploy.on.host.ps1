@@ -20,6 +20,10 @@ function stopIIS() {
 }
 #end
 
+function closeExplorer() {
+	(New-Object -comObject Shell.Application).Windows() | ? { $_.FullName -ne $null } | ? { $_.FullName.toLower().Endswith('\explorer.exe') } | % { $_.Quit() }
+}
+
 function backup() {
 	$appFullPath = "$app3wPath\$appName"
 	if (!$(test-path $appFullPath)) {
@@ -49,6 +53,7 @@ function logActionHeader() {
 
 function main() {
 	logActionHeader
+	closeExplorer #to aviod rename-item failed when execute backup
 	stopIIS
 	sleep 5
 	backup

@@ -3,10 +3,11 @@
 
 Ciom_Mysql_Log=/tmp/_ciom.mysql.log
 
+Ciom_Mysql_User='ciom'
 Ciom_Mysql_Password='pwdasdwx'
-Ciom_Mysql_Master="172.17.128.231"
-Ciom_Mysql_Slaves="172.17.128.231 172.17.128.231"
-Ciom_Mysql_Workspace="/tech/user/micro/backup"
+Ciom_Mysql_Master="10.10.71.10"
+Ciom_Mysql_Slaves="10.10.77.235 10.10.66.88"
+Ciom_Mysql_Workspace="/home/micro/backup"
 Ciom_Mysql_Timestamp=$(date +%04Y%02m%02d)
 Ciom_Mysql_Error_Log="_ciom.mysql.util.error.log"
 
@@ -46,31 +47,31 @@ execSQL_BN() {
 stopSlaves() {
 	for slave in $Ciom_Mysql_Slaves; do
 		echo "stop slave on $slave"
-		execSQL_BN $slave 3306 root $Ciom_Mysql_Password 'stop slave'
+		execSQL_BN $slave 3306 $Ciom_Mysql_User $Ciom_Mysql_Password 'stop slave'
 	done
 }
 
 startSlaves() {
 	for slave in $Ciom_Mysql_Slaves; do
 		echo "start slave on $slave"
-		execSQL_BN $slave 3306 root $Ciom_Mysql_Password 'start slave'
+		execSQL_BN $slave 3306 $Ciom_Mysql_User $Ciom_Mysql_Password 'start slave'
 	done
 }
 
 showSlavesStatus() {
 	for slave in $Ciom_Mysql_Slaves; do
 		echo "show slave status on $slave"
-		execSQL $slave 3306 root $Ciom_Mysql_Password 'show slave status\G'
+		execSQL $slave 3306 $Ciom_Mysql_User $Ciom_Mysql_Password 'show slave status\G'
 	done
 }
 
 resetMaster() {
 	echo "reset master on $Ciom_Mysql_Master"
-	execSQL_BN $Ciom_Mysql_Master 3306 root $Ciom_Mysql_Password 'reset master'
+	execSQL_BN $Ciom_Mysql_Master 3306 $Ciom_Mysql_User $Ciom_Mysql_Password 'reset master'
 }
 
 firstTimeSetSlavesMaster() {
-	status=$(execSQL_BN $Ciom_Mysql_Master 3306 root $Ciom_Mysql_Password 'show master status')
+	status=$(execSQL_BN $Ciom_Mysql_Master 3306 $Ciom_Mysql_User $Ciom_Mysql_Password 'show master status')
 	statusArray=(${status// / })
 	binlogFile=${statusArray[0]}
 	binlogPos=${statusArray[1]}
@@ -85,7 +86,7 @@ firstTimeSetSlavesMaster() {
 		master_log_pos=$binlogPos;"
 		
 		echo "change master on $slave - $query"
-		execSQL_BN $slave 3306 root $Ciom_Mysql_Password "$query"
+		execSQL_BN $slave 3306 $Ciom_Mysql_User $Ciom_Mysql_Password "$query"
 	done
 }
 
@@ -98,7 +99,7 @@ setSlavesMaster() {
 		master_password='$Ciom_Mysql_Password';"
 		
 		echo "change master on $slave - $query"
-		execSQL_BN $slave 3306 root $Ciom_Mysql_Password "$query"
+		execSQL_BN $slave 3306 $Ciom_Mysql_User $Ciom_Mysql_Password "$query"
 	done
 }
 
@@ -137,20 +138,20 @@ dump() {
 }
 
 dumpMaster() {
-	dump $Ciom_Mysql_Master 3306 root $Ciom_Mysql_Password exiaoxin
+	dump $Ciom_Mysql_Master 3306 $Ciom_Mysql_User $Ciom_Mysql_Password exiaoxin
 }
 
 import2Slaves() {
 	fileDumpout=$(getDumpoutFile exiaoxin)
 	for slave in $Ciom_Mysql_Slaves; do
-		import $slave 3306 root $Ciom_Mysql_Password $fileDumpout
+		import $slave 3306 $Ciom_Mysql_User $Ciom_Mysql_Password $fileDumpout
 	done
 }
 
 getAllTablesInDB() {
 	host=$1
 	db=$2
-	execSQL_BN $host 3306 root $Ciom_Mysql_Password "show tables" $db | sort > _$host.$db.tables
+	execSQL_BN $host 3306 $Ciom_Mysql_User $Ciom_Mysql_Password "show tables" $db | sort > _$host.$db.tables
 }
 
 getTableRows() {
@@ -158,7 +159,7 @@ getTableRows() {
 	db=$2
 	table=$3
 	sql="select count(1) from $table"
-	tableRow=$(execSQL_BN $host 3306 root $Ciom_Mysql_Password "$sql" $db)
+	tableRow=$(execSQL_BN $host 3306 $Ciom_Mysql_User $Ciom_Mysql_Password "$sql" $db)
 
 	echo "$tableRow"
 }
