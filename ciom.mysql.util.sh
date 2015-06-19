@@ -7,7 +7,7 @@ Ciom_Mysql_User='ciom'
 Ciom_Mysql_Password='pwdasdwx'
 Ciom_Mysql_Master="10.10.71.10"
 Ciom_Mysql_Slaves="10.10.77.235 10.10.66.88"
-Ciom_Mysql_Workspace="/home/micro/backup"
+Ciom_Mysql_Workspace="/home/uciom/backup"
 Ciom_Mysql_Timestamp=$(date +%04Y%02m%02d)
 Ciom_Mysql_Error_Log="_ciom.mysql.util.error.log"
 
