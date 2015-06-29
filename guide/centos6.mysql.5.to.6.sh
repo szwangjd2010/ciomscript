@@ -17,6 +17,12 @@ grant all privileges on yxt.* to yxt@'%' identified by 'hzyxtDUANG2015';
 
 set password for 'yxt'@'10.10.%' = password('hzyxtDUANG2015');
 
+grant all privileges on lecai2.* to dev@'%' identified by 'pwdasdwx';
+grant all privileges on component.* to dev@'%';
+grant all privileges on mall.* to dev@'%';
+grant all privileges on qida.* to dev@'%';
+
+
 
 CREATE DATABASE yxt DEFAULT CHARACTER SET utf8;
 

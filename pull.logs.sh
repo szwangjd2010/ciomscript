@@ -1,6 +1,8 @@
 #!/bin/bash
 #
-logFileYMD=$(date -d '1 days ago' +%04Y%02m%02d)
+
+dayAgo=${1:-1}
+logFileYMD=$(date -d "$dayAgo days ago" +%04Y%02m%02d)
 
 AdminapiHosts="10.10.74.158"
 ApiHosts="10.10.73.235 10.10.76.73 10.10.75.138"
@@ -11,7 +13,7 @@ pullLog() {
 	localLogLocation=$3
 	
 	for host in $hosts; do
-		ssh root@$host "cd $svrTomcatParent; tar -cjvf /data/tmp/$host.tomcat.logs.bz2 "'$(find tomcat7-[1-4] -regextype posix-extended -regex '"'"'.*/(debug|error|info)\.'"$logFileYMD""\.log')"
+		ssh root@$host "cd $svrTomcatParent; tar -cjvf /data/tmp/$host.tomcat.logs.bz2 "'$(find tomcat7-[1-4] -regextype posix-extended -regex '"'"'.*/(debug|error|info|event)\.'"$logFileYMD""\.log')"
 		
 		localHostLogLocation=$localLogLocation/$host
 		mkdir -p $localHostLogLocation
@@ -25,7 +27,7 @@ mergeLog() {
 	hosts=$1
 	localLogLocation=$2	
 
-	for level in debug error info; do
+	for level in debug error info event; do
 		find "$localLogLocation" -name "$level.$logFileYMD.log" -exec cat {} >> "$localLogLocation/$level.$logFileYMD.all-instances.log" \;
 	done
 }
