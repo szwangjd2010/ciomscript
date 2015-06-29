@@ -1,0 +1,3 @@
+svn copy --username lile --password 'P@ss!23' -m "create branch v1.1" http://172.17.127.72/hz/yxt/trunk http://172.17.127.72/hz/yxt/branches/v1.0
+svn copy --username lile --password 'P@ss!23' -m "create branch v1.1" http://172.17.127.72/hz/yxtweb/trunk http://172.17.127.72/hz/yxtweb/branches/v1.0
+svn copy --username lile --password 'P@ss!23' -m "create branch v1.1" http://172.17.127.72/hz/yxtta/trunk http://172.17.127.72/hz/yxtta/branches/v1.0
