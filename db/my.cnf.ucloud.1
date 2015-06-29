@@ -1,0 +1,89 @@
+[mysql]
+default-character-set=utf8
+socket = /mysql/data/mysql.sock
+
+[client]
+default-character-set=utf8
+port = 3306
+socket = /mysql/data/mysql.sock
+
+[mysqld_safe]
+character-set-server = utf8
+
+
+[mysqld]
+character-set-server = utf8
+user = mysql
+port = 3306
+
+socket = /mysql/data/mysql.sock
+pid-file = /mysql/data/mysql.pid
+log-error = /var/log/mysql_error.log
+
+basedir = /usr
+datadir = /mysql/data/basedata
+tmpdir=/mysql/data/tmpfiles
+log-bin=/mysql/data/logbins/binarylog
+log-bin-index=/mysql/data/logbins/logbins.index
+
+innodb_data_home_dir = /mysql/data/innodbdata
+innodb_log_group_home_dir=/mysql/data/redolog
+
+
+innodb_file_per_table=1
+performance_schema=1
+
+slow_query_log=1
+slow_query_log_file=/mysql/data/slowsql.txt
+
+long_query_time=1
+log_output=table
+
+max_allowed_packet=41943040
+
+innodb_log_buffer_size=16777216
+innodb_log_files_in_group=15
+innodb_log_file_size=104857600
+innodb_flush_log_at_trx_commit=1
+
+external-locking = FALSE
+explicit_defaults_for_timestamp 
+default-storage-engine = INNODB
+skip-name-resolve
+performance_schema
+
+
+transaction-isolation=READ-COMMITTED
+binlog_format=row
+sync_binlog=1
+innodb_support_xa=1
+
+
+max_connections=1000
+
+query_cache_type=0
+
+key_buffer_size=33554432
+
+thread_cache_size=64
+
+sort_buffer_size=1048576
+join_buffer_size=524288
+
+
+innodb_buffer_pool_size=10737418240
+
+expire_logs_days=30
+
+server-id=70
+
+
+relay_log=/mysql/data/relaylogs/mysql-relay-bin
+relay_log_index=/mysql/data/relaylogs/mysql-relay-bin.index
+master-info-repository=table
+relay-log-info-repository=table
+relay_log_recovery=1
+sync_relay_log=1
+
+log_slave_updates=1
+

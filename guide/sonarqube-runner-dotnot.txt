@@ -1,0 +1,8 @@
+sonar.sourceEncoding=UTF-8
+
+sonar.projectKey=yxt:lecaiweb
+sonar.projectVersion=trunk
+sonar.projectName=lecaiweb
+
+sonar.sources=.
+sonar.language=cs
