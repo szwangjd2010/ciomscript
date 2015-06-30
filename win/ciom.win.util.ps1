@@ -9,8 +9,8 @@ function log($str) {
 }
 
 function exec($cmd) {
-	Invoke-Expression "$cmd"
 	log($cmd)
+	Invoke-Expression "$cmd"
 }
 
 function remoteExec($ip, $port, $username, $password, $cmd) {

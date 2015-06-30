@@ -16,7 +16,7 @@ function getProjectBuildOutputPath($str) {
 function getPackages() {
 	mkdir "$sourcePath\packages"
 	foreach ($item in $CIOM.packageConfigManifest) {
-		exec("NuGet install $sourcePath\$item -OutputDirectory $sourcePath\packages")
+		exec("NuGet install '$sourcePath\$item' -OutputDirectory '$sourcePath\packages'")
 	}		
 }
 
