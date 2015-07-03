@@ -36,8 +36,8 @@ main() {
 	svrAdminTomcatParent="/opt/ws1/"
 	svrApiTomcatParent="/opt/ws/"
 	
-	localAdminapiLogLocation=/usr/share/nginx/html/ciompub/leicai/adminapi/$logFileYMD
-	localApiLogLocation=/usr/share/nginx/html/ciompub/leicai/api/$logFileYMD
+	localAdminapiLogLocation=/usr/share/nginx/html/ciompub/lecai/adminapi/$logFileYMD
+	localApiLogLocation=/usr/share/nginx/html/ciompub/lecai/api/$logFileYMD
 
 	mkdir -p $localAdminapiLogLocation
 	mkdir -p $localApiLogLocation
