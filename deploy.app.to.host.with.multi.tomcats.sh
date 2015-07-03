@@ -50,6 +50,7 @@ setAppContextName() {
 
 preDeployApp() {
 	stopTomcats $host $port $tomcatParent
+	sleep 3
 }
 
 postDeployApp() {
