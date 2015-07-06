@@ -25,7 +25,13 @@ sub fillPms() {
 	$Pms->{CFBundleVersion} = $ENV{CFBundleVersion};
 }
 
+sub resyncSourceCode() {
+	$ciomUtil->exec("$ENV{CIOM_HOME}/ciom/syncup.to.slave.sh $version $cloudId $appName osx");
+}
+
 sub build() {
+	resyncSourceCode();
+
 	#following all directory are remote directory
 	my $cmd2Workspace = "cd $SlaveVcaHome/$appMainModuleName";
 	#fix issue - "User Interaction Is Not Allowed"
@@ -53,11 +59,12 @@ sub moveApppkgFile($) {
 	#/bin/cp: skipping file `WebSchool/eschool.ipa', as it was replaced while being copied
 	$ciomUtil->exec("sleep 5");
 	my $appFinalPkgName = getAppFinalPkgName($code);
-	$ciomUtil->exec("mv $appMainModuleName/${xcodeTarget}.ipa $ApppkgPath/$appFinalPkgName");
+	my $orgIpaFile = "$ENV{CIOM_HOME}/ci.slave.osx/$version/$cloudId/$appName/$appMainModuleName/${xcodeTarget}.ipa";
+	$ciomUtil->exec("mv $orgIpaFile $ApppkgPath/$appFinalPkgName");
 }
 
 sub cleanAfterOrgBuild() {
-	$ciomUtil->exec("rm -rf $appMainModuleName/build/*");
+	;
 }
 
 sub getBuildError() {

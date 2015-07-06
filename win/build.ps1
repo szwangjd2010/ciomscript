@@ -34,7 +34,16 @@ function package() {
 	compress $packageFile $appBuildout
 }
 
+function mkdirBuildout() {
+	$buildoutDir = getVerEnvBuildPath
+	if (!(Test-Path -Path $buildoutDir )){
+	    New-Item -ItemType directory -Path $buildoutDir
+	}	
+}
+
 function build() {
+	mkdirBuildout
+	
 	foreach ($item in $CIOM.solutionManifest) {
 		if ($item.endswith(".sln")) {
 			buildSolution($item)
