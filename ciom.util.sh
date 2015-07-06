@@ -62,6 +62,21 @@ startTomcats() {
 	done
 }
 
+stopTomcat() {
+	host=$1
+	port=$2
+	tomcatHome=$3
+	execRemoteCmd $host $port "pkill -9 -f '$tomcatHome"
+}
+
+startTomcat() {
+	host=$1
+	port=$2
+	tomcatHome=$3
+	execRemoteCmd $host $port "$tomcatHome/bin/startup.sh"
+	sleep 5
+}
+
 simulateJenkinsContainer() {
 	if [ "$JENKINS_HOME" == "" ]; then
 		export JENKINS_HOME=/var/lib/jenkins

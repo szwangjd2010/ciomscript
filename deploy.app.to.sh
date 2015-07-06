@@ -1,92 +1,75 @@
 #!/bin/bash
-# 
 #
-appName=$1
-targetIP=$2
-targetPort=$3
-targetTomcatHome=$4
+source $CIOM_HOME/ciom/ciom.util.sh
+if [ "$JENKINS_HOME" == "" ]; then
+	simulateJenkinsContainer
+fi
 
+host=$1
+port=$2
+tomcatHome=$3
+appName=$4
+asRoot=${5:-NotAsRoot}
 
-# 0: DONOT do actual deploy on target, for debug only
-# 1: DO actual deploy on target
-RUN_MODE=1
+AppPackageFile="$appName.war"
+MyWorkspace="$WORKSPACE/$appName/target"
+WebappsLocation="$tomcatHome/webapps"
+tomcatParent="$tomcatHome/.."
 
-ADLog="/tmp/_ciom.log"
-
-AppPackageFile="$appName.$BUILD_ID.tgz"
-TargetADWorkspace="/root"
-Adworkspace="$WORKSPACE/$appName/target"
-WebappsLocation="$targetTomcatHome/webapps"
-TomcatPattern="$targetTomcatHome/"
-
-outHelp() {
-	cat <<HELP
-"usage: 
-  $0 %appName %targetIP %targetPort %targetTomcatHome"
-
-HELP
-}
-
-execCmd() {
-	echo "$1" | tee -a $ADLog
-	if [ $RUN_MODE -eq 1 ]; then
-		eval $1 
-	fi
-}
+appContextName=$appName
 
 enterWorkspace() {
-	execCmd "cd $Adworkspace"
+	execCmd "cd $MyWorkspace"
 }
 
 leaveWorkspace() {
-	execCmd "cd $Adworkspace"
-}
-
-upload() {
-	execCmd "scp -P $targetPort $1 root@$targetIP:$TargetADWorkspace/"
-}
-
-execRemoteCmd() {
-	execCmd "ssh -p $targetPort root@$targetIP \"$1\""
+	execCmd "cd $MyWorkspace"
 }
 
 uploadFiles() {
-	upload $AppPackageFile
+	upload $AppPackageFile $host $port $tomcatParent/
 }
 
 applyAppPackage() {
-	execRemoteCmd "tar --overwrite -xzpvf $TargetADWorkspace/$AppPackageFile -C $WebappsLocation"
+	execRemoteCmd $host $port "unzip -o $tomcatParent/$AppPackageFile -d $WebappsLocation/$appContextName"
 }
 
 backup() {
 	timestamp=$(date +%04Y%02m%02d.%02k%02M%02S)
-	execRemoteCmd "cd $WebappsLocation; tar -czvf $targetTomcatHome/$appName-$timestamp.tgz $appName; rm -rf $appName; "
+	execRemoteCmd $host $port "cd $WebappsLocation; tar -czvf $tomcatParent/$AppPackageFile-$timestamp.tgz $appContextName"
 }
 
-stopTargetService() {
-	execRemoteCmd "pkill -9 -f '$TomcatPattern'"
+clean() {
+	execRemoteCmd $host $port "cd $WebappsLocation; rm -rf $appContextName $appName"	
 }
 
-startTargetService() {
-	execRemoteCmd "export JRE_HOME='/usr/java/jdk1.7.0_76'; $targetTomcatHome/bin/startup.sh"
-}
-
-checkArgus() {
-	if [ $# -lt 4 ]; then
-		outHelp
-		exit 1
+setAppContextName() {
+	if [ $asRoot == "AsRoot" ]; then
+		appContextName='ROOT'
 	fi
 }
 
+preDeployApp() {
+	stopTomcat $host $port $tomcatHome
+	sleep 3
+}
+
+postDeployApp() {
+	startTomcat $host $port $tomcatHome
+}
+
 main() {
-	checkArgus $@
+	setAppContextName
 	enterWorkspace
-	uploadFiles
-	stopTargetService
+	preDeployApp
 	backup
+	clean
+	uploadFiles
 	applyAppPackage
-	startTargetService
+	postDeployApp
 	leaveWorkspace
 }
 
-main $@
+main
+
+unsimulateJenkinsContainer

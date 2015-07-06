@@ -4,20 +4,22 @@
 
 TomcatSeed=$1
 instanceAmount=$2
-basePortDelta=${3:-0}
+basePortDelta=$3
+shareWebapps=${4:-1}
 
 fileJavaOptsTpl=$CIOM_HOME/ciom/${4:-tomcat.catalina.java.opts.tpl}
 fileHttpListenTpl=$CIOM_HOME/ciom/${5:-tomcat.server.xml.http.section.tpl}
-
-echo $fileJavaOptsTpl
-echo $fileHttpListenTpl
-
 
 clean() {
 	rm -rf $TomcatSeed-*
 	rm -rf tomcats.bz2
 	rm -rf tomcat.users.section
 	rm -rf webapps
+	rm -rf $TomcatSeed
+}
+
+cloneSeed() {
+	cp -r $TomcatSeed.seed $TomcatSeed
 }
 
 modifyTomcatUsersXml() {
@@ -62,7 +64,7 @@ modifyTomcatListenPort() {
 	sed -i "s/8009/$ajpPort/g" $serverXml
 }
 
-createOrignalWebapps() {
+createSharedWebapps() {
 	cp -r $TomcatSeed/webapps webapps
 }
 
@@ -81,18 +83,23 @@ modifyTomcatCatalinaSh() {
 	sed -i "$lineNum r $fileJavaOptsTpl" $catalinaSh
 }
 
-removeUnusedAppsInOrignalWebapps() {
-	rm -rf webapps/examples
-	rm -rf webapps/docs
-	rm -rf webapps/host-manager
-	rm -rf webapps/ROOT
+removeWebappsUnusedApp() {
+	webappsLocation=$TomcatSeed/webapps
+	rm -rf $webappsLocation/examples
+	rm -rf $webappsLocation/docs
+	rm -rf $webappsLocation/host-manager
+	rm -rf $webappsLocation/ROOT
 }
 
 packageTomcats() {
-	tar -cjvf tomcats.bz2 webapps $TomcatSeed-* 
+	if [ $shareWebapps -eq 1 ]; then
+		tar -cjvf tomcats.bz2 webapps $TomcatSeed-* 
+	else
+		tar -cjvf tomcats.bz2 $TomcatSeed-* 
+	fi
 }
 
-linkInstanceWebapps2OriginalWebapps() {
+linkInstanceWebapps2SharedWebapps() {
 	tomcatHome=$1
 	rm -rf $tomcatHome/webapps
 	(cd $tomcatHome; ln -s ../webapps webapps)
@@ -109,14 +116,22 @@ duplicateTomcat() {
 		modifyTomcatRealm $tomcatHome
 		modifyTomcatUsersXml $tomcatHome
 		modifyTomcatCatalinaSh $tomcatHome
-		linkInstanceWebapps2OriginalWebapps $tomcatHome
+
+		if [ $shareWebapps -eq 1 ]; then
+			linkInstanceWebapps2SharedWebapps $tomcatHome
+		fi
 	done
 }
 
 main() {
 	clean
-	createOrignalWebapps
-	removeUnusedAppsInOrignalWebapps
+	cloneSeed
+
+	removeWebappsUnusedApp
+	if [ $shareWebapps -eq 1 ]; then
+		createSharedWebapps
+	fi
+
 	duplicateTomcat
 	packageTomcats
 }
