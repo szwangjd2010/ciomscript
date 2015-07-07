@@ -66,7 +66,7 @@ stopTomcat() {
 	host=$1
 	port=$2
 	tomcatHome=$3
-	execRemoteCmd $host $port "pkill -9 -f '$tomcatHome"
+	execRemoteCmd $host $port "pkill -9 -f '$tomcatHome'"
 }
 
 startTomcat() {

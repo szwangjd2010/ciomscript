@@ -7,8 +7,8 @@ instanceAmount=$2
 basePortDelta=$3
 shareWebapps=${4:-1}
 
-fileJavaOptsTpl=$CIOM_HOME/ciom/${4:-tomcat.catalina.java.opts.tpl}
-fileHttpListenTpl=$CIOM_HOME/ciom/${5:-tomcat.server.xml.http.section.tpl}
+fileJavaOptsTpl=$CIOM_HOME/ciom/${5:-tomcat.catalina.java.opts.tpl}
+fileHttpListenTpl=$CIOM_HOME/ciom/${6:-tomcat.server.xml.http.section.tpl}
 
 clean() {
 	rm -rf $TomcatSeed-*
