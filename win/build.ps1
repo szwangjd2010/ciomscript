@@ -15,9 +15,25 @@ function getProjectBuildOutputPath($str) {
 
 function getPackages() {
 	mkdir "$sourcePath\packages"
+
+	$arrayPackagesConfig = getPackageConfigList
 	foreach ($item in $CIOM.packageConfigManifest) {
 		exec("NuGet install '$sourcePath\$item' -OutputDirectory '$sourcePath\packages'")
 	}		
+}
+
+function getPackageConfigList() {
+	$arrayPackagesConfig = @()
+	foreach ($item in $CIOM.solutionManifest) {
+		if ($item.endswith(".sln")) {
+			continue
+		}
+
+		$packgesConfigFile = $item.substring(0, ($item.length - ".csproj".length))
+		$arrayPackagesConfig += $packgesConfigFile
+	}
+
+	return $arrayPackagesConfig	
 }
 
 function buildSolution($sln) {

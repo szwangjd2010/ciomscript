@@ -1,8 +1,0 @@
-#!/bin/bash
-# ciom prebuild extra action
-#
-
-perl -i -0 -pE \
-'s|(?<g1><artifactId>waf</artifactId>\s+<version>)(?<g2>[^<>]+)(?<g3></version>)|$+{g1}$+{g2}-dev$+{g3}|sg' \
-$WORKSPACE/waf/pom.xml
-

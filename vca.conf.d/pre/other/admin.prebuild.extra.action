@@ -1,8 +1,0 @@
-#!/bin/bash
-# ciom prebuild extra action
-#
-
-perl -0 -i -pE \
-'s|(?<g1>var adminServer = ")(?<g2>)(?<g3>";)|$+{g1}http://survey.yxt.com$+{g3}|sg' \
-$WORKSPACE/admin/web/static/js/common/common.js
-
