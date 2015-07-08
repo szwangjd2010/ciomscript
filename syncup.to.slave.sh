@@ -7,7 +7,8 @@ appName=$3
 os=$4
 
 src="$WORKSPACE/$appName"
-dst="/opt/ciom/ci.slave.$os/$ver/$env/$appName"
+slaveWorkspaceEnvVarName="CIOM_SLAVE_${os^^}_WORKSPACE"
+dst="${!slaveWorkspaceEnvVarName}/$ver/$env/$appName"
 
 syncup_win() {
 	rsync -az \
