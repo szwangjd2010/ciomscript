@@ -3,7 +3,7 @@ param($ver, $env, $appName)
 . c:\ciom\win\ciom.win.util.ps1
 
 
-function getProjectBuildOutputPath($str) {
+function getWebProjectBuildOutputPath($str) {
 	if ($str.indexof("\Applications\") -eq -1) {
 		return $targetPath
 	}
@@ -44,8 +44,8 @@ function buildSolution($sln) {
 }
 
 function buildProject($proj) {
-	$outputPath = getProjectBuildOutputPath($proj)
-	exec("$MsBuild $sourcePath\$proj $ProjectCF $OutputCF=$outputPath $LogCF")
+	$outputPath = getWebProjectBuildOutputPath($proj)
+	exec("$MsBuild $sourcePath\$proj $WebProjectCF $WebProjectOutputCF=$outputPath $LogCF")
 }
 
 function package() {
@@ -116,8 +116,9 @@ $packageFile = getAppPackageFile
 
 $MsBuild = "&'C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild.exe' --%"
 $SolutionCF = "/t:Clean;Build /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
-$ProjectCF = "/t:ResolveReferences;Compile /t:_WPPCopyWebApplication /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
-$OutputCF = "/p:WebProjectOutputDir"
+$CommonProjectCF = "/t:ResolveReferences;Compile /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
+$WebProjectCF = "/t:ResolveReferences;Compile /t:_WPPCopyWebApplication /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
+$WebProjectOutputCF = "/p:WebProjectOutputDir"
 
 $CommonLogFile = getAppBuildLogFile("common")
 $ErrorLogFile = getAppBuildLogFile("error")
