@@ -1,4 +1,4 @@
-#!/usr/bin/perl -W -I /opt/ciom/ciom
+#!/usr/bin/perl -W -I /opt/ciom/ciomscript
 #
 
 use strict;

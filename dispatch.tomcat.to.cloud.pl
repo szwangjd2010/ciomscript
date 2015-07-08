@@ -1,4 +1,4 @@
-#!/usr/bin/perl -W -I /opt/ciom/ciom
+#!/usr/bin/perl -W -I /opt/ciom/ciomscript
 # 
 #
 
@@ -66,7 +66,7 @@ my $Clouds = {
 
 sub generateTomcatInstances() {
 	$ciomUtil->exec(sprintf("%s %s %s %s %s %s",
-		"$ENV{CIOM_HOME}/ciom/generate.tomcat.instance.sh",
+		"$ENV{CIOM_SCRIPT_HOME}/generate.tomcat.instance.sh",
 		$Clouds->{$cloudId}->{tomcatSeed},
 		$Clouds->{$cloudId}->{tomcatAmount},
 		$Clouds->{$cloudId}->{basePortDelta},
@@ -82,7 +82,7 @@ sub dispatch() {
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $host = $hosts->[$i];
 		$ciomUtil->exec(sprintf("%s %s %s %s",
-			"$ENV{CIOM_HOME}/ciom/dispatch.tomcat.to.host.sh",
+			"$ENV{CIOM_SCRIPT_HOME}/dispatch.tomcat.to.host.sh",
 			$host->{host},
 			$host->{port},
 			$tomcatParent

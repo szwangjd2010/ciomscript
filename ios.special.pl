@@ -3,12 +3,12 @@ our $cloudId;
 our $appName;
 
 our $ciomUtil;
-our $CiomVcaHome;
+our $AppVcaHome;
 our $ApppkgPath;
 our $Pms;
 our $CiomData;
 
-my $SlaveVcaHome = "/Users/ciom/ciomws/$version/$cloudId/$appName";
+my $AppWorkspaceOnSlave = "/Users/ciom/ciomws/$version/$cloudId/$appName";
 my $appMainModuleName = getAppMainModuleName();
 my $xcodeTarget = $CiomData->{scm}->{repos}->[0]->{xcodeTarget};
 my $SshInfo = {
@@ -26,20 +26,20 @@ sub fillPms() {
 }
 
 sub resyncSourceCode() {
-	$ciomUtil->exec("$ENV{CIOM_HOME}/ciom/syncup.to.slave.sh $version $cloudId $appName osx");
+	$ciomUtil->exec("$ENV{CIOM_SCRIPT_HOME}/syncup.to.slave.sh $version $cloudId $appName osx");
 }
 
 sub build() {
 	resyncSourceCode();
 
 	#following all directory are remote directory
-	my $cmd2Workspace = "cd $SlaveVcaHome/$appMainModuleName";
+	my $cmd2Workspace = "cd $AppWorkspaceOnSlave/$appMainModuleName";
 	#fix issue - "User Interaction Is Not Allowed"
 	my $cmdUnlockKeychain = "security -v unlock-keychain -p pwdasdwx /Users/ciom/Library/Keychains/login.keychain";
 	#end
 	my $cmdBuild = "xcodebuild -target $xcodeTarget -configuration Distribution -sdk iphoneos build";
-	my $outAppDirectory = "$SlaveVcaHome/$appMainModuleName/build/Release-iphoneos/${xcodeTarget}.app";
-	my $ipaFile = "$SlaveVcaHome/$appMainModuleName/${xcodeTarget}.ipa";
+	my $outAppDirectory = "$AppWorkspaceOnSlave/$appMainModuleName/build/Release-iphoneos/${xcodeTarget}.app";
+	my $ipaFile = "$AppWorkspaceOnSlave/$appMainModuleName/${xcodeTarget}.ipa";
 	my $cmdPackage = "xcrun -sdk iphoneos PackageApplication -v $outAppDirectory -o $ipaFile";
 	
 	$SshInfo->{cmd} = "( $cmd2Workspace; $cmdUnlockKeychain; $cmdBuild; $cmdPackage )";

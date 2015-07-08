@@ -36,7 +36,7 @@ sub main() {
 	
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $host = $hosts->[$i];
-		system("$ENV{CIOM_HOME}/ciom/restart.tomcat.on.host.sh $host->{host} $host->{port} $host->{tomcatParent}");
+		system("$ENV{CIOM_SCRIPT_HOME}/restart.tomcat.on.host.sh $host->{host} $host->{port} $host->{tomcatParent}");
 	}
 }
 

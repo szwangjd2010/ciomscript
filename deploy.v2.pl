@@ -1,4 +1,4 @@
-#!/usr/bin/perl -W -I /opt/ciom/ciom
+#!/usr/bin/perl -W -I /opt/ciom/ciomscript
 # 
 #
 use strict;
@@ -28,7 +28,7 @@ sub leaveWorkspace() {
 }
 
 sub deploy() {
-	my $shDeploy2Host = "$ENV{CIOM_HOME}/ciom/deploy.app.to.host.with.multi.tomcats.sh";
+	my $shDeploy2Host = "$ENV{CIOM_SCRIPT_HOME}/deploy.app.to.host.with.multi.tomcats.sh";
 	
 	my $hosts = $Cloud->{hosts};
 	my $cnt = $#{$hosts} + 1;

@@ -3,7 +3,7 @@ our $cloudId;
 our $appName;
 
 our $ciomUtil;
-our $CiomVcaHome;
+our $AppVcaHome;
 our $ApppkgPath;
 our $Pms;
 our $CiomData;

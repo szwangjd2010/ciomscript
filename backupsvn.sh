@@ -2,7 +2,7 @@
 #
 #
 
-source $CIOM_HOME/ciom/ciom.util.sh
-source $CIOM_HOME/ciom/ciom.svn.util.sh
+source $CIOM_SCRIPT_HOME/ciom.util.sh
+source $CIOM_SCRIPT_HOME/ciom.svn.util.sh
 
 backup yxt

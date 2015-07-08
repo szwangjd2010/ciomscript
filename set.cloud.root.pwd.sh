@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-source $CIOM_HOME/ciom/ciom.util.sh
+source $CIOM_SCRIPT_HOME/ciom.util.sh
 
 if [ $# -lt 2 ]; then
 	echo "usage:"

@@ -7,8 +7,8 @@ instanceAmount=$2
 basePortDelta=$3
 shareWebapps=${4:-1}
 
-fileJavaOptsTpl=$CIOM_HOME/ciom/${5:-tomcat.catalina.java.opts.tpl}
-fileHttpListenTpl=$CIOM_HOME/ciom/${6:-tomcat.server.xml.http.section.tpl}
+fileJavaOptsTpl=$CIOM_SCRIPT_HOME/${5:-tomcat.catalina.java.opts.tpl}
+fileHttpListenTpl=$CIOM_SCRIPT_HOME/${6:-tomcat.server.xml.http.section.tpl}
 
 clean() {
 	rm -rf $TomcatSeed-*
@@ -26,7 +26,7 @@ modifyTomcatUsersXml() {
 	tomcatHome=$1
 	
 	fileUserSection="tomcat.users.section"
-	fileUserSectionTpl="$CIOM_HOME/ciom/tomcat.users.section.tpl"
+	fileUserSectionTpl="$CIOM_SCRIPT_HOME/tomcat.users.section.tpl"
 	/bin/cp -rf $fileUserSectionTpl $fileUserSection
 
 	user="admin"
@@ -71,7 +71,7 @@ createSharedWebapps() {
 modifyTomcatRealm() {
 	tomcatHome=$1
 	serverXml="$tomcatHome/conf/server.xml"
-	fileHostRealm="$CIOM_HOME/ciom/tomcat.server.xml.realm.tpl"
+	fileHostRealm="$CIOM_SCRIPT_HOME/tomcat.server.xml.realm.tpl"
 	sed -i "/unpackWARs=\"true\" autoDeploy=\"true\"/ r $fileHostRealm" $serverXml
 }
 

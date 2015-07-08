@@ -1,4 +1,4 @@
-#!/usr/bin/perl -I /opt/ciom/ciom
+#!/usr/bin/perl -I /opt/ciom/ciomscript
 use strict;
 use English;
 use Data::Dumper;

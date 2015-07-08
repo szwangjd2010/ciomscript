@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # example:
-# cd /tech/user/micro/backup && $CIOM_HOME/ciom/importdb.sh nest 222.92.116.85 3308 root 'Juziwl!@#' 20141206
+# cd /tech/user/micro/backup && $CIOM_SCRIPT_HOME/importdb.sh nest 222.92.116.85 3308 root 'Juziwl!@#' 20141206
 
 dbName=$1
 dbHost=$2

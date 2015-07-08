@@ -1,4 +1,4 @@
-#!/usr/bin/perl -W -I /opt/ciom/ciom
+#!/usr/bin/perl -W -I /opt/ciom/ciomscript
 # 
 # add this for windows scp, 
 # cause windows ssh client scp speed is very slow
