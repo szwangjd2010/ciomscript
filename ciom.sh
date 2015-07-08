@@ -1,5 +1,5 @@
 export CIOM_HOME="/opt/ciom"
 export CIOM_SCRIPT_HOME="$CIOM_HOME/ciomscript"
 export CIOM_VCA_HOME="$CIOM_HOME/ciomvca"
-export CIOM_SLAVE_WIN_WORKSPACE="$CIOM_HOME/ciom.slave.win"
-export CIOM_SLAVE_OSX_WORKSPACE="$CIOM_HOME/ciom.slave.osx"
+export CIOM_SLAVE_WIN_WORKSPACE="$CIOM_HOME/ciom.slave.win.workspace"
+export CIOM_SLAVE_OSX_WORKSPACE="$CIOM_HOME/ciom.slave.osx.workspace"

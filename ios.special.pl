@@ -59,7 +59,7 @@ sub moveApppkgFile($) {
 	#/bin/cp: skipping file `WebSchool/eschool.ipa', as it was replaced while being copied
 	$ciomUtil->exec("sleep 5");
 	my $appFinalPkgName = getAppFinalPkgName($code);
-	my $orgIpaFile = "$ENV{CIOM_HOME}/ci.slave.osx/$version/$cloudId/$appName/$appMainModuleName/${xcodeTarget}.ipa";
+	my $orgIpaFile = "$ENV{CIOM_SLAVE_OSX_WORKSPACE}/$version/$cloudId/$appName/$appMainModuleName/${xcodeTarget}.ipa";
 	$ciomUtil->exec("mv $orgIpaFile $ApppkgPath/$appFinalPkgName");
 }
 
