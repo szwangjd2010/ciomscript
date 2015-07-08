@@ -15,12 +15,14 @@ function getProjectBuildOutputPath($str) {
 
 function getPackages() {
 	mkdir "$sourcePath\packages"
-	foreach ($item in $CIOM.packageConfigManifest) {
+	$arrayPackagesConfig = getPackagesConfigListBySolutionManifest
+	$arrayPackagesConfig += $CIOM.extraPackagesConfigList
+	foreach ($item in $arrayPackagesConfig) {
 		exec("NuGet install '$sourcePath\$item' -OutputDirectory '$sourcePath\packages'")
 	}
 }
 
-function getPackageConfigList() {
+function getPackagesConfigListBySolutionManifest() {
 	$arrayPackagesConfig = @()
 	foreach ($item in $CIOM.solutionManifest) {
 		if ($item.endswith(".sln")) {
