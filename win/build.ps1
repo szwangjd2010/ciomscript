@@ -29,13 +29,11 @@ function getPackagesConfigListBySolutionManifest() {
 			continue
 		}
 
-		$packgesConfigFile = ""
-		if ($item.indexOf("\") -eq -1) {
-			$packgesConfigFile = "packages.config"
-		} else {
-			$packgesConfigFile = $item.substring(0, $item.LastIndexOf("\")) + "\packages.config"
+		$packgesConfigFilePath = ""
+		if ($item.indexOf("\") -ne -1) {
+			$packgesConfigFilePath = $item.substring(0, $item.LastIndexOf("\") + 1)
 		}
-		$arrayPackagesConfig += $packgesConfigFile
+		$arrayPackagesConfig += $packgesConfigFilePath + "packages.config"
 	}
 
 	return $arrayPackagesConfig	
