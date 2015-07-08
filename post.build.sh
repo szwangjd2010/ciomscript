@@ -12,7 +12,7 @@ version=${3:-v1}
 
 AppPackageFile="$appName.war"
 Adworkspace="$WORKSPACE/$appName/target"
-CnfLocation="$CIOM_HOME/ciomvca/$version/post/$deployToEnv"
+CnfLocation="$CIOM_VCA_HOME/$version/post/$deployToEnv"
 
 enterWorkspace() {
 	execCmd "cd $Adworkspace"

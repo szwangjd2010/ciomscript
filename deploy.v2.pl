@@ -15,7 +15,7 @@ my $asRoot = $ARGV[3] || 'NotAsRoot';
 my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
 
-my $AppCiomFile="$ENV{CIOM_HOME}/ciomvca/$version/pre/$cloudId/$appName.ciom";
+my $AppCiomFile="$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName.ciom";
 require $AppCiomFile;
 our $Cloud;
 

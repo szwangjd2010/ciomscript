@@ -12,7 +12,7 @@ my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
 
 my $ciomUtil = new CiomUtil(1);
-my $AppVcaHome="$ENV{CIOM_HOME}/ciomvca/$version/pre/$cloudId/$appName";
+my $AppVcaHome="$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
 
 sub main() {
 	chdir($AppVcaHome);
