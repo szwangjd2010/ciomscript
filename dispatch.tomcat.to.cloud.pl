@@ -1,7 +1,7 @@
-#!/usr/bin/perl -W -I /opt/ciom/ciomscript
+#!/usr/bin/perl -W
 # 
 #
-
+use lib "$ENV{CIOM_SCRIPT_HOME}";
 use strict;
 use English;
 use Data::Dumper;
