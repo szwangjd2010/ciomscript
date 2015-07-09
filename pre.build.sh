@@ -1,6 +1,7 @@
 #!/bin/bash
 # 
 #
+
 source $CIOM_SCRIPT_HOME/ciom.util.sh
 if [ "$JENKINS_HOME" == "" ]; then
 	simulateJenkinsContainer
