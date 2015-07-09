@@ -190,7 +190,8 @@ sub iterateOrgsAndBuildEligibles() {
 
 sub getOrgCodesWhichNeedToBuild() {
 	if ($orgCodes eq '*') {
-		$orgCodesWhichNeedToBuild = \(keys %{$CiomData->{orgs}});
+		my @orgsKeys = keys %{$CiomData->{orgs}};
+		$orgCodesWhichNeedToBuild = \@orgsKeys;
 		return;
 	}
 
@@ -206,13 +207,18 @@ sub validateInputOrgCodes() {
 	return $#{$orgCodesWhichNeedToBuild} >= 0;
 }
 
+sub outputOrgCodesWhichNeedToBuild() {
+	$ciomUtil->log(Dumper($orgCodesWhichNeedToBuild));
+}
+
 sub main() {
 	getOrgCodesWhichNeedToBuild();
 	if (!validateInputOrgCodes()) {
 		$ciomUtil->log("\n\nbuild error: org code \"$orgCodes\" does not exists!\n\n");
 		return 1;
 	}
-
+	outputOrgCodesWhichNeedToBuild();
+	
 	doPlatformDependencyInjection();
 	enterWorkspace();
 	makeApppkgDirectory();
