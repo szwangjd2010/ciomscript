@@ -2,14 +2,8 @@
 	"appName": "yxtweb",
 	"siteName": "yxtweb",
 	
-	"packageConfigManifest": [
-		"YXT.Core\\packages.config",
-		"Web\\packages.config",
-		"Web\\Applications\\YXT.Demo\\packages.config",
-		"Web\\Applications\\YXT.Group\\packages.config",
-		"Web\\Applications\\YXT.Home\\packages.config",
-		"Web\\Applications\\YXT.Kng\\packages.config",
-		"Web\\Applications\\YXT.Study\\packages.config"
+	"extraPackagesConfigList": [
+		"YXT.Core\\packages.config"
 	],
 
 	"solutionManifest": [
