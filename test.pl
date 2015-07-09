@@ -5,15 +5,14 @@ use Data::Dumper;
 use Data::UUID;
 my $ug = Data::UUID->new();	
 
-my $b = "| grep '^?' | awk '{print \$2}' | xargs -I{} rm -rf '{}'";
-my $suffix = "_android_#code#"; 
-my $code = "1smart";
-$suffix =~ s|#code#|$code|;
+my $aa = {
+	"k1" => 1,
+	"k2" => 2
+};
 
-my $var = [1, 2];
-$var="111";
-if(ref($var) eq 'ARRAY') {
-	print "array";
-} else {
-	print "not array";
-}
+my @b = (keys %{$aa});
+print Dumper(\@b);
+
+
+my $c=[];
+print $#{[]};

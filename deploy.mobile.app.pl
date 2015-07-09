@@ -26,6 +26,7 @@ our $CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
 
 my $ShellStreamedit = "_streamedit.ciom";
 my $OldPwd = getcwd();
+my $orgCodesWhichNeedToBuild = [];
 
 sub getAppMainModuleName() {
 	return $CiomData->{scm}->{repos}->[0]->{name};
@@ -174,22 +175,44 @@ sub outputApppkgUrl() {
 }
 
 sub iterateOrgsAndBuildEligibles() {
-	my $orgs = $CiomData->{orgs};
-	for my $code (keys %{$orgs}) {
-		my $re = '(^|,)' . $code . '($|,)';
-		if ($orgCodes eq '*' || $orgCodes =~ m/$re/) {
-			revertCode();
-			replaceOrgCustomizedFiles($code);
-			streameditConfs4AllOrgs();
-			streameditConfs4Org($code);
-			build();
-			moveApppkgFile($code);
-			cleanAfterOrgBuild();
-		}
+	my $cnt = $#{$orgCodesWhichNeedToBuild} + 1;
+	for (my $i = 0; $i < $cnt; $i++) {
+		my $code = $orgCodesWhichNeedToBuild->[$i];
+		revertCode();
+		replaceOrgCustomizedFiles($code);
+		streameditConfs4AllOrgs();
+		streameditConfs4Org($code);
+		build();
+		moveApppkgFile($code);
+		cleanAfterOrgBuild();
 	}	
 }
 
+sub getOrgCodesWhichNeedToBuild() {
+	if ($orgCodes eq '*') {
+		$orgCodesWhichNeedToBuild = \(keys %{$CiomData->{orgs}});
+		return;
+	}
+
+	for my $code (keys %{$CiomData->{orgs}}) {
+		my $re = '(^|,)' . $code . '($|,)';
+		if ($orgCodes =~ m/$re/) {
+			push(@{$orgCodesWhichNeedToBuild}, $code);
+		}
+	}
+}
+
+sub validateInputOrgCodes() {
+	return $#{$orgCodesWhichNeedToBuild} >= 0;
+}
+
 sub main() {
+	getOrgCodesWhichNeedToBuild();
+	if (!validateInputOrgCodes()) {
+		$ciomUtil->log("\n\nbuild error: org code \"$orgCodes\" does not exists!\n\n");
+		return 1;
+	}
+
 	doPlatformDependencyInjection();
 	enterWorkspace();
 	makeApppkgDirectory();
