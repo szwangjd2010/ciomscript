@@ -14,11 +14,13 @@ function getWebProjectBuildOutputPath($str) {
 }
 
 function getPackages() {
-	mkdir "$sourcePath\packages"
+	$packagesLocation = "$sourcePath\packages"
+	mkdirIfNotExist "$packagesLocation"
+
 	$arrayPackagesConfig = getPackagesConfigListBySolutionManifest
 	$arrayPackagesConfig += $CIOM.extraPackagesConfigList
 	foreach ($item in $arrayPackagesConfig) {
-		exec("NuGet install '$sourcePath\$item' -OutputDirectory '$sourcePath\packages'")
+		exec("NuGet install '$sourcePath\$item' -OutputDirectory '$packagesLocation'")
 	}
 }
 
@@ -54,10 +56,7 @@ function package() {
 }
 
 function mkdirBuildout() {
-	$buildoutDir = getVerEnvBuildPath
-	if (!(Test-Path -Path $buildoutDir )){
-	    New-Item -ItemType directory -Path $buildoutDir
-	}	
+	mkdirIfNotExist $(getVerEnvBuildPath)
 }
 
 function build() {

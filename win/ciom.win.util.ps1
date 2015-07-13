@@ -65,3 +65,9 @@ function getTimestamp() {
 function getDatestamp() {
 	return Get-Date -Format 'yyyyMMdd'
 }
+
+function mkdirIfNotExist($directory) {
+	if (!(Test-Path -Path $directory)) {
+	    New-Item -ItemType directory -Path $directory
+	}	
+}
