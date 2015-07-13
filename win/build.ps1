@@ -74,12 +74,13 @@ function build() {
 }
 
 function clean() {
-	exec("remove-item '$targetPath\*' -recurse -force")
-	exec("remove-item '$packageFile' -force")
+	cleanDirectory "$targetPath"
 
-	exec("remove-item '$CommonLogFile' -force")
-	exec("remove-item '$ErrorLogFile' -force")
-	exec("remove-item '$WarningLogFile' -force")
+	rmFile "$packageFile"
+
+	rmFile "$CommonLogFile"
+	rmFile "$ErrorLogFile"
+	rmFile "$WarningLogFile"
 }
 
 function getBuildLogCF() {

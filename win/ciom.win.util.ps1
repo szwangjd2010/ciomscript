@@ -71,3 +71,15 @@ function mkdirIfNotExist($directory) {
 	    New-Item -ItemType directory -Path $directory
 	}	
 }
+
+function cleanDirectory($path) {
+	if (Test-Path $path) {
+	    remove-item "$path\*" -recurse -force
+	}	
+}
+
+function rmFile($path) {
+	if (Test-Path $path) {
+	    remove-item "$path" -recurse -force
+	}	
+}
