@@ -43,13 +43,14 @@ sub installJdk($) {
 		cmd => "rpm -ivh /root/$rpmfile"
 	});
 
-	$ciomUtil->exec("scp ./jdk/$ver/local_policy.jar $securityLocation");
-	$ciomUtil->exec("scp ./jdk/$ver/US_export_policy.jar $securityLocation");
+	$ciomUtil->exec("scp ./jdk/$ver/local_policy.jar $host:/$securityLocation");
+	$ciomUtil->exec("scp ./jdk/$ver/US_export_policy.jar $host:/$securityLocation");
+	$ciomUtil->exec("scp ./jdk.sh $host:/etc/profile.d/");
 }
 
 sub main() {
-	setMaxOpenFile();
-	#installJdk('1.7');
+	#setMaxOpenFile();
+	installJdk('1.7');
 }
 
 main();
