@@ -17,18 +17,24 @@ my $slaves = [
 	'172.17.128.215',
 	'172.17.128.216'
 ];
-my $hadoopConfDir = '/opt/hadoop-2.7.1';
-my $ciomUtil = new CiomUtil(1);
+
+my $hadoopConfDir = '/opt/hadoop-2.7.1/etc/hadoop';
+my $sparkConfDir = '/opt/spark-1.4.0-bin-hadoop2.6/conf';
+my $ciomUtil = new CiomUtil($ARGV[0] || 0);
 
 sub main() {
 	my $cnt = $#{$slaves} + 1;
 	for (my $i = 0; $i < $cnt; $i++) {
-		$ciomUtil->remoteExec(
-			$master,
-			22,
-			'root',
-			"rsync $hadoopConfDir/* $slaves->[$i]:$hadoopConfDir/"
-		);
+		my $slave = $slaves->[$i];
+		$ciomUtil->remoteExec({
+			host => $master,
+			cmd => [
+				"rsync /etc/profile.d/hadoop.sh $slave:/etc/profile.d/hadoop.sh",
+				"rsync /etc/profile.d/spark.sh $slave:/etc/profile.d/spark.sh",
+				"rsync $hadoopConfDir/* $slave:$hadoopConfDir/",
+				"rsync $sparkConfDir/* $slave:$sparkConfDir/"			
+			]
+		});
 	}
 }
 
