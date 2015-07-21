@@ -1,7 +1,7 @@
 CIOM
 Automation framework for Continuous Integration & Operation Maintenance 
 
-support:
+support following:
 linux + j2ee
 win + .net
 ios
