@@ -138,11 +138,13 @@ dump() {
 }
 
 dumpMaster() {
-	dump $Ciom_Mysql_Master 3306 $Ciom_Mysql_User $Ciom_Mysql_Password exiaoxin
+	db=$1
+	dump $Ciom_Mysql_Master 3306 $Ciom_Mysql_User $Ciom_Mysql_Password $db
 }
 
 import2Slaves() {
-	fileDumpout=$(getDumpoutFile exiaoxin)
+	db=$1
+	fileDumpout=$(getDumpoutFile $db)
 	for slave in $Ciom_Mysql_Slaves; do
 		import $slave 3306 $Ciom_Mysql_User $Ciom_Mysql_Password $fileDumpout
 	done
