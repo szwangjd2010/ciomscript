@@ -1,4 +1,4 @@
-$CiomWorkspace = "C:\ciom.workspace"
+$CiomWorkspace = "$ENV:CIOM_WIN_WORKSPACE"
 
 function getVerEnvPath() {
 	return "$CiomWorkspace\$ver\$env"

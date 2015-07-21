@@ -1,6 +1,6 @@
 param($ver, $env, $appName)
-. c:\ciom\win\ciom.win.ver.env.util.ps1
-. c:\ciom\win\ciom.win.util.ps1
+. $ENV:CIOM_SCRIPT_HOME\win\ciom.win.ver.env.util.ps1
+. $ENV:CIOM_SCRIPT_HOME\win\ciom.win.util.ps1
 
 $CIOM = getAppCiomJson
 $siteName = $CIOM.siteName
@@ -27,13 +27,13 @@ function deployUsingWinRM($ip, $username, $password, $app3wPath) {
 	
 	invoke-command `
 	-comp $ip `
-	-FilePath "c:\ciom\win\do.deploy.on.host.ps1" `
+	-FilePath "$ENV:CIOM_SCRIPT_HOME\win\do.deploy.on.host.ps1" `
 	-argumentlist $timestamp, $appName, $siteName, $app3wPath `
 	-Credential $cred
 }
 
 function deployUsingSSH($ip, $port, $username, $password, $app3wPath) {
-	upload $port "c:\ciom\win\do.deploy.on.host.ps1" "${ip}:/c:/" $username "$password"
+	upload $port "$ENV:CIOM_SCRIPT_HOME\win\do.deploy.on.host.ps1" "${ip}:/c:/" $username "$password"
 	
 	$argus = "-timestamp $timestamp -appName $appName -siteName $siteName -app3wPath $app3wPath"
 	remoteExec $ip $port $username "$password" "powershell.exe -file c:\do.deploy.on.host.ps1 $argus"

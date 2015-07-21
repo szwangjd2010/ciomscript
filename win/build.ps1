@@ -1,7 +1,6 @@
 param($ver, $env, $appName)
-. c:\ciom\win\ciom.win.ver.env.util.ps1
-. c:\ciom\win\ciom.win.util.ps1
-
+. $ENV:CIOM_SCRIPT_HOME\win\ciom.win.ver.env.util.ps1
+. $ENV:CIOM_SCRIPT_HOME\win\ciom.win.util.ps1
 
 function getWebProjectBuildOutputPath($str) {
 	if ($str.indexof("\Applications\") -eq -1) {
