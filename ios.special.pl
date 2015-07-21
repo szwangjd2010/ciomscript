@@ -35,7 +35,7 @@ sub build() {
 	#following all directory are remote directory
 	my $cmd2Workspace = "cd $AppWorkspaceOnSlave/$appMainModuleName";
 	#fix issue - "User Interaction Is Not Allowed"
-	my $cmdUnlockKeychain = "security -v unlock-keychain -p pwdasdwx1 /Users/ciom/Library/Keychains/login.keychain";
+	my $cmdUnlockKeychain = "security -v unlock-keychain -p pwdasdwx /Users/ciom/Library/Keychains/login.keychain";
 	#end
 	my $cmdBuild = "xcodebuild -target $xcodeTarget -configuration Distribution -sdk iphoneos build";
 	my $outAppDirectory = "$AppWorkspaceOnSlave/$appMainModuleName/build/Release-iphoneos/${xcodeTarget}.app";
