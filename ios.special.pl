@@ -69,6 +69,6 @@ sub cleanAfterOrgBuild() {
 
 sub getBuildError() {
 	my $logFile = getBuildLogFile();
-	my $buildFailedCnt = $ciomUtil->execWithReturn("grep -c 'BUILD FAILED' $logFile");
-	return 0;	
+	my $buildFailedCnt = $ciomUtil->execWithReturn("grep -c 'with exit code 1' $logFile");
+	return $buildFailedCnt - 1;	
 }
