@@ -2,7 +2,7 @@
 import pika
 
 credentials = pika.PlainCredentials('yxt', '8cc3fbeea7a8ec58f550f2eb31ec8a071e1ae077971a7a470f7e36f8f4ba8437')
-parameters = pika.ConnectionParameters('10.10.106.125',
+parameters = pika.ConnectionParameters('10.10.69.218',
                                        5672,
                                        '/',
                                        credentials)
