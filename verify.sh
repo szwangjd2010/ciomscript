@@ -1,7 +1,7 @@
 #!/bin/bash
 # 
 #
-if [ "$CiomPassphrase" == "YXTduang2015" ]; then
+if [ "$CiomPassphrase" == "prestableV2" ]; then
 	exit 0
 fi
 

@@ -18,8 +18,8 @@ my $AppVcaHome="$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
 
 sub main() {
 	chdir($AppVcaHome);
-	$ciomUtil->exec("svn revert -R *");
-	$ciomUtil->exec("svn update");
+	#$ciomUtil->exec("svn revert -R *");
+	$ciomUtil->exec("svn --no-auth-cache --username lile --password 'P\@ss!23' update");
 }
 
 main();
