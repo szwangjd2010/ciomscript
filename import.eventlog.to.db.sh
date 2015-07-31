@@ -23,7 +23,7 @@ logInfo() {
 }
 
 main() {
-	for eventlogFile in $(find /opt/ws/tomcat[678]-[1-9]/logs -name event.$logFileYMD.log); do
+	for eventlogFile in $(find /data/ws/tomcat[678]-[1-9]/logs -name event.$logFileYMD.log); do
 		instanceSQLTpl
 		execSQLFile 10.10.73.166 3306 yxt pwdasdwx load.eventlog.to.db.sql yxtlog
 		logInfo

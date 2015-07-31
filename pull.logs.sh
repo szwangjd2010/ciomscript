@@ -4,8 +4,11 @@
 dayAgo=${1:-1}
 logFileYMD=$(date -d "$dayAgo days ago" +%04Y%02m%02d)
 
-AdminapiHosts="10.10.74.158"
-ApiHosts="10.10.73.235 10.10.76.73 10.10.75.138"
+LecaiApiHosts="10.10.73.235 10.10.76.73 10.10.75.138"
+LecaiAdminapiHosts="10.10.74.158"
+MallApiHosts="10.10.110.226"
+MallAdminapiHosts="10.10.74.158"
+ComponentapiHost="10.10.105.125"
 
 pullLog() {
 	hosts=$1
@@ -32,21 +35,31 @@ mergeLog() {
 	done
 }
 
+getComponentLocalLogLocation() {
+	componentName=$1
+	echo -n "/usr/share/nginx/html/ciompub/$componentName/$logFileYMD"
+}
+
+handleComponentLog() {
+	hosts=$1
+	tomcatParent=$2
+	componentName=$3
+
+	localLogLocation=$(getComponentLocalLogLocation $componentName)
+
+	mkdir -p $localLogLocation
+	pullLog "$hosts" "$tomcatParent" "$localLogLocation"
+	mergeLog "$hosts" "$localLogLocation"
+}
+
 main() {
-	svrAdminTomcatParent="/opt/ws1/"
-	svrApiTomcatParent="/opt/ws/"
-	
-	localAdminapiLogLocation=/usr/share/nginx/html/ciompub/lecai/adminapi/$logFileYMD
-	localApiLogLocation=/usr/share/nginx/html/ciompub/lecai/api/$logFileYMD
+	handleComponentLog "$LecaiApiHosts" 		/data/ws 	lecai.api
+	handleComponentLog "$LecaiAdminapiHosts" 	/data/ws-1 	lecai.adminapi
 
-	mkdir -p $localAdminapiLogLocation
-	mkdir -p $localApiLogLocation
+	handleComponentLog "$MallApiHosts" 			/data 		mall.api
+	handleComponentLog "$MallAdminapiHosts" 	/data/ws-4 	mall.adminapi
 
-	pullLog "$AdminapiHosts" "$svrAdminTomcatParent" "$localAdminapiLogLocation"
-	pullLog "$ApiHosts" "$svrApiTomcatParent" "$localApiLogLocation"
-	
-	mergeLog "$AdminapiHosts" "$localAdminapiLogLocation"
-	mergeLog "$ApiHosts" "$localApiLogLocation"	
+	handleComponentLog "$ComponentapiHost" 		/data 		component.api
 }
 
 main
