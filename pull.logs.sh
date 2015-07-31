@@ -8,7 +8,7 @@ LecaiApiHosts="10.10.73.235 10.10.76.73 10.10.75.138"
 LecaiAdminapiHosts="10.10.74.158"
 MallApiHosts="10.10.110.226"
 MallAdminapiHosts="10.10.74.158"
-ComponentapiHost="10.10.105.125"
+ComponentapiHost="10.10.106.125"
 
 pullLog() {
 	hosts=$1
@@ -16,7 +16,7 @@ pullLog() {
 	localLogLocation=$3
 	
 	for host in $hosts; do
-		ssh root@$host "cd $svrTomcatParent; tar -cjvf /data/tmp/$host.tomcat.logs.bz2 "'$(find tomcat7-[1-4] -regextype posix-extended -regex '"'"'.*/(debug|error|info|event)\.'"$logFileYMD""\.log')"
+		ssh root@$host "cd $svrTomcatParent; tar -cjvf /data/tmp/$host.tomcat.logs.bz2 "'$(find -regextype posix-extended -regex '"'"'.*/(debug|error|info|event)\.'"$logFileYMD""\.log')"
 		
 		localHostLogLocation=$localLogLocation/$host
 		mkdir -p $localHostLogLocation
