@@ -2,7 +2,7 @@
 # 
 
 RUN_MODE=1
-LOG=/tmp/_ciom.log
+LOG=$CIOM_LOG_FILE
 
 setMode() {
 	RUN_MODE=$1

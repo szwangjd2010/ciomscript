@@ -11,7 +11,7 @@ sub new() {
 	
 	my $self = {
 		RunMode => $runMode,
-		Log => '/tmp/_ciom.log',
+		Log => $ENV{CIOM_LOG_FILE},
 		DebugHost => '192.168.0.125',
 		DebugPort => '22'
 	};
