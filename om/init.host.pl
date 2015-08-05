@@ -49,7 +49,7 @@ sub installJdk($) {
 }
 
 sub main() {
-	#setMaxOpenFile();
+	setMaxOpenFile();
 	installJdk('1.7');
 }
 

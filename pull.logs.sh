@@ -16,7 +16,7 @@ pullLog() {
 	localLogLocation=$3
 	
 	for host in $hosts; do
-		ssh root@$host "cd $svrTomcatParent; tar -cjvf /data/tmp/$host.tomcat.logs.bz2 "'$(find -regextype posix-extended -regex '"'"'.*/(debug|error|info|event)\.'"$logFileYMD""\.log')"
+		ssh root@$host "cd $svrTomcatParent; mkdir -p /data/tmp; tar -cjvf /data/tmp/$host.tomcat.logs.bz2 "'$(find -regextype posix-extended -regex '"'"'.*/(debug|error|info|event)\.'"$logFileYMD""\.log')"
 		
 		localHostLogLocation=$localLogLocation/$host
 		mkdir -p $localHostLogLocation
