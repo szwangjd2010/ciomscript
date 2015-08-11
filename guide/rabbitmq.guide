@@ -2,6 +2,7 @@
 https://www.rabbitmq.com/install-rpm.html
 
 
+service rabbitmq-server start
 
 rabbitmqctl add_user admin pwdasdwx
 rabbitmqctl set_user_tags admin administrator
@@ -9,7 +10,7 @@ rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
 
 
 rabbitmq-plugins enable rabbitmq_management
-
+service rabbitmq-server restart
 
 
 The web UI is located at: http://server-name:15672/

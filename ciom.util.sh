@@ -53,12 +53,13 @@ startTomcats() {
 	host=$1
 	port=$2
 	tomcatParent=$3
+	inteval=${4:-30}
 	execRemoteCmd $host $port "find -L $tomcatParent -maxdepth 1 -type d -regextype posix-extended -regex '.*/tomcat[678]-[1-9]' | sort > /opt/_ciom_tomcats"
 	download $host $port "/opt/_ciom_tomcats" "."
 	for tomcat in $(cat _ciom_tomcats); do
 		#execRemoteCmd $host $port "export JRE_HOME='/usr/java/jdk1.7.0_76'; $tomcat/bin/startup.sh"
 		execRemoteCmd $host $port "$tomcat/bin/startup.sh"
-		sleep 30
+		sleep $inteval
 	done
 }
 

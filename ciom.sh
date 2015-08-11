@@ -1,6 +1,8 @@
 export CIOM_HOME="/opt/ciom"
 export CIOM_SCRIPT_HOME="$CIOM_HOME/ciomscript"
 export CIOM_VCA_HOME="$CIOM_HOME/ciomvca"
+export CIOM_REPOS_HOME="$CIOM_HOME/ciomrepos"
+export CIOM_CLI_WORKSPACE="$CIOM_HOME/ciom.cli.workspace"
 export CIOM_SLAVE_WIN_WORKSPACE="$CIOM_HOME/ciom.slave.win.workspace"
 export CIOM_SLAVE_OSX_WORKSPACE="$CIOM_HOME/ciom.slave.osx.workspace"
 export CIOM_LOG_FILE="/var/log/ciom.log"

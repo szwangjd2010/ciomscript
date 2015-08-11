@@ -1,7 +1,6 @@
 #!/bin/bash
 # 
 #
-
 TomcatSeed=$1
 instanceAmount=$2
 basePortDelta=$3
@@ -9,6 +8,15 @@ shareWebapps=${4:-1}
 
 fileJavaOptsTpl=$CIOM_SCRIPT_HOME/${5:-tomcat.catalina.java.opts.tpl}
 fileHttpListenTpl=$CIOM_SCRIPT_HOME/${6:-tomcat.server.xml.http.section.tpl}
+oldPwd=$(pwd)
+
+enterWorkspace() {
+	cd $CIOM_CLI_WORKSPACE
+}
+
+leaveWorkspace() {
+	cd $oldPwd
+}
 
 clean() {
 	rm -rf $TomcatSeed-*
@@ -19,7 +27,7 @@ clean() {
 }
 
 cloneSeed() {
-	cp -r $TomcatSeed.seed $TomcatSeed
+	cp -r $CIOM_REPOS_HOME/$TomcatSeed.seed $TomcatSeed
 }
 
 modifyTomcatUsersXml() {
@@ -124,6 +132,7 @@ duplicateTomcat() {
 }
 
 main() {
+	enterWorkspace
 	clean
 	cloneSeed
 
@@ -134,6 +143,7 @@ main() {
 
 	duplicateTomcat
 	packageTomcats
+	leaveWorkspace
 }
 
 main

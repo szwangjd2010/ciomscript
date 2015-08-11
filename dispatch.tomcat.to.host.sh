@@ -10,6 +10,15 @@ host=$1
 port=$2
 tomcatParent=$3
 
+oldPwd=$(pwd)
+enterWorkspace() {
+	cd $CIOM_CLI_WORKSPACE
+}
+
+leaveWorkspace() {
+	cd $oldPwd
+}
+
 createTomcatParent() {
 	execRemoteCmd $host $port "mkdir -p $tomcatParent"
 }
@@ -27,12 +36,14 @@ cleanTomcats(){
 }
 
 main() {
+	enterWorkspace
 	createTomcatParent
 	stopTomcats $host $port $tomcatParent
 	cleanTomcats
 	uploadTomcats
 	extractTomcats
-	startTomcats $host $port $tomcatParent
+	startTomcats $host $port $tomcatParent 3
+	leaveWorkspace
 }
 
 main
