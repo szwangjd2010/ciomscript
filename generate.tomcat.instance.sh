@@ -27,7 +27,7 @@ clean() {
 }
 
 cloneSeed() {
-	cp -r $CIOM_REPOS_HOME/$TomcatSeed.seed $TomcatSeed
+	tar -xjvf $CIOM_REPOS_HOME/$TomcatSeed.seed.bz2
 }
 
 modifyTomcatUsersXml() {
