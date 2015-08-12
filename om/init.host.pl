@@ -37,15 +37,15 @@ sub installJdk($) {
 
 	my $rpmfile = $JdkInfo->{$ver}->{rpmfile};
 	my $securityLocation = $JdkInfo->{$ver}->{securityLocation};
-	$ciomUtil->exec("scp ./jdk/$rpmfile $host:/root/");
+	$ciomUtil->exec("scp $ENV{CIOM_REPOS_HOME}/$rpmfile $host:/root/");
 	$ciomUtil->remoteExec({
 		host => $host,
 		cmd => "rpm -ivh /root/$rpmfile"
 	});
 
-	$ciomUtil->exec("scp ./jdk/$ver/local_policy.jar $host:/$securityLocation");
-	$ciomUtil->exec("scp ./jdk/$ver/US_export_policy.jar $host:/$securityLocation");
-	$ciomUtil->exec("scp ./jdk.sh $host:/etc/profile.d/");
+	$ciomUtil->exec("scp $ENV{CIOM_REPOS_HOME}/jdk.patch/$ver/local_policy.jar $host:/$securityLocation");
+	$ciomUtil->exec("scp $ENV{CIOM_REPOS_HOME}/jdk.patch/$ver/US_export_policy.jar $host:/$securityLocation");
+	$ciomUtil->exec("scp $ENV{CIOM_REPOS_HOME}/jdk.sh $host:/etc/profile.d/");
 }
 
 sub main() {
