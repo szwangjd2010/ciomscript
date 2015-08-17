@@ -10,6 +10,7 @@ use CiomUtil;
 
 my $host = $ARGV[0];
 my $port = $ARGV[1] || 22;
+my $jdkver = $ARGV[2] || '1.7';
 my $MAX_OPEN_FILES = 102400;
 
 my $ciomUtil = new CiomUtil(1);
@@ -50,7 +51,7 @@ sub installJdk($) {
 
 sub main() {
 	setMaxOpenFile();
-	installJdk('1.7');
+	installJdk();
 }
 
 main();
