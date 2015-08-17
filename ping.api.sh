@@ -19,4 +19,7 @@ while [ True ]; do
 			pingapi $host $port
 		done
 	done
+
+	echo ---------------------------------------------------------
+	sleep 2
 done
