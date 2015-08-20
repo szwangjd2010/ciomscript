@@ -20,6 +20,7 @@ my $slaves = [
 
 my $hadoopConfDir = '/opt/hadoop-2.7.1/etc/hadoop';
 my $sparkConfDir = '/opt/spark-1.4.0-bin-hadoop2.6/conf';
+my $zooKeeperHome = '/opt/zookeeper-3.4.6';
 my $ciomUtil = new CiomUtil($ARGV[0] || 0);
 
 sub main() {
@@ -29,10 +30,11 @@ sub main() {
 		$ciomUtil->remoteExec({
 			host => $master,
 			cmd => [
-				"rsync /etc/profile.d/hadoop.sh $slave:/etc/profile.d/hadoop.sh",
-				"rsync /etc/profile.d/spark.sh $slave:/etc/profile.d/spark.sh",
-				"rsync $hadoopConfDir/* $slave:$hadoopConfDir/",
-				"rsync $sparkConfDir/* $slave:$sparkConfDir/"			
+				"rsync -az /etc/profile.d/hadoop.sh $slave:/etc/profile.d/hadoop.sh",
+				"rsync -az /etc/profile.d/spark.sh $slave:/etc/profile.d/spark.sh",
+				"rsync -az $hadoopConfDir/* $slave:$hadoopConfDir/",
+				"rsync -az $sparkConfDir/* $slave:$sparkConfDir/",			
+				"rsync -az $zooKeeperHome $slave:/opt/"
 			]
 		});
 	}

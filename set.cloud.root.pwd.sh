@@ -9,13 +9,18 @@ if [ $# -lt 2 ]; then
 	exit 0
 fi
 
-runMode=${3:-0}
-setMode $runMode
-
 cloudId=$1
 password=$2
-sha256Password=$(echo -n $(echo -n $password | sha256sum | awk {'print $1'}))
-cmdSetRootPwd="echo -n $sha256Password | passwd --stdin root"
+hashPwd=${3:-1}
+runMode=${4:-0}
+
+setMode $runMode
+
+if [ $hashPwd == "1" ]; then
+	password=$(echo -n $(echo -n $password | sha256sum | awk {'print $1'}))	
+fi
+
+cmdSetRootPwd="echo -n $password | passwd --stdin root"
 
 for host in $(cat "$cloudId.hosts"); do
 	execRemoteCmd $host 22 "$cmdSetRootPwd"

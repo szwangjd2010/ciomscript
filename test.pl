@@ -9,16 +9,6 @@ use Data::UUID;
 use CiomUtil;
 my $ug = Data::UUID->new();	
 
-my $aa = {
-	"k1" => 1,
-	"k2" => 2
-};
-
-my $ciomUtil = new CiomUtil(0);
-$ciomUtil->log("aaaaaaaaaaaaaaaaaaa");
-my @b = (keys %{$aa});
-print Dumper(\@b);
-
-
-my $c=[];
-print $#{[]};
+my $api = "/v1/industries/0/positionfunctions/3e74bb02-4e9d-4b50-a696-856a59cd2b78/positions";
+$api =~ s/[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}/#uuid#/g;
+print $api;
