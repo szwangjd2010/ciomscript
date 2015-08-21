@@ -2,6 +2,7 @@
 #
 
 dayAgo=${1:-1}
+logLevels=${2:-debug error info event time}
 logFileYMD=$(date -d "$dayAgo days ago" +%04Y%02m%02d)
 
 LecaiApiHosts="10.10.73.235 10.10.76.73 10.10.75.138"
@@ -14,9 +15,10 @@ pullLog() {
 	hosts=$1
 	svrTomcatParent=$2
 	localLogLocation=$3
-	
+	reLogLevels=$logLevels
+	reLogLevels=${reLogLevels// /\|}
 	for host in $hosts; do
-		ssh root@$host "cd $svrTomcatParent; mkdir -p /data/tmp; tar -cjvf /data/tmp/$host.tomcat.logs.bz2 "'$(find -regextype posix-extended -regex '"'"'.*/(debug|error|info|event)\.'"$logFileYMD""\.log')"
+		ssh root@$host "cd $svrTomcatParent; mkdir -p /data/tmp; find -regextype posix-extended -regex '.*/($reLogLevels).$logFileYMD.log' > /tmp/_pulllog; tar -cjvf /data/tmp/$host.tomcat.logs.bz2 --files-from /tmp/_pulllog"
 		
 		localHostLogLocation=$localLogLocation/$host
 		mkdir -p $localHostLogLocation
@@ -30,7 +32,7 @@ mergeLog() {
 	hosts=$1
 	localLogLocation=$2	
 
-	for level in debug error info event; do
+	for level in $logLevels; do
 		find "$localLogLocation" -name "$level.$logFileYMD.log" -exec cat {} >> "$localLogLocation/$level.$logFileYMD.all-instances.log" \;
 	done
 }
@@ -54,12 +56,12 @@ handleComponentLog() {
 
 main() {
 	handleComponentLog "$LecaiApiHosts" 		/data/ws 	lecai.api
-	handleComponentLog "$LecaiAdminapiHosts" 	/data/ws-1 	lecai.adminapi
+	#handleComponentLog "$LecaiAdminapiHosts" 	/data/ws-1 	lecai.adminapi
 
-	handleComponentLog "$MallApiHosts" 			/data 		mall.api
-	handleComponentLog "$MallAdminapiHosts" 	/data/ws-4 	mall.adminapi
+	#handleComponentLog "$MallApiHosts" 			/data 		mall.api
+	#handleComponentLog "$MallAdminapiHosts" 	/data/ws-4 	mall.adminapi
 
-	handleComponentLog "$ComponentapiHost" 		/data 		component.api
+	#handleComponentLog "$ComponentapiHost" 		/data 		component.api
 }
 
 main

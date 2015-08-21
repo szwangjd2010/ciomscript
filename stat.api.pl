@@ -8,13 +8,16 @@ use Data::Dumper;
 use String::Buffer;
 
 my $gLogFile = $ARGV[0];
+my $gReportOutLocation = $ARGV[1] || '.';
+my $gTomcatId = $ARGV[2] || '';
+
 my $gApisInfo = {};
 my $gCounter = 0;
 my $gCost = 0;
 my $gApisSortedByCost = [];
 my $gApisSortedByCounter = [];
-my $gCostInfoFile = "cost.info";
-my $gCounterInfoFile = "counter.info";
+my $gCostInfoFile = "$gReportOutLocation/$gTomcatId+cost.txt";
+my $gCounterInfoFile = "$gReportOutLocation/$gTomcatId+counter.txt";
 
 sub add2Global($) {
 	my $apiInfo = shift;
@@ -121,15 +124,18 @@ sub outApisCounterInfo() {
     }
 
     outGlobalInfo($h);
-    print $h "api.executed.counter api\n";
+    print $h "api.executed.counter average (max, min) api\n";
 	my $buf = String::Buffer->new();	
 	my $cnt = $#{$gApisSortedByCounter} + 1;
 
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $api = $gApisSortedByCounter->[$i];
 		my $apiInfo = $gApisInfo->{$api};
-		$buf->writeln(sprintf("%8d %s",
+		$buf->writeln(sprintf("%8d %4dms (%4dms, %4dms) %s",
 			$apiInfo->{counter},
+			$apiInfo->{avg},
+			$apiInfo->{max},
+			$apiInfo->{min},			
 			$api
 		));
 
@@ -174,6 +180,19 @@ sub main() {
 
 		#uuid 3698ad58-ebbf-4aec-8bec-484fa4ca7528 ->#uuid#
 		$apiInfo->{api} =~ s/[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}/%uuid%/g;
+
+		if ($apiInfo->{api} =~ m</v1/orgs/([^/]+)$>) {
+			if ($1 ne "www") {
+				$apiInfo->{api} =~ s|[^/]+$|%code%|g;
+			}
+		}
+		if ($apiInfo->{api} =~ m</v1/news/([^/]+)$>) {
+			$apiInfo->{api} =~ s|[^/]+$|%newsid%|g;
+		}
+		if ($apiInfo->{api} =~ m|/captchas/\d+$|) {
+			$apiInfo->{api} =~ s|\d+$|%phonenumber%|g
+		}
+
 		if (!defined($gApisInfo->{$apiInfo->{api}})) {
 			initApiInfoInGApisInfo($apiInfo);
 		} else {
