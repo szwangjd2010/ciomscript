@@ -24,6 +24,14 @@ sub setRunMode() {
 	$self->{RunMode} = shift;
 }
 
+sub output() {
+	my $self = shift;
+	my $cmd = shift;
+	
+	my $out = "$cmd\n";
+	print $out;
+}
+
 sub log() {
 	my $self = shift;
 	my $cmd = shift;

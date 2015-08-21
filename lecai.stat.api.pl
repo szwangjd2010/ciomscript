@@ -4,6 +4,7 @@
 use lib "$ENV{CIOM_SCRIPT_HOME}";
 use strict;
 use English;
+use CiomUtil;
 
 my $Apps = {
 	'lecai.api' => [
@@ -21,6 +22,7 @@ my $Apps = {
 
 my $statedDate = $ARGV[0];
 my $TplAppDailyLogLocation = "/sdb/ciompub/#AppName#/#Date#";
+my $ciomUtil = new CiomUtil(1);
 
 sub main() {
 	for my $name (keys %{$Apps}) {
@@ -31,22 +33,32 @@ sub main() {
 		my $appDailyLogLocation = $TplAppDailyLogLocation;
 		$appDailyLogLocation =~ s/#AppName#/$name/;
 		$appDailyLogLocation =~ s/#Date#/$statedDate/;
-		system("find $appDailyLogLocation -name 'time.$statedDate.log > $name.timelog.list");
+		my $appTimelogListFile = "$appDailyLogLocation/$name.timelog.list";
+		system("find $appDailyLogLocation -name time.$statedDate.log > $appTimelogListFile");
 
-		my @arrTimelogFiles = <$name.timelog.list>;
+		#my $h;
+		open(my $h, "<", "$appTimelogListFile") or die("Cannot open $appTimelogListFile!\n");
+		my @arrTimelogFiles = <$h>;
+		close($h);
 
 		my $cnt = $#arrTimelogFiles + 1;
-		for (my $i = 0; $i < $cnt; $++) {
+		for (my $i = 0; $i < $cnt; $i++) {
 			my $logfile = $arrTimelogFiles[$i];
+			$logfile =~ s/\n//g;
 			$logfile =~ m|\d{8}/(.+)/logs/|;
 			my $tomcatId = $1;
 			$tomcatId =~ s|/|+|g;
-			system("perl stat.api.pl $logfile $appDailyLogLocation $tomcatId");
+
+			$ciomUtil->exec("perl stat.api.pl $logfile $appDailyLogLocation $tomcatId");
 		}
 
-		my $allInOneLogFile = "$appDailyLogLocation/$name.$statedDate.all-instances.log";
-
-		system("perl stat.api.pl $allInOneLogFile $appDailyLogLocation all-instances");
+		my $allInOneLogFile = "$appDailyLogLocation/time.$statedDate.all-instances.log";
+		$ciomUtil->exec("perl stat.api.pl $allInOneLogFile $appDailyLogLocation all-instances");
+		
+		my $instanceSimpleSumFile = "$appDailyLogLocation/tomcats.instance.simple.sum";
+		$ciomUtil->exec("cat $appDailyLogLocation/*tomcat7*simple.sum | sort > $instanceSimpleSumFile");
+		$ciomUtil->exec("sed -i \"1 r $instanceSimpleSumFile\" $appDailyLogLocation/all-instances+cost.txt");
+		$ciomUtil->exec("sed -i \"1 r $instanceSimpleSumFile\" $appDailyLogLocation/all-instances+counter.txt");
 	}	
 }
 

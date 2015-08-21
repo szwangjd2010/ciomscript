@@ -6,11 +6,13 @@ use strict;
 use English;
 use Data::Dumper;
 use String::Buffer;
+use CiomUtil;
 
 my $gLogFile = $ARGV[0];
 my $gReportOutLocation = $ARGV[1] || '.';
 my $gTomcatId = $ARGV[2] || '';
 
+my $ciomUtil = new CiomUtil(1);
 my $gApisInfo = {};
 my $gCounter = 0;
 my $gCost = 0;
@@ -18,6 +20,7 @@ my $gApisSortedByCost = [];
 my $gApisSortedByCounter = [];
 my $gCostInfoFile = "$gReportOutLocation/$gTomcatId+cost.txt";
 my $gCounterInfoFile = "$gReportOutLocation/$gTomcatId+counter.txt";
+my $gSimpleSumInfoFile = "$gReportOutLocation/$gTomcatId+simple.sum";
 
 sub add2Global($) {
 	my $apiInfo = shift;
@@ -147,11 +150,26 @@ sub outApisCounterInfo() {
 	close($h);
 }
 
+sub outApisSimpleSumInfo() {
+	my $h;
+    if (!open($h, '>', $gSimpleSumInfoFile)) {
+    	print("Can not open $gSimpleSumInfoFile \n");
+    	return;
+    }
+
+	print $h sprintf("  |- %-25s %8d, %6.2f min(s)\n",
+		$gTomcatId,
+		$gCounter,
+		$gCost / (1000 * 60)
+	);
+
+	close($h);
+}
 
 sub main() {
 	my $h;
 	if (!open($h, $gLogFile)) {
-		output("Can not open $gLogFile!\n");
+		$ciomUtil->log("Can not open $gLogFile!\n");
 		return 1;
 	}
 
@@ -208,6 +226,8 @@ sub main() {
 
 	outApisCostInfo();
 	outApisCounterInfo();
+
+	outApisSimpleSumInfo();
 }
 
 main();
