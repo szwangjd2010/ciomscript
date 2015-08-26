@@ -1,4 +1,4 @@
-    <Connector port="8080" protocol="org.apache.coyote.http11.Http11NioProtocol"
+    <Connector port="8080" protocol="#PROTCOL#"
 		connectionTimeout="20000"
 		redirectPort="8443"
 		URIEncoding="utf-8"

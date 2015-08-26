@@ -3,13 +3,17 @@
 #
 TomcatSeed=$1
 instanceAmount=$2
-basePortDelta=$3
+basePortDelta=${3:-0}
 shareWebapps=${4:-1}
 noAjp=${5:-1}
+protcolName=${6:-nio}
+fileJavaOptsTpl=$CIOM_SCRIPT_HOME/${7:-tomcat.catalina.java.opts.tpl}
+fileHttpListenTpl=$CIOM_SCRIPT_HOME/${8:-tomcat.server.xml.http.section.tpl}
 
-fileJavaOptsTpl=$CIOM_SCRIPT_HOME/${5:-tomcat.catalina.java.opts.tpl}
-fileHttpListenTpl=$CIOM_SCRIPT_HOME/${6:-tomcat.server.xml.http.section.tpl}
+declare -A Protcols=( [1.1]='HTTP/1.1' [nio]='org.apache.coyote.http11.Http11NioProtocol' [apr]='org.apache.coyote.http11.Http11AprProtocol' )
+protcol=${Protcols[$protcolName]}
 oldPwd=$(pwd)
+
 
 enterWorkspace() {
 	cd $CIOM_CLI_WORKSPACE
@@ -56,6 +60,7 @@ modifyTomcatHttpConnector() {
 	sed -i '/<Connector port="8080"/ i <!-- #CIOM_BEGIN#' $serverXml
 	sed -i '/A "Connector" using the shared thread pool/ i #CIOM_END# -->' $serverXml
 	sed -i "/#CIOM_END# -->/ r $fileHttpListenTpl" $serverXml
+	sed -i "s/#PROTCOL#/$protcol/"  $serverXml
 }
 
 commentAjp() {
@@ -97,6 +102,9 @@ modifyTomcatCatalinaSh() {
 	lineNum=$(echo -n $(sed -n '/# OS specific support/=' $catalinaSh))
 	lineNum=$(( $lineNum - 1 ))
 	sed -i "$lineNum r $fileJavaOptsTpl" $catalinaSh
+	if [ $protcolName == 'apr' ]; then
+		sed -i '/# OS specific support/i CATALINA_OPTS="-Djava.library.path=/usr/local/apr/lib"' $catalinaSh
+	fi
 }
 
 removeWebappsUnusedApp() {
@@ -143,7 +151,36 @@ duplicateTomcat() {
 	done
 }
 
+usage() {
+	cat <<EOF
+usage:
+$0 %tomcatSeed %instanceAmount [%basePortDelta %shareWebapps ...]
+
+tomcatSeed: tomcat7 or tomcat8
+instanceAmount: [1-10]
+basePortDelta: >= 0
+shareWebapps: 
+  1 -> multi tomcat instance on same host share webapps
+  0 -> do not share
+  default is 1
+noAjp: 
+  1 -> comment ajp listen
+  0 -> do not comment
+  default is 1
+protcolName: 1.1, nio, apr, default nio
+fileJavaOptsTpl: default is tomcat.catalina.java.opts.tpl
+fileHttpListenTpl: default is tomcat.server.xml.http.section.tpl
+
+
+EOF
+}
+
 main() {
+	if [ $1 -lt 3 ]; then
+		usage
+		return 0
+	fi
+
 	enterWorkspace
 	clean
 	cloneSeed
@@ -158,4 +195,4 @@ main() {
 	leaveWorkspace
 }
 
-main
+main $#

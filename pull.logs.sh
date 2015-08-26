@@ -50,6 +50,7 @@ handleComponentLog() {
 	localLogLocation=$(getComponentLocalLogLocation $componentName)
 
 	mkdir -p $localLogLocation
+	rm -rf $localLogLocation/*
 	pullLog "$hosts" "$tomcatParent" "$localLogLocation"
 	mergeLog "$hosts" "$localLogLocation"
 }
