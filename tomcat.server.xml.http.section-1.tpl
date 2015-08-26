@@ -1,7 +1,7 @@
     <Connector port="8080" protocol="org.apache.coyote.http11.Http11NioProtocol"
 		connectionTimeout="20000"
 		redirectPort="8443"
-		uRIEncoding="utf-8"
+		URIEncoding="utf-8"
 		enableLookups="false" 
 		disableUploadTimeout="true"
 		acceptCount="500"

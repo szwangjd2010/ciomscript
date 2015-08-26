@@ -61,8 +61,8 @@ modifyTomcatHttpConnector() {
 commentAjp() {
 	tomcatHome=$1
 	serverXml="$tomcatHome/conf/server.xml"	
-	sed -i '/<Connector port="8009"/ i <!-- #CIOM_BEGIN#' $serverXml
-	sed -i '/<Connector port="8009"/ a #CIOM_END# -->' $serverXml
+	sed -i '/<Connector port="8009"/i <!-- #CIOM_BEGIN#' $serverXml
+	sed -i '/<Connector port="8009"/a #CIOM_END# -->' $serverXml
 }
 
 modifyTomcatListenPort() {
