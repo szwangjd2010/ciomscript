@@ -5,6 +5,7 @@ TomcatSeed=$1
 instanceAmount=$2
 basePortDelta=$3
 shareWebapps=${4:-1}
+noAjp=${5:-1}
 
 fileJavaOptsTpl=$CIOM_SCRIPT_HOME/${5:-tomcat.catalina.java.opts.tpl}
 fileHttpListenTpl=$CIOM_SCRIPT_HOME/${6:-tomcat.server.xml.http.section.tpl}
@@ -55,6 +56,13 @@ modifyTomcatHttpConnector() {
 	sed -i '/<Connector port="8080"/ i <!-- #CIOM_BEGIN#' $serverXml
 	sed -i '/A "Connector" using the shared thread pool/ i #CIOM_END# -->' $serverXml
 	sed -i "/#CIOM_END# -->/ r $fileHttpListenTpl" $serverXml
+}
+
+commentAjp() {
+	tomcatHome=$1
+	serverXml="$tomcatHome/conf/server.xml"	
+	sed -i '/<Connector port="8009"/ i <!-- #CIOM_BEGIN#' $serverXml
+	sed -i '/<Connector port="8009"/ a #CIOM_END# -->' $serverXml
 }
 
 modifyTomcatListenPort() {
@@ -119,6 +127,10 @@ duplicateTomcat() {
 		tomcatHome="$TomcatSeed-$tomcatIndex"
 		cp -r $TomcatSeed $tomcatHome
 		
+		if [ $noAjp -eq 1 ]; then
+			commentAjp $tomcatHome
+		fi
+
 		modifyTomcatHttpConnector $tomcatHome
 		modifyTomcatListenPort $tomcatIndex $tomcatHome
 		modifyTomcatRealm $tomcatHome

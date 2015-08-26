@@ -2,7 +2,7 @@
 #
 
 dayAgo=${1:-1}
-logLevels=${2:-debug error info event}
+logLevels=${2:-debug error info event time}
 logFileYMD=$(date -d "$dayAgo days ago" +%04Y%02m%02d)
 
 LecaiApiHosts="10.10.73.235 10.10.76.73 10.10.75.138"
@@ -56,12 +56,12 @@ handleComponentLog() {
 
 main() {
 	handleComponentLog "$LecaiApiHosts" 		/data/ws 	lecai.api
-	#handleComponentLog "$LecaiAdminapiHosts" 	/data/ws-1 	lecai.adminapi
+	handleComponentLog "$LecaiAdminapiHosts" 	/data/ws-1 	lecai.adminapi
 
-	#handleComponentLog "$MallApiHosts" 			/data 		mall.api
-	#handleComponentLog "$MallAdminapiHosts" 	/data/ws-4 	mall.adminapi
+	handleComponentLog "$MallApiHosts" 			/data 		mall.api
+	handleComponentLog "$MallAdminapiHosts" 	/data/ws-4 	mall.adminapi
 
-	#handleComponentLog "$ComponentapiHost" 		/data 		component.api
+	handleComponentLog "$ComponentapiHost" 		/data 		component.api
 }
 
 main
