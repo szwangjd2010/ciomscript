@@ -25,16 +25,17 @@ my $ciomUtil = new CiomUtil($ARGV[0] || 0);
 
 sub main() {
 	my $cnt = $#{$slaves} + 1;
+	my $rsync = "rsync --delete --force -az";
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $slave = $slaves->[$i];
 		$ciomUtil->remoteExec({
 			host => $master,
 			cmd => [
-				"rsync -az /etc/profile.d/hadoop.sh $slave:/etc/profile.d/hadoop.sh",
-				"rsync -az /etc/profile.d/spark.sh $slave:/etc/profile.d/spark.sh",
-				"rsync -az $hadoopConfDir/* $slave:$hadoopConfDir/",
-				"rsync -az $sparkConfDir/* $slave:$sparkConfDir/",			
-				"rsync -az $zooKeeperHome $slave:/opt/"
+				"$rsync /etc/profile.d/hadoop.sh $slave:/etc/profile.d/hadoop.sh",
+				"$rsync /etc/profile.d/spark.sh $slave:/etc/profile.d/spark.sh",
+				"$rsync $hadoopConfDir/* $slave:$hadoopConfDir/",
+				"$rsync $sparkConfDir/* $slave:$sparkConfDir/",			
+				"$rsync $zooKeeperHome $slave:/opt/"
 			]
 		});
 	}

@@ -31,3 +31,8 @@ perl -i.bak -p0E
 perl -p0E 's|(?<g1><stringProp name="Argument.name">ServerIP</stringProp>\s+<stringProp name="Argument.value">)[\w\.]+(?<g2></stringProp>)|$+{g1}1.1.1.1$+{g2}|smg' /tech/api.jmx | head -n 20
 
  A905295A5D17FB075828FD15BD36FD7D0B875F5B
+
+
+
+find /data/ -name catalina.sh -exec sed -i '/# OS specific support/i CATALINA_OPTS="-Djava.library.path=/usr/local/apr/lib"' {} \;
+find /data/ -name server.xml -exec sed -i 's/Http11NioProtocol/Http11AprProtocol/' {} \;
