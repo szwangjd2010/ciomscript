@@ -26,7 +26,7 @@ sub build() {
 sub getAppFinalPkgName($) {
 	my $code = $_[0];
 	my $pkgName = $CiomData->{orgs}->{$code}->{pkgName} || $CiomData->{pkgName};
-	$pkgName =~ s|#code#|$code|;
+	$pkgName =~ s|#code#|$Pms->{versionCode}|;
 
 	return "${pkgName}.apk";
 }
