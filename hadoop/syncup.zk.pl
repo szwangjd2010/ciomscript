@@ -36,7 +36,10 @@ sub main() {
 		my $slave = $slaves->[$i];
 		$ciomUtil->remoteExec({
 			host => $master,
-			cmd => "$rsync $zkHome/conf/* $slave:$zkHome/conf/"
+			cmd => [
+				"$rsync $zkHome/conf/* $slave:$zkHome/conf/",
+				"$rsync $zkHome/bin/zkServer.sh $slave:$zkHome/bin/zkServer.sh",
+			]
 		});
 
 		createMyidFile($slave, $i + 2);
