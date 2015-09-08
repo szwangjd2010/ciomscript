@@ -8,7 +8,7 @@ use Data::Dumper;
 use Cwd;
 use CiomUtil;
 
-my $master = '172.17.128.210';
+my $origin = '172.17.128.210';
 my $slaves = [
 	'172.17.128.208',
 	'172.17.128.209',
@@ -43,7 +43,7 @@ my $ciomUtil = new CiomUtil($ARGV[0] || 0);
 
 sub cleanSyncup() {
 	$ciomUtil->remoteExec({
-		host => $master,
+		host => $origin,
 		cmd => "rm -rf /opt/hdfsroot/name/* /opt/hdfsroot/data/* /opt/journal/data/*"
 	});
 
@@ -52,7 +52,7 @@ sub cleanSyncup() {
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $slave = $slaves->[$i];
 		$ciomUtil->remoteExec({
-			host => $master,
+			host => $origin,
 			cmd => [
 				"$rsync /opt/hdfsroot/* $slave:/opt/hdfsroot/",
 				"$rsync /opt/journal/* $slave:/opt/journal/",
@@ -105,8 +105,8 @@ sub setSparkMasterIP() {
 		$ciomUtil->remoteExec({
 			host => $node,
 			cmd => [
-				"perl -i -pE 's|(SPARK_MASTER_IP=).*|\1$node|g' $sparkConfDir/spark-env.sh",
-				"perl -i -pE 's|(spark.master\s*spark://).*(:\d+)|\1$node\2|g' $sparkConfDir/spark-defaults.conf"
+				"perl -i -pE 's|(SPARK_MASTER_IP=).*|\\1$node|g' $sparkConfDir/spark-env.sh",
+				"perl -i -pE 's|(spark.master\\s*spark://).*(:\\d+)|\\1$node\\2|g' $sparkConfDir/spark-defaults.conf"
 			]
 		});
 	}	
