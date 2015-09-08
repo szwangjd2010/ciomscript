@@ -10,3 +10,9 @@ hdfs://172.17.128.210:9000/data/1/acl.c
 --executor-memory 3g \
 /opt/hs/wordcount.py \
 hdfs://172.17.128.210:9000/data/1/acl.c
+
+
+/opt/hadoop-2.7.1/bin/hdfs namenode -format
+/opt/hadoop-2.7.1/sbin/hadoop-daemon.sh start journalnode
+/opt/hadoop-2.7.1/sbin/hadoop-daemon.sh start namenode
+/opt/hadoop-2.7.1/sbin/hadoop-daemon.sh start datanode
