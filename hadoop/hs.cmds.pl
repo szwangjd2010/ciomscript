@@ -16,3 +16,6 @@ hdfs://172.17.128.210:9000/data/1/acl.c
 /opt/hadoop-2.7.1/sbin/hadoop-daemon.sh start journalnode
 /opt/hadoop-2.7.1/sbin/hadoop-daemon.sh start namenode
 /opt/hadoop-2.7.1/sbin/hadoop-daemon.sh start datanode
+/opt/hadoop-2.7.1/sbin/hadoop-daemon.sh start zkfc
+
+/opt/hadoop-2.7.1/sbin/start-dfs.sh
