@@ -16,11 +16,24 @@ function getPackages() {
 	$packagesLocation = "$sourcePath\packages"
 	mkdirIfNotExist "$packagesLocation"
 
-	$arrayPackagesConfig = getPackagesConfigListBySolutionManifest
+	$arrayPackagesConfigSM = getPackagesConfigListBySolutionManifest
+	$arrayPackagesConfig = validatePkgsConfList($arrayPackagesConfigSM)
 	$arrayPackagesConfig += $CIOM.extraPackagesConfigList
 	foreach ($item in $arrayPackagesConfig) {
 		exec("NuGet install '$sourcePath\$item' -OutputDirectory '$packagesLocation'")
 	}
+}
+
+function validatePkgsConfList($arrayPkgsConf){
+	$newArrPkgsConf = @()
+	
+	foreach ($item in $arrayPkgsConf) {
+		if(validatePath($item)){
+			$newArrPkgsConf += $item
+		}
+	}
+	
+	return $newArrPkgsConf
 }
 
 function getPackagesConfigListBySolutionManifest() {

@@ -83,3 +83,7 @@ function rmFile($path) {
 	    remove-item "$path" -recurse -force
 	}	
 }
+
+function validatePath($path) {
+	return Test-Path $path
+}
