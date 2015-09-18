@@ -37,6 +37,7 @@ sub main() {
 		$ciomUtil->remoteExec({
 			host => $master,
 			cmd => [
+				"$rsync /etc/profile.d/zookeeper.sh $slave:/etc/profile.d/",
 				"$rsync $zkHome/conf/* $slave:$zkHome/conf/",
 				"$rsync $zkHome/bin/zkServer.sh $slave:$zkHome/bin/zkServer.sh",
 			]

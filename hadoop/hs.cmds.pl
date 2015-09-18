@@ -19,3 +19,15 @@ hdfs://172.17.128.210:9000/data/1/acl.c
 /opt/hadoop-2.7.1/sbin/hadoop-daemon.sh start zkfc
 
 /opt/hadoop-2.7.1/sbin/start-dfs.sh
+
+
+./bin/sqoop list-tables \
+--connect jdbc:mysql://172.17.128.231/lecai2 \
+--username yxt \
+--password pwdasdwx
+
+./bin/sqoop list-tables \
+--connect jdbc:oracle:thin:@172.17.125.202:1521:yxtdb \
+--username elearning \
+--password 'password01!'
+

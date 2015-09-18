@@ -6,33 +6,63 @@ if [ "$JENKINS_HOME" == "" ]; then
 	simulateJenkinsContainer
 fi
 
-deployToEnv=$1
-appName=$2
-version=${3:-v1}
+version=${1:-v1}
+deployToEnv=$2
+appName=$3
+bTarget=${4:-master}
 
-AppPackageFile="$appName.war"
-Adworkspace="$WORKSPACE/$appName/target"
+if [ "$bTarget" == "master" ]; then
+	AppPackageFile="$appName.war"
+	AppDirectory="$WORKSPACE/$appName/target"
+fi
+
+if [ "$bTarget" == "win" ]; then
+	AppPackageFile="$appName.zip"
+	AppDirectory="$CIOM_SLAVE_WIN_WORKSPACE/$version/$deployToEnv/build/$appName"
+fi
+
 CnfLocation="$CIOM_VCA_HOME/$version/post/$deployToEnv"
 
 enterWorkspace() {
-	execCmd "cd $Adworkspace"
+	execCmd "cd $AppDirectory"
 }
 
 leaveWorkspace() {
-	execCmd "cd $Adworkspace"
+	execCmd "cd $WORKSPACE"
 }
 
 generateAppPackage() {
-	execCmd "cd $appName; zip -r ../$AppPackageFile *"
+
+	if [ "$bTarget" == "master" ]; then
+		execCmd "cd $WORKSPACE/$appName; zip -r ../$AppPackageFile *"
+	fi
+	
+	if [ "$bTarget" == "win" ]; then
+		execCmd "cd ..;rm -rf ../$AppPackageFile; zip -r ../$AppPackageFile $appName/*"
+	fi
 }
+
 
 replaceEnvSpecialFiles() {
 	execCmd "/bin/cp -rf $CnfLocation/$appName/* $WORKSPACE/$appName/target/$appName/"
 }
 
+execPostbuildExtraAction() {
+	filePostbuildExtraAction="$CnfLocation/$appName.postbuild.extra.action"
+	if [ ! -e $filePostbuildExtraAction ]; then
+		return
+	fi
+
+	echo
+	cat $filePostbuildExtraAction
+	echo
+	source $filePostbuildExtraAction
+}
+
 main() {
 	enterWorkspace
 	replaceEnvSpecialFiles
+	execPostbuildExtraAction
 	generateAppPackage
 	leaveWorkspace
 }
