@@ -60,10 +60,10 @@ postDeployApp() {
 main() {
 	setAppContextName
 	enterWorkspace
+	uploadFiles
 	preDeployApp
 	backup
 	clean
-	uploadFiles
 	applyAppPackage
 	postDeployApp
 	leaveWorkspace
