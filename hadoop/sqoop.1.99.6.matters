@@ -1,0 +1,17 @@
+sqoop 1.99.6
+
+1. Exception: org.apache.sqoop.common.SqoopException Message: CLIENT_0004:Unable to find valid Kerberos ticket cache (kinit)
+A: 	Some times this happens when there's actually a different issue. Could you
+enable debug logging via "set option --name verbose --value true" and try
+"show connector" again?
+
+http://qnalist.com/questions/6024365/1-99-5-and-unable-to-find-valid-kerberos-ticket
+
+Solution: cause by incorrect hadoop libs in common.loader
+found this issue cause from in sqoop2-server stop log
+
+$HADOOP_HOME/all.hadoop.lib/*.jar, sqoop2-server can not get exported $HADOOP_HOME
+so change it to absolute path 
+/opt/hadoop-2.7.1/all.hadoop.lib/*.jar
+
+common.loader=${catalina.base}/lib,${catalina.base}/lib/*.jar,${catalina.home}/lib,${catalina.home}/lib/*.jar,${catalina.home}/../lib/*.jar,/opt/hadoop-2.7.1/all.hadoop.lib/*.jar
