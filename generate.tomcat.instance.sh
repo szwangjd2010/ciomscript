@@ -176,7 +176,7 @@ EOF
 }
 
 main() {
-	if [ $1 -lt 3 ]; then
+	if [ $1 -lt 2 ]; then
 		usage
 		return 0
 	fi
