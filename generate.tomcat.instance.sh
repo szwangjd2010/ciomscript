@@ -7,8 +7,8 @@ basePortDelta=${3:-0}
 shareWebapps=${4:-1}
 noAjp=${5:-1}
 protcolName=${6:-nio}
-fileJavaOptsTpl=$CIOM_SCRIPT_HOME/${7:-tomcat.catalina.java.opts.tpl}
-fileHttpListenTpl=$CIOM_SCRIPT_HOME/${8:-tomcat.server.xml.http.section.tpl}
+fileJavaOptsTpl=$CIOM_SCRIPT_HOME/tomcat/${7:-tomcat.catalina.java.opts.tpl}
+fileHttpListenTpl=$CIOM_SCRIPT_HOME/tomcat/${8:-tomcat.server.xml.http.section.tpl}
 
 declare -A Protcols=( [1.1]='HTTP/1.1' [nio]='org.apache.coyote.http11.Http11NioProtocol' [apr]='org.apache.coyote.http11.Http11AprProtocol' )
 protcol=${Protcols[$protcolName]}
@@ -39,7 +39,7 @@ modifyTomcatUsersXml() {
 	tomcatHome=$1
 	
 	fileUserSection="tomcat.users.section"
-	fileUserSectionTpl="$CIOM_SCRIPT_HOME/tomcat.users.section.tpl"
+	fileUserSectionTpl="$CIOM_SCRIPT_HOME/tomcat/tomcat.users.section.tpl"
 	/bin/cp -rf $fileUserSectionTpl $fileUserSection
 
 	user="admin"
@@ -92,7 +92,7 @@ createSharedWebapps() {
 modifyTomcatRealm() {
 	tomcatHome=$1
 	serverXml="$tomcatHome/conf/server.xml"
-	fileHostRealm="$CIOM_SCRIPT_HOME/tomcat.server.xml.realm.tpl"
+	fileHostRealm="$CIOM_SCRIPT_HOME/tomcat/tomcat.server.xml.realm.tpl"
 	sed -i "/unpackWARs=\"true\" autoDeploy=\"true\"/ r $fileHostRealm" $serverXml
 }
 

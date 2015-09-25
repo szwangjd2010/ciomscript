@@ -10,10 +10,11 @@ use CiomUtil;
 
 my $host = $ARGV[0];
 my $port = $ARGV[1];
-my $tomcatSeed = $ARGV[2];
-my $tomcatAmount = $ARGV[3];
-my $fileJavaOptsTpl = $ARGV[4] || "tomcat.catalina.java.opts.tpl";
-my $fileHttpListenTpl = $ARGV[5] || "tomcat.server.xml.http.section.tpl";
+my $tomcatParentBase = $ARGV[2];
+my $tomcatSeed = $ARGV[3];
+my $tomcatAmount = $ARGV[4];
+my $fileJavaOptsTpl = $ARGV[5] || "tomcat.catalina.java.opts.tpl";
+my $fileHttpListenTpl = $ARGV[6] || "tomcat.server.xml.http.section.tpl";
 
 my $ciomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
@@ -21,9 +22,9 @@ my $OldPwd = getcwd();
 sub usage() {
 	print <<EOF;
 usage:
-$0 172.17.128.225 22 tomcat7 4 tomcat.catalina.java.opts-1.tpl  tomcat.server.xml.http.section-1.tpl
-$0 172.17.128.225 22 tomcat7 4 tomcat.catalina.java.opts.tpl  tomcat.server.xml.http.section.tpl
-$0 172.17.128.225 22 tomcat7 4
+$0 172.17.128.225 22 /data tomcat7 4 tomcat.catalina.java.opts-1.tpl  tomcat.server.xml.http.section-1.tpl
+$0 172.17.128.225 22 /data tomcat7 4 tomcat.catalina.java.opts.tpl  tomcat.server.xml.http.section.tpl
+$0 172.17.128.225 22 /data tomcat7 4
 
 EOF
 }
@@ -59,7 +60,7 @@ sub main() {
 
 	for (my $i = 0; $i < $tomcatAmount; $i++) {
 		generateTomcatInstances($i);
-		my $tomcatParent = "/opt/ws-" . ($i + 1);
+		my $tomcatParent = "/$tomcatParentBase/ws-" . ($i + 1);
 		dispatch($tomcatParent);
 	}
 }

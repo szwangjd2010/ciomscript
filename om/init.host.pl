@@ -51,7 +51,7 @@ sub installJdk($) {
 
 sub main() {
 	setMaxOpenFile();
-	installJdk();
+	installJdk($jdkver);
 }
 
 main();
