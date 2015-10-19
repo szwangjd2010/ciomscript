@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+<!-- ha begin -->
+    <property>
+        <name>dfs.nameservices</name>
+        <value>yxtdfs</value>
+    </property>
+    <property>
+        <name>dfs.ha.namenodes.yxtdfs</name>
+        <value>nn1,nn2</value>
+    </property>
+    <property>
+        <name>dfs.namenode.rpc-address.yxtdfs.nn1</name>
+        <value>172.17.128.210:8020</value>
+    </property>
+    <property>
+        <name>dfs.namenode.rpc-address.yxtdfs.nn2</name>
+        <value>172.17.128.208:8020</value>
+    </property>
+    <property>
+        <name>dfs.namenode.http-address.yxtdfs.nn1</name>
+        <value>172.17.128.210:50070</value>
+    </property>
+    <property>
+        <name>dfs.namenode.http-address.yxtdfs.nn2</name>
+        <value>172.17.128.208:50070</value>
+    </property>
+    <property>
+        <name>dfs.namenode.shared.edits.dir</name>
+        <value>qjournal://172.17.128.210:8485;172.17.128.208:8485;172.17.128.209:8485/yxtdfs</value>
+    </property>
+    <property>
+        <name>dfs.client.failover.proxy.provider.yxtdfs</name>
+        <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+    </property>
+    <property>
+        <name>dfs.ha.fencing.methods</name>
+        <value>sshfence</value>
+    </property>
+    <property>
+        <name>dfs.ha.fencing.ssh.private-key-files</name>
+        <value>/root/.ssh/id_rsa</value>
+    </property>
+    <property>
+        <name>dfs.journalnode.edits.dir</name>
+        <value>/opt/journal/data</value>
+    </property>
+<!-- ha end -->
+
+<!-- zk begin-->
+    <property>
+        <name>dfs.ha.automatic-failover.enabled</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>ha.zookeeper.quorum</name>
+        <value>172.17.128.210:2181,172.17.128.208:2181,172.17.128.209:2181</value>
+    </property>
+<!-- zk end -->
+
+    <property>
+        <name>dfs.replication</name>
+        <value>3</value>
+    </property>
+
+    <property>
+        <name>dfs.replication</name>
+        <value>3</value>
+    </property>
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>/opt/hdfsroot/name</value>
+    </property>
+
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>/opt/hdfsroot/data</value>
+    </property>
+    <property>
+        <name>dfs.namenode.http-address</name>
+        <value>172.17.128.210:50070</value>
+        <description>
+          The address and the base port where the dfs namenode web ui will listen on.
+        </description>
+    </property>
+</configuration>

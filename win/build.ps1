@@ -13,13 +13,21 @@ function getWebProjectBuildOutputPath($str) {
 }
 
 function getPackages() {
-	$packagesLocation = "$sourcePath\packages"
+    if ($CIOM.packagesLocation -ne $null) {
+        $packagesLocation = $sourcePath+"\"+$CIOM.packagesLocation
+		echo ">> $packagesLocation"
+    }
+
+    if ($CIOM.packagesLocation -eq $null) {
+        $packagesLocation = "$sourcePath\packages"
+    }
 	mkdirIfNotExist "$packagesLocation"
 
 	$arrayPackagesConfigSM = getPackagesConfigListBySolutionManifest
 	$arrayPackagesConfig = validatePkgsConfList($arrayPackagesConfigSM)
 	$arrayPackagesConfig += $CIOM.extraPackagesConfigList
 	foreach ($item in $arrayPackagesConfig) {
+		echo "NuGet install $item"
 		exec("NuGet install '$sourcePath\$item' -OutputDirectory '$packagesLocation'")
 	}
 }
@@ -28,7 +36,7 @@ function validatePkgsConfList($arrayPkgsConf){
 	$newArrPkgsConf = @()
 	
 	foreach ($item in $arrayPkgsConf) {
-		if(validatePath($item)){
+		if (validatePath($sourcePath+"\"+$item)) {
 			$newArrPkgsConf += $item
 		}
 	}
@@ -86,6 +94,11 @@ function build() {
 }
 
 function clean() {
+	if ($appName -eq "lecaiweb") {
+		$dtNow = getTimestamp
+		Copy-Item "$targetPath" "c:\lecaiweb.build.history\lecaiweb-$dtNow" -recurse
+	}
+	
 	cleanDirectory "$targetPath"
 
 	rmFile "$packageFile"
