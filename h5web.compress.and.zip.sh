@@ -31,7 +31,7 @@ generateAppPackage() {
 
 main() {
 	enterWorkspace
-	#gruntCompress
+	gruntCompress
 	generateAppPackage
 	leaveWorkspace
 }
