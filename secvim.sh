@@ -14,7 +14,7 @@ getTimestamp() {
 	echo -n $(date +%04Y%02m%02d.%02k%02M%02S)
 }
 
-snapshortFile() {
+snapshotFile() {
 	timestamp=$(getTimestamp)
 	cp $file $file.$timestamp
 }
@@ -50,7 +50,7 @@ if [ "$md5sum0" == "$md5sum1" ]; then
 	exit 0
 fi
 
-snapshortFile
+snapshotFile
 $aesPrefix -e -in $tmpFile -out $file
 
 clean
