@@ -2,13 +2,16 @@
 # 
 #
 
+file=1111
 syncup_win() {
-	echo win
+	file1=$1
+	echo $file1
 }
 
-syncup_osx() {
-	echo osx
-}
+echo $file
 
-os=win
-syncup_${os}
+syncup_win 22222
+
+echo $file
+
+
