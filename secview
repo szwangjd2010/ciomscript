@@ -1,0 +1,4 @@
+#!/bin/bash
+
+D="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+$D/secedit $1 $2 1

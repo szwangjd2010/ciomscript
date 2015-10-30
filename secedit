@@ -1,7 +1,9 @@
 #!/bin/bash
+#
 
 file=$1
 passphase=$2
+readonly=${3:-0}
 
 tmpFile="__$file.tmp"
 aesPrefix="openssl enc -aes-256-cbc -salt -a -pass pass:$passphase"
@@ -40,6 +42,12 @@ if [ $? -ne 0 ]; then
 	exit 3
 fi
 
+if [ $readonly -eq 1 ]; then
+	cat $tmpFile
+	clean	
+	exit 0
+fi
+
 md5sum0=$(getMd5sum $tmpFile)
 vim $tmpFile
 md5sum1=$(getMd5sum $tmpFile)
@@ -55,4 +63,3 @@ $aesPrefix -e -in $tmpFile -out $file
 
 clean
 cat $file
-
