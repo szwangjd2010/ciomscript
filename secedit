@@ -61,6 +61,6 @@ fi
 
 snapshotFile
 $aesPrefix -e -in $tmpFile -out $file
-
 clean
+
 cat $file
