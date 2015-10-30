@@ -34,10 +34,15 @@ function backup() {
 }
 
 function restoreFromBackup() {
-	$toRestorePath = "$app3wPath\$appName\Upload"
-	$backupUploadPath = "$app3wPath\${appName}_$timestamp\Upload"
-	#exec("remove-item -recurse -force $toRestorePath")
-	exec("copy-item -recurse -force $backupUploadPath\* $toRestorePath\")
+	$appRoot = $app3wPath + "\" + $appName
+	$backupRoot = $app3wPath + "\" + ${appName} + "_" + $timestamp
+	$folder1 = "Upload"
+	$file1 = "ping.htm"
+	exec("copy-item -recurse -force $backupRoot\$folder1\* $appRoot\$folder1\")
+	#exec("remove-item -recurse -force $backupRoot\$folder1")
+	if ($(test-path "$backupRoot\$file1")) {
+		exec("copy-item -recurse -force $backupRoot\$file1 $appRoot\")
+	}
 }
 
 function clean() {
