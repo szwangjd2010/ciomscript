@@ -32,6 +32,9 @@ sub generateTomcatInstances() {
 		$Clouds->{$cloudId}->{tomcatSeed},
 		$Clouds->{$cloudId}->{tomcatAmount},
 		$Clouds->{$cloudId}->{basePortDelta},
+		1,
+		1,
+		"nio",
 		$Clouds->{$cloudId}->{fileJavaOptsTpl},
 		$Clouds->{$cloudId}->{fileHttpListenTpl}
 	));

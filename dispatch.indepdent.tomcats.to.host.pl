@@ -31,12 +31,14 @@ EOF
 
 sub generateTomcatInstances($) {
 	my $basePortDelta = shift;
-	$ciomUtil->exec(sprintf("%s %s %s %s %s %s",
+	$ciomUtil->exec(sprintf("%s %s %s %s %s %s %s %s %s",
 		"$ENV{CIOM_SCRIPT_HOME}/generate.tomcat.instance.sh",
 		$tomcatSeed,
 		1,
 		$basePortDelta,
 		1,
+		1,
+		"nio",
 		$fileJavaOptsTpl,
 		$fileHttpListenTpl
 	));
