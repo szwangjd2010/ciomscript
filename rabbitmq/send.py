@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import pika
 
-credentials = pika.PlainCredentials('yxt', 'pwdasdwx')
-parameters = pika.ConnectionParameters('10.4.36.230',
+credentials = pika.PlainCredentials('yunxuetang', 'yunxuetang')
+parameters = pika.ConnectionParameters('10.10.118.154',
                                        5672,
                                        '/',
                                        credentials)

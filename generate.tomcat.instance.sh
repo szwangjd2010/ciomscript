@@ -57,17 +57,17 @@ modifyTomcatUsersXml() {
 modifyTomcatHttpConnector() {
 	tomcatHome=$1
 	serverXml="$tomcatHome/conf/server.xml"
-	sed -i '/<Connector port="8080"/ i <!-- #CIOM_BEGIN#' $serverXml
-	sed -i '/A "Connector" using the shared thread pool/ i #CIOM_END# -->' $serverXml
-	sed -i "/#CIOM_END# -->/ r $fileHttpListenTpl" $serverXml
+	sed -i '/<Connector port="8080"/ i <!-- #CIOM_BEGIN#-8080' $serverXml
+	sed -i '/A "Connector" using the shared thread pool/ i #CIOM_END#-8080 -->' $serverXml
+	sed -i "/#CIOM_END#-8080 -->/ r $fileHttpListenTpl" $serverXml
 	sed -i "s/#PROTCOL#/$protcol/"  $serverXml
 }
 
 commentAjp() {
 	tomcatHome=$1
 	serverXml="$tomcatHome/conf/server.xml"	
-	sed -i '/<Connector port="8009"/i <!-- #CIOM_BEGIN#' $serverXml
-	sed -i '/<Connector port="8009"/a #CIOM_END# -->' $serverXml
+	sed -i '/<Connector port="8009"/i <!-- #CIOM_BEGIN#-AJP' $serverXml
+	sed -i '/<Connector port="8009"/a #CIOM_END#-AJP -->' $serverXml
 }
 
 modifyTomcatListenPort() {
