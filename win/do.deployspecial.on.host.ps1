@@ -18,6 +18,12 @@ function startIIS() {
 function stopIIS() {
 	iisreset /STOP
 }
+
+function mkdirIfNotExist($directory) {
+	if (!(Test-Path -Path $directory)) {
+	    New-Item -ItemType directory -Path $directory
+	}	
+}
 #end
 
 function closeExplorer() {
@@ -37,8 +43,19 @@ function restoreFromBackup() {
 	$appRoot = $app3wPath + "\" + $appName
 	$backupRoot = $app3wPath + "\" + ${appName} + "_" + $timestamp
 	$folder1 = "Upload"
+	$folder2 = "Config\ApiCount"
 	$file1 = "ping.htm"
-	exec("copy-item -recurse -force $backupRoot\$folder1\* $appRoot\$folder1\")
+	$file2 = "CountSta.db"
+	
+	if (($appName -eq "eschapi") -or ($appName -eq "qidacsapi")){
+		mkdirIfNotExist("$appRoot\$folder2")
+		exec("move-item -force $backupRoot\$folder2\$file2 $appRoot\$folder2\")
+	}
+	
+	if (($appName -eq "eschweb") -or ($appName -eq "qidaweb")){
+		exec("move-item -force $backupRoot\$folder1\* $appRoot\$folder1\")
+	}
+	
 	#exec("remove-item -recurse -force $backupRoot\$folder1")
 	if ($(test-path "$backupRoot\$file1")) {
 		exec("copy-item -recurse -force $backupRoot\$file1 $appRoot\")
@@ -58,6 +75,18 @@ function extract() {
 	exec("&('C:\Program Files\2345Soft\HaoZip\HaoZipC') x c:\$appName.zip -o$app3wPath")
 }
 
+function updatePriv() {
+	$appRoot = $app3wPath + "\" + $appName
+	$folder1 = "Upload"
+	if (($appName -eq "eschweb") -or ($appName -eq "qidaweb")){
+		exec("cacls $appRoot\$folder1 /E /P NETWORKSERVICE:f")
+	}
+	#for eschool unionpay
+	if ($appName -eq "eschweb") {
+		exec("cacls $appRoot\Config\Unionpay.config /E /P everyone:f")
+	}
+}
+
 function logActionHeader() {
 	log("===============================================")
 	log($timestamp)
@@ -72,6 +101,7 @@ function main() {
 	clean
 	extract
 	restoreFromBackup
+	updatePriv
 	startIIS
 }
 
