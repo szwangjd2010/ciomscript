@@ -1,0 +1,35 @@
+1.
+KEYWORDS
+- SHUTDOWN_MSG: Shutting down DataNode at java.net.UnknownHostException: xxxx
+- Exception in thread "main" java.net.UnknownHostException: 172-17-128-2l8: 172-17-128-2l8: Name or service not known
+
+datanode, spark worker 等hadoop组件启动后很快自动shutdown的问题 
+会在系统一些特殊情况下导致系统网络有些问题是 会出现上述问题
+(怪异的是, 明明/etc/hosts中有匹配hostnames的映射项, 还是会出现这个错误.)
+用下面的java snippet code - test.java 测试也确实能不断重现, 试了若干试图清楚JVM的DNS cache的方法都不好使.
+
+-- test.java 
+import java.net.*; 
+
+class test 
+{ 
+	public static void main(String args[]) throws 
+		Exception { 
+		InetAddress Address = InetAddress.getLocalHost(); 
+		System.out.println(Address); 
+		Address = InetAddress.getByName("starwave.com"); 
+		System.out.println(Address); 
+		InetAddress SW[] = InetAddress.getAllByName("www.nba.com"); 
+		for (int i=0; i<SW.length; i++) 
+		System.out.println(SW[i]);
+	}
+}
+
+最后的变通解决方案是:
+1.a 先将hostname改成其他名字, 并在/etc/hosts中添加match新hostname的映射项
+1.b reboot
+1.c run 上述java app 测试, OK
+2.a 重新将hostname改回之前的hostname, 
+2.b reboot
+2.c run 上述java app 测试, OK
+3. 问题解决
