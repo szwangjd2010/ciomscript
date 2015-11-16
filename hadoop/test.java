@@ -4,8 +4,7 @@ import java.net.*;
 
 class test 
 { 
-	public static void main(String args[]) throws 
-		Exception { 
+	public static void main(String args[]) throws Exception { 
 		InetAddress Address = InetAddress.getLocalHost(); 
 		System.out.println(Address); 
 		Address = InetAddress.getByName("starwave.com"); 
