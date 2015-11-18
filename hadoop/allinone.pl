@@ -34,11 +34,24 @@ my $journalNodes = [
 	'172.17.128.209'
 ];
 
+my $hbaseMaster = '172.17.128.211';
+my $hbaseRegionservers = [
+	'172.17.128.212',
+	'172.17.128.213',
+	'172.17.128.214',
+	'172.17.128.215',
+	'172.17.128.216',
+	'172.17.128.217',
+	'172.17.128.218'	
+];
+
 my $nn1 = '172.17.128.210';
 my $nn2 = '172.17.128.208';
 
 my $hadoopConfDir = '/opt/hadoop-2.7.1/etc/hadoop';
 my $sparkConfDir = '/opt/spark-1.4.0-bin-hadoop2.6/conf';
+my $hbaseConfDir = '/opt/hbase-1.1.2/conf';
+
 my $ciomUtil = new CiomUtil($ARGV[0] || 0);
 
 sub cleanSyncup() {
@@ -73,6 +86,21 @@ sub startJournalDaemons() {
 		$ciomUtil->remoteExec({
 			host => $jn,
 			cmd => "/opt/hadoop-2.7.1/sbin/hadoop-daemon.sh start journalnode"
+		});
+	}	
+}
+
+sub syncupHbaseConf() {
+	my $cnt = $#{$hbaseRegionservers} + 1;
+	my $rsync = "rsync --delete --force -az";
+	for (my $i = 0; $i < $cnt; $i++) {
+		my $regionserver = $hbaseRegionservers->[$i];
+		$ciomUtil->remoteExec({
+			host => $hbaseMaster,
+			cmd => [
+				#"scp -r /opt/hbase-1.1.2 $regionserver:/opt/"
+				"$rsync $hbaseConfDir/* $regionserver:$hbaseConfDir/"
+			]
 		});
 	}	
 }
@@ -123,12 +151,14 @@ sub setSparkMasterIP() {
 }
 
 sub main() {
-	cleanSyncup();
-	startJournalDaemons();
-	formatNameNodes();
-	syncupNN1ToNN2();
-	initHAStateInZK();
-	setSparkMasterIP();
+	#cleanSyncup();
+	#startJournalDaemons();
+	#formatNameNodes();
+	#syncupNN1ToNN2();
+	#initHAStateInZK();
+	#setSparkMasterIP();
+
+	syncupHbaseConf();
 }
 
 main();
