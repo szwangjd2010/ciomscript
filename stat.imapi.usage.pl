@@ -18,7 +18,7 @@ my $usersUsageResult = [];
 sub main() {
 	my $hUser;
 	my $hImapiUsageResult;
-	my $fileUser = 'user.csv';
+	my $fileUser = "$ENV{CIOM_SCRIPT_HOME}/user.csv";
 	my $fileImapiUsageResult = 'hz.imapi.todo.userid.times.result';
 	if (!open($hUser, $fileUser)) {
 		$ciomUtil->log("Can not open $fileUser!\n");
@@ -31,6 +31,7 @@ sub main() {
 	
 	my $line;
 	my $name;
+	my $department;
 	my $email;
 	my $uid;	
 	my $times;
@@ -41,15 +42,18 @@ sub main() {
 		}
 
 		$line =~ s|[\r\n]+||g;
-		if ($line =~ m|(.*),(.*),(.*)|) {
+		if ($line =~ m|(.*),(.*),(.*),(.*)|) {
 			$name = $1;
-			$email = $2;
-			$uid = $3;
+			$department = $2;
+			$email = $3;
+			$uid = $4;
+
 			if (!defined($users->{$uid})) {
 				$users->{$uid} = {};
 			}
 			$users->{$uid}->{email} = $email;
 			$users->{$uid}->{name} = $name;
+			$users->{$uid}->{department} = $department;
 		} else {
 			next;
 		}
@@ -66,7 +70,7 @@ sub main() {
 		if ($line =~ m|\s+(\d+)\s([\w-]+)|) {
 			$times = $1;
 			$uid = $2;
-			if ($uid eq '44240668-f3c9-413c-a88e-322eebb8efa3') {
+			if (0 && $uid eq '44240668-f3c9-413c-a88e-322eebb8efa3') {
 				$times = 198;
 			}
 	
@@ -76,6 +80,7 @@ sub main() {
 			$usersUsage->{$uid}->{times} = $times;
 			$usersUsage->{$uid}->{email} = $users->{$uid}->{email};
 			$usersUsage->{$uid}->{name} = $users->{$uid}->{name};
+			$usersUsage->{$uid}->{department} = $users->{$uid}->{department};
 	
 		} else {
 			next;
@@ -98,15 +103,14 @@ sub sortByTimes() {
 		if (!defined($usersUsage->{$uid}->{name}) || $usersUsage->{$uid}->{email} eq "") {
 			next;
 		}
-		push(@{$usersUsageResult}, sprintf('"%s","%s","%s","%s"',
+		push(@{$usersUsageResult}, sprintf('%s,%s,%s,%s,%s',
 			$usersUsage->{$uid}->{times},
 			$usersUsage->{$uid}->{name},
+			$usersUsage->{$uid}->{department},
 			$usersUsage->{$uid}->{email},
 			$uid
 		));
 	}
-
-	print Dumper($usersUsageResult);
 }
 
 sub outputResult2CSV() {
