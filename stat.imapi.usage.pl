@@ -70,9 +70,6 @@ sub main() {
 		if ($line =~ m|\s+(\d+)\s([\w-]+)|) {
 			$times = $1;
 			$uid = $2;
-			if (0 && $uid eq '44240668-f3c9-413c-a88e-322eebb8efa3') {
-				$times = 198;
-			}
 	
 			if (!defined($usersUsage->{$uid})) {
 				$usersUsage->{$uid} = {};
