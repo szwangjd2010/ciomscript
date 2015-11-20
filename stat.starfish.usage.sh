@@ -8,8 +8,8 @@ fileHZMergedLog="hz.qidaapi.evt.log"
 
 main() {
 	execRemoteCmd 10.4.3.237 22 'rm -rf /tmp/$fileMergedLog; find /data/ -mtime -$lastDays -name event.*.log -exec cat {} >> /tmp/$fileMergedLog \;'
-	#execRemoteCmd 10.4.3.237 22 "grep -P '/v1/figures.*71028353-7246-463f-ab12-995144fb4cb2.$' /tmp/$fileMergedLog > /tmp/$fileHZMergedLog"
-	execRemoteCmd 10.4.3.237 22 "grep -P '/v1/orgs/71028353-7246-463f-ab12-995144fb4cb2/todo' /tmp/$fileMergedLog > /tmp/$fileHZMergedLog"
+	execRemoteCmd 10.4.3.237 22 "grep -P '/v1/figures.*71028353-7246-463f-ab12-995144fb4cb2.$' /tmp/$fileMergedLog > /tmp/$fileHZMergedLog"
+	execRemoteCmd 10.4.3.237 22 "grep -P '/v1/orgs/71028353-7246-463f-ab12-995144fb4cb2/todo' /tmp/$fileMergedLog >> /tmp/$fileHZMergedLog"
 
 	rm -rf ./$fileHZMergedLog
 	scp root@10.4.3.237:/tmp/$fileHZMergedLog .

@@ -59,9 +59,9 @@ sub parseEventLog() {
 		}
 
 		$line =~ s|[\r\n]+||g;
-		if ($line =~ m|/v1/orgs/71028353-7246-463f-ab12-995144fb4cb2/todo","","([^"]+).*"([\w-]+)","([\w-]+)"$|) {
-			$ua = $1;
-			$uid = $2;
+		if ($line =~ m|(/v1/orgs/71028353-7246-463f-ab12-995144fb4cb2/todo\|/v1/figures)","","([^"]+).*"([\w-]+)","([\w-]+)"$|) {
+			$ua = $2;
+			$uid = $3;
 
 			if ($ua =~ m|Android|) {
 				$device = "android";
@@ -215,7 +215,7 @@ sub outputResult2CSV() {
 		$buf->writeln($aggregatedUsersUsageResult->[$i]);
 	}
 
-	$ciomUtil->writeToFile("usage.csv", chr(0xFEFF) . ($buf->flush() || '');
+	$ciomUtil->writeToFile("usage.csv", chr(0xFEFF) . ($buf->flush() || ''));
 }
 
 main();
