@@ -99,7 +99,6 @@ sub writeToFile() {
 		print "open $file failed!\n";
 		return -1
 	}
-	print $h chr(0xFEFF);
 	print $h $content;
 	close($h);
 	

@@ -215,7 +215,7 @@ sub outputResult2CSV() {
 		$buf->writeln($aggregatedUsersUsageResult->[$i]);
 	}
 
-	$ciomUtil->writeToFile("usage.csv", $buf->flush() || '');
+	$ciomUtil->writeToFile("usage.csv", chr(0xFEFF) . ($buf->flush() || '');
 }
 
 main();
