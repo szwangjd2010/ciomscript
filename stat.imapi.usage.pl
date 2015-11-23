@@ -184,7 +184,7 @@ sub sortByTimes() {
 		if (!defined($aggregatedUsersUsage->{$uid}->{name}) || $aggregatedUsersUsage->{$uid}->{email} eq "") {
 			next;
 		}
-		push(@{$aggregatedUsersUsageResult}, sprintf("%s,%s,%s,%s,%s,%s,%s,%s",
+		push(@{$aggregatedUsersUsageResult}, sprintf("%s,%s,%s,%s,%s,%s,%s,%s,%s",
 			$aggregatedUsersUsage->{$uid}->{name},
 			$aggregatedUsersUsage->{$uid}->{department},
 			$aggregatedUsersUsage->{$uid}->{email},
@@ -192,7 +192,8 @@ sub sortByTimes() {
 			$aggregatedUsersUsage->{$uid}->{android},
 			$aggregatedUsersUsage->{$uid}->{iphone},
 			$aggregatedUsersUsage->{$uid}->{macosx},
-			$aggregatedUsersUsage->{$uid}->{windows}
+			$aggregatedUsersUsage->{$uid}->{windows},
+			$uid,
 		));
 	}
 }
@@ -200,7 +201,7 @@ sub sortByTimes() {
 sub outputResult2CSV() {
 	my $buf = String::Buffer->new();
 	my $cnt =$#{$aggregatedUsersUsageResult} +1;
-	$buf->writeln(sprintf("%s,%s,%s,%s,%s,%s,%s,%s",
+	$buf->writeln(sprintf("%s,%s,%s,%s,%s,%s,%s,%s,%s",
 			"username",
 			"department",
 			"email",
@@ -208,7 +209,8 @@ sub outputResult2CSV() {
 			"android usage",
 			"iphone usage",
 			"macosx usage",
-			"windows usage"
+			"windows usage",
+			"userid"
 	));
 
 	for (my $i = 0; $i < $cnt; $i++) {
