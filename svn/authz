@@ -1,0 +1,17 @@
+[aliases]
+
+[groups]
+gadmin=lile,cxx
+gios=jxc,zhuli,cdx,zhaott,weixl
+gandroid=jxc,zhuli,cdx,zhaott,weixl
+
+
+[app_ios:/]
+@gadmin=rw
+@gios=rw
+@gandroid=rw
+
+[app_android:/]
+@gadmin=rw
+@gios=rw
+@gandroid=rw
