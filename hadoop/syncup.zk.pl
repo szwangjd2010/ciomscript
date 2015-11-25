@@ -8,13 +8,14 @@ use Data::Dumper;
 use Cwd;
 use CiomUtil;
 
-my $master = '172.17.128.210';
+my $master = '172.17.128.201';
 my $slaves = [
-	'172.17.128.208',
-	'172.17.128.209'
+	'172.17.128.202',
+	'172.17.128.203'
 ];
 
 my $zkHome = '/opt/zookeeper-3.4.6';
+my $zkDataHome = '/opt/zkdata';
 my $ciomUtil = new CiomUtil($ARGV[0] || 0);
 
 sub createMyidFile($$) {
@@ -23,7 +24,7 @@ sub createMyidFile($$) {
 
 	$ciomUtil->remoteExec({
 		host => $host,
-		cmd => "echo $svrId > $zkHome/data/myid"
+		cmd => "echo $svrId > $zkDataHome/myid"
 	});	
 }
 

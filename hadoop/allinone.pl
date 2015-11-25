@@ -52,31 +52,71 @@ my $hadoopConfDir = '/opt/hadoop-2.7.1/etc/hadoop';
 my $sparkConfDir = '/opt/spark-1.4.0-bin-hadoop2.6/conf';
 my $hbaseConfDir = '/opt/hbase-1.1.2/conf';
 
+my $componentSyncupItems = {
+	common => [
+		'/etc/hosts'
+	],
+	hdfs => [
+		'/opt/hdfsroot/'
+	],
+	journal => [
+		'/opt/journal/'
+	],
+	hadoop => [
+		'/etc/profile.d/hadoop.sh',
+		"$hadoopConfDir/"
+	],
+	spark => [
+		'/etc/profile.d/spark.sh',
+		"$sparkConfDir/"
+	]
+};
+
 my $ciomUtil = new CiomUtil($ARGV[0] || 0);
 
-sub cleanSyncup() {
+sub cleanHdfs() {
 	$ciomUtil->remoteExec({
 		host => $seed,
-		cmd => "rm -rf /opt/hdfsroot/name/* /opt/hdfsroot/data/* /opt/journal/data/*"
+		cmd => "rm -rf /opt/hdfsroot/name/* /opt/hdfsroot/data/*"
 	});
+}
 
+sub cleanJournalDaemonData() {
+	$ciomUtil->remoteExec({
+		host => $seed,
+		cmd => "rm -rf /opt/journal/data/*"
+	});	
+}
+
+sub clean() {
+	cleanHdfs();
+	cleanJournalDaemonData();	
+}
+
+sub syncupComponent($) {
+	my $component = shift;
 	my $cnt = $#{$slaves} + 1;
 	my $rsync = "rsync --delete --force -az";
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $slave = $slaves->[$i];
-		$ciomUtil->remoteExec({
-			host => $seed,
-			cmd => [
-				"$rsync /opt/hdfsroot/* $slave:/opt/hdfsroot/",
-				"$rsync /opt/journal/* $slave:/opt/journal/",
-				"$rsync /etc/hosts $slave:/etc/hosts",
-				"$rsync /etc/profile.d/hadoop.sh $slave:/etc/profile.d/hadoop.sh",
-				"$rsync /etc/profile.d/spark.sh $slave:/etc/profile.d/spark.sh",
-				"$rsync $hadoopConfDir/* $slave:$hadoopConfDir/",
-				"$rsync $sparkConfDir/* $slave:$sparkConfDir/"
-			]
-		});
-	}	
+
+		my $items = $componentSyncupItems->{$component};
+		for (my $j = 0; $j <= $#{$items}; $j++) {
+			my $item = $items->[$j];
+			$ciomUtil->remoteExec({
+				host => $seed,
+				cmd => "$rsync $item $slave:$item"
+			});			
+		}
+	}
+}
+
+sub syncup() {
+	#syncupComponent('common');
+	#syncupComponent('hdfs');
+	#syncupComponent('journal');
+	#syncupComponent('hadoop');
+	syncupComponent('spark');
 }
 
 sub startJournalDaemons() {
@@ -151,7 +191,8 @@ sub setSparkMasterIP() {
 }
 
 sub main() {
-	#cleanSyncup();
+	#clean();
+	#syncup();
 	#startJournalDaemons();
 	#formatNameNodes();
 	#syncupNN1ToNN2();
