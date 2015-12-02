@@ -3,18 +3,14 @@ param($ver, $env, $appName)
 . $ENV:CIOM_SCRIPT_HOME\win\ciom.win.util.ps1
 
 function buildSolution($sln) {
-	exec("$MsBuild $sourcePath\$sln $SolutionCF $LogCF")
+	$outputPath = $targetPath
+	exec("$MsBuild $sourcePath\$sln $SolutionCF $WinFormProjectOutputCF=$outputPath $LogCF")
 }
 
 function buildProject($proj) {
 	$outputPath = $targetPath
-	#exec("$MsBuild $sourcePath\$proj $WinFormProjectCF $WinFormProjectOutputCF=$outputPath $LogCF")
-	exec("$MsBuild $sourcePath\$proj $WinFormProjectCF $LogCF")
-}
-
-function package() {
-	$appBuildout = $targetPath
-	compress $packageFile $appBuildout
+	exec("$MsBuild $sourcePath\$proj $WinFormProjectCF $WinFormProjectOutputCF=$outputPath $LogCF")
+	#exec("$MsBuild $sourcePath\$proj $WinFormProjectCF $LogCF")
 }
 
 function mkdirBuildout() {
@@ -71,8 +67,7 @@ function main() {
 		outputError
 		exit 1 #build error
 	}
-	
-	package
+
 }
 
 $CIOM = getAppCiomJson
@@ -83,7 +78,7 @@ $packageFile = getAppPackageFile
 $MsBuild = "&'C:\Program Files (x86)\MSBuild\12.0\Bin\msbuild.exe' --%"
 $SolutionCF = "/t:Clean;Build /p:Configuration=Release /p:_ResolveReferenceDependencies=true"
 $WinFormProjectCF = "/t:ResolveReferences;Compile /p:Configuration=Release /p:Platform=AnyCPU /p:_ResolveReferenceDependencies=true"
-$WinFormProjectOutputCF = "/p:OutputPath"
+$WinFormProjectOutputCF = "/p:OutDir"
 
 $CommonLogFile = getAppBuildLogFile("common")
 $ErrorLogFile = getAppBuildLogFile("error")

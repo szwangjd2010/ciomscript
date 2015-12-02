@@ -21,6 +21,7 @@ function getPackages() {
     if ($CIOM.packagesLocation -eq $null) {
         $packagesLocation = "$sourcePath\packages"
     }
+
 	mkdirIfNotExist "$packagesLocation"
 
 	$arrayPackagesConfigSM = getPackagesConfigListBySolutionManifest

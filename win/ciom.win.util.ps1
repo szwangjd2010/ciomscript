@@ -3,6 +3,8 @@ $logFile = "c:\ciom.log"
 $SSH = "&('C:\PuTTY\plink.exe') -ssh"
 $SCP = "&('C:\PuTTY\pscp.exe') -scp"
 $ZIP = "&('C:\Program Files\2345Soft\HaoZip\HaoZipC')"
+# PsExec -i -2 means remoteExec with admin
+$PsExec = "&('C:\PSTools\PsExec.exe') -i 2 -d"
 
 function log($str) {
 	echo  "$str" >> $logFile
@@ -16,8 +18,13 @@ function exec($cmd) {
 function remoteExec($ip, $port, $username, $password, $cmd) {
 	exec("$SSH -P $port $ip -l $username -pw $password `"$cmd`"")
 }
+
 function remoteExecUsingKey($ip, $port, $username, $key, $cmd) {
 	exec("$SSH -P $port $ip -l $username -i $key `"$cmd`"")
+}
+
+function remotePsExec($ip, $username, $password, $programPath) {
+	exec("$PsExec \\$ip -u $username -p $password $programPath")
 }
 
 function upload($port, $localURI, $remoteURI, $user, $password) {

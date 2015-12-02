@@ -25,4 +25,8 @@ if [ "$CiomPassphraseYMall" == "ymallzy" ]; then
 	exit 0
 fi
 
+if [ "$CiomPassphraseXKB" == "xkbjxf" ]; then
+	exit 0
+fi
+
 exit 1

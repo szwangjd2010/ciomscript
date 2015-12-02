@@ -47,12 +47,12 @@ function restoreFromBackup() {
 	$file1 = "ping.htm"
 	$file2 = "CountSta.db"
 	
-	if (($appName -eq "eschapi") -or ($appName -eq "qidacsapi")){
+	if ($appName -like "*api"){
 		mkdirIfNotExist("$appRoot\$folder2")
 		exec("move-item -force $backupRoot\$folder2\$file2 $appRoot\$folder2\")
 	}
 	
-	if (($appName -eq "eschweb") -or ($appName -eq "qidaweb")){
+	if (($appName -like "*web") -or ($appName -eq "eschool") -or ($appName -eq "elearning")){
 		exec("move-item -force $backupRoot\$folder1\* $appRoot\$folder1\")
 	}
 	
@@ -78,11 +78,11 @@ function extract() {
 function updatePriv() {
 	$appRoot = $app3wPath + "\" + $appName
 	$folder1 = "Upload"
-	if (($appName -eq "eschweb") -or ($appName -eq "qidaweb")){
+	if (($appName -like "*web") -or ($appName -eq "eschool") -or ($appName -eq "elearning")){
 		exec("cacls $appRoot\$folder1 /E /P NETWORKSERVICE:f")
 	}
 	#for eschool unionpay
-	if ($appName -eq "eschweb") {
+	if (($appName -eq "eschweb") -or ($appName -eq "eschool")) {
 		exec("cacls $appRoot\Config\Unionpay.config /E /P everyone:f")
 	}
 }
