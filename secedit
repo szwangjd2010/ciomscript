@@ -6,9 +6,6 @@ file=$1
 passphase=$2
 readonly=${3:-0}
 
-tmpFile="__$file.tmp"
-aesPrefix="openssl enc -aes-256-cbc -salt -a -pass pass:$passphase"
-
 getMd5sum() {
 	echo -n $(openssl md5 $1 | awk '{print $2}')
 }
@@ -26,8 +23,11 @@ clean() {
 	rm -rf $tmpFile
 }
 
-if [ $# -lt 2 ]; then
-	echo "usage: $0 %file %passphase"
+if [ $# -lt 1 ] || [ "$1" == "help" ] || [ "$1" == "-h" ]; then
+	echo "usage:"
+	echo "$0 %file %passphase"
+	echo "$0 %file, and input %passphase lazzly"
+	echo 
 	exit 1
 fi
 
@@ -35,6 +35,17 @@ if [ ! -f $file ]; then
 	echo "file not exist!"
 	exit 2
 fi
+
+if [ "$passphase" == "" ]; then
+	read -s passphase
+fi
+
+# 
+#--------------------------------------------------------------------------
+#
+
+tmpFile="__$file.tmp"
+aesPrefix="openssl enc -aes-256-cbc -salt -a -pass pass:$passphase"
 
 $aesPrefix -d -in $file -out $tmpFile
 if [ $? -ne 0 ]; then
