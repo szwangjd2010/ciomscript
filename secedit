@@ -42,7 +42,7 @@ getMd5sum() {
 }
 
 getTimestamp() {
-	echo -n $(date +%04Y%02m%02d.%02k%02M%02S)
+	echo -n $(date +%Y%m%d.%k%M%S)
 }
 
 snapshotFile() {
