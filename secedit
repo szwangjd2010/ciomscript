@@ -10,7 +10,7 @@ tmpFile="__$file.tmp"
 aesPrefix="openssl enc -aes-256-cbc -salt -a -pass pass:$passphase"
 
 getMd5sum() {
-	echo -n $(md5sum $1 | awk '{print $1}')
+	echo -n $(openssl md5 $1 | awk '{print $2}')
 }
 
 getTimestamp() {
