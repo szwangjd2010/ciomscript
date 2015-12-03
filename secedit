@@ -82,7 +82,7 @@ edit() {
 	fi	
 }
 
-doReadonly() {
+showFile() {
 	cat $tmpFile
 	clean	
 	exit 0	
@@ -95,7 +95,7 @@ main() {
 	decrypt
 
 	if [ $readonly -eq 1 ]; then
-		doReadonly
+		showFile
 	fi
 
 	edit
