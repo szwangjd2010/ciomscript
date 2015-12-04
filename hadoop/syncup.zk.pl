@@ -8,13 +8,13 @@ use Data::Dumper;
 use Cwd;
 use CiomUtil;
 
-my $master = '172.17.128.201';
+my $master = '10.10.69.210';
 my $slaves = [
-	'172.17.128.202',
+	'10.10.69.218',
 	'172.17.128.203'
 ];
 
-my $zkHome = '/opt/zookeeper-3.4.6';
+my $zkHome = '/opt/zookeeper-3.4.7';
 my $zkDataHome = '/opt/zkdata';
 my $ciomUtil = new CiomUtil($ARGV[0] || 0);
 
