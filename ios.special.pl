@@ -11,6 +11,12 @@ our $CiomData;
 my $AppWorkspaceOnSlave = "/Users/ciom/ciomws/$version/$cloudId/$appName";
 my $appMainModuleName = getAppMainModuleName();
 my $xcodeTarget = $CiomData->{scm}->{repos}->[0]->{xcodeTarget};
+my $xcodeWorkspace = $CiomData->{scm}->{repos}->[0]->{xcodeWorkspace};
+
+if (!defined($xcodeTarget)) {
+	$xcodeTarget = $xcodeWorkspace;
+}
+
 my $SshInfo = {
 	host => '172.17.125.199',
 	port => '22',
@@ -37,7 +43,12 @@ sub build() {
 	#fix issue - "User Interaction Is Not Allowed"
 	my $cmdUnlockKeychain = "security -v unlock-keychain -p pwdasdwx /Users/ciom/Library/Keychains/login.keychain";
 	#end
+
 	my $cmdBuild = "xcodebuild -target $xcodeTarget -configuration Distribution -sdk iphoneos build";
+	if (defined($xcodeWorkspace)) {
+		$cmdBuild = "xcodebuild -workspace ${xcodeWorkspace}.xcworkspace -scheme $xcodeWorkspace -configuration Distribution -sdk iphoneos build";
+	}
+
 	my $outAppDirectory = "$AppWorkspaceOnSlave/$appMainModuleName/build/Release-iphoneos/${xcodeTarget}.app";
 	my $ipaFile = "$AppWorkspaceOnSlave/$appMainModuleName/${xcodeTarget}.ipa";
 	my $cmdPackage = "xcrun -sdk iphoneos PackageApplication -v $outAppDirectory -o $ipaFile";

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import pika
 credentials = pika.PlainCredentials('starfish', 'mLjhKmZ4')
-parameters = pika.ConnectionParameters('61.153.102.100',
+parameters = pika.ConnectionParameters('10.10.118.154',
                                        5672,
                                        '/',
                                        credentials)

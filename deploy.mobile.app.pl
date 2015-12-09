@@ -19,6 +19,8 @@ our $cloudId = $ARGV[1];
 our $appName = $ARGV[2];
 our $orgCodes = $ARGV[3] || '*';
 
+our $doPublish = $ENV{DoPublish} || '0';
+
 our $ciomUtil = new CiomUtil(1);
 our $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
 our $ApppkgPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/app";
@@ -68,7 +70,7 @@ sub updateCode($) {
 	my $cnt = $#{$repos} + 1;
 
 	my $cmdSvnPrefix = "svn --non-interactive --username $username --password '$password'";
-	my $cmdRmUnversionedTpl = "$cmdSvnPrefix status %s | grep '^?' | awk '{print \$2}' | xargs -I{} rm -rf '{}'";
+	my $cmdRmUnversionedTpl = "$cmdSvnPrefix status %s | grep -P '^\?' | awk '{print \$2}' | xargs -I{} rm -rf '{}'";
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $name = $repos->[$i]->{name};
 		my $url = $repos->[$i]->{url};
@@ -212,6 +214,15 @@ sub outputOrgCodesWhichNeedToBuild() {
 	$ciomUtil->log(Dumper($orgCodesWhichNeedToBuild));
 }
 
+sub uploadPkgs() {
+	my $info = $CiomData->{publishto};
+	if (!defined($CiomData->{publishto})) {
+		return;
+	}
+	
+	$ciomUtil->exec("scp -r -P $info->{ip} $ApppkgPath/* ciom\@$info->{ip}:/$info->{path}/");
+}
+
 sub main() {
 	getOrgCodesWhichNeedToBuild();
 	if (!validateInputOrgCodes()) {
@@ -228,6 +239,11 @@ sub main() {
 	extraPreAction();
 	iterateOrgsAndBuildEligibles();
 	extraPostAction();
+
+	if ($doPublish eq '1') {
+		uploadPkgs();
+	}
+
 	outputApppkgUrl();
 	leaveWorkspace();
 
