@@ -18,7 +18,7 @@ if (!defined($xcodeTarget)) {
 }
 
 my $SshInfo = {
-	host => '172.17.125.199',
+	host => '172.17.124.199',
 	port => '22',
 	user => 'ciom'
 };
@@ -46,7 +46,7 @@ sub build() {
 
 	my $cmdBuild = "xcodebuild -target $xcodeTarget -configuration Distribution -sdk iphoneos build";
 	if (defined($xcodeWorkspace)) {
-		$cmdBuild = "xcodebuild -workspace ${xcodeWorkspace}.xcworkspace -scheme $xcodeWorkspace -configuration Distribution -sdk iphoneos build";
+		$cmdBuild = "xcodebuild -workspace ${xcodeWorkspace}.xcworkspace -scheme $xcodeWorkspace -configuration Release -sdk iphoneos build ARCHS='armv7 arm64' VALID_ARCHS='armv7 arm64'";
 	}
 
 	my $outAppDirectory = "$AppWorkspaceOnSlave/$appMainModuleName/build/Release-iphoneos/${xcodeTarget}.app";

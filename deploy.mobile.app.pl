@@ -215,12 +215,12 @@ sub outputOrgCodesWhichNeedToBuild() {
 }
 
 sub uploadPkgs() {
-	my $info = $CiomData->{publishto};
-	if (!defined($CiomData->{publishto})) {
+	my $publishto = $CiomData->{publishto};
+	if (!defined($publishto)) {
 		return;
 	}
 	
-	$ciomUtil->exec("scp -r -P $info->{ip} $ApppkgPath/* ciom\@$info->{ip}:/$info->{path}/");
+	$ciomUtil->exec("scp -r -P $publishto->{port} $ApppkgPath/* ciom\@$publishto->{ip}:/$publishto->{path}/");
 }
 
 sub main() {

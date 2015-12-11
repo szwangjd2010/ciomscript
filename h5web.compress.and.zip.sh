@@ -9,6 +9,7 @@ fi
 version=${1:-v1}
 deployToEnv=$2
 appName=$3
+skipGrunt=${4:-noskip}
 
 AppPackageFile="$appName.zip"
 
@@ -21,7 +22,9 @@ leaveWorkspace() {
 }
 
 gruntCompress() {
-	execCmd "grunt"
+	if [ "$skipGrunt" != "skipgrunt" ]; then
+        	execCmd "grunt"
+	fi
 }
 
 generateAppPackage() {
