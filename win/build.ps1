@@ -95,10 +95,10 @@ function build() {
 }
 
 function clean() {
-	if ($appName -eq "lecaiweb") {
-		$dtNow = getTimestamp
-		Copy-Item "$targetPath" "c:\lecaiweb.build.history\lecaiweb-$dtNow" -recurse
-	}
+	#if ($appName -eq "lecaiweb") {
+	#	$dtNow = getTimestamp
+	#	Copy-Item "$targetPath" "c:\lecaiweb.build.history\lecaiweb-$dtNow" -recurse
+	#}
 	
 	cleanDirectory "$targetPath"
 

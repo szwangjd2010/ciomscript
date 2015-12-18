@@ -19,8 +19,21 @@ sub fillPms() {
 }
 
 sub build() {
-	my $fileBuildXml = "$appMainModuleName/build.xml";
-	$ciomUtil->exec("ant -f $fileBuildXml clean release");
+	my $build = $CiomData->{build};
+	
+	my $builder = $build->{builder};
+	my $file = $build->{file};
+	my $target = $build->{target};
+
+	if ($builder eq 'ant') {
+		$ciomUtil->exec("ant -f $file $target");
+		return;
+	}
+
+	if ($builder eq 'gradle') {
+		$ciomUtil->exec("gradle -b $file $target");
+		return;
+	}
 }
 
 sub getAppFinalPkgName($) {

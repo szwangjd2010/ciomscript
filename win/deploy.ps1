@@ -19,6 +19,7 @@ function fillHostInfo($hostInfo) {
 	nullset $hostInfo "app3wPath"
 	nullset $hostInfo "typeRM"
 	nullset $hostInfo "port"
+	nullset $hostInfo "adminPwd"
 }
 
 function getDeployScript() {
@@ -75,7 +76,8 @@ function main(){
 		
 		if ($appName -like "*mq") {
 			$mqProgramPath = "$app3wPath\OceanSoft.ServiceMgmt.exe"
-			remotePsExec $ip $hostInfo.adminAcc $hostInfo.adminPwd $mqProgramPath
+			$sessionId = getRemoteSessionID $ip $hostInfo.port $hostInfo.activeAccName $hostInfo.activeAccPwd
+			remotePsExec $ip $sessionId $hostInfo.adminPwd $mqProgramPath
 			$LASTEXITCODE = 0
 		}
 	}

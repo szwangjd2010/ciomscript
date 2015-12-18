@@ -22,3 +22,13 @@ datanode, spark worker 等hadoop组件启动后很快自动shutdown的问题
 2.b reboot
 2.c run 上述java app 测试, OK
 3. 问题解决
+
+
+2. issue: kafka broker refuse connection from client
+config/server.properties
+must set following two items value:
+host.name=%ip.or.name%
+advertised.host.name=%ip.or.name%
+then broker accessible from remote client
+
+

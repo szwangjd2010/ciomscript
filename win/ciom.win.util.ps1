@@ -4,7 +4,7 @@ $SSH = "&('C:\PuTTY\plink.exe') -ssh"
 $SCP = "&('C:\PuTTY\pscp.exe') -scp"
 $ZIP = "&('C:\Program Files\2345Soft\HaoZip\HaoZipC')"
 # PsExec -i -2 means remoteExec with admin
-$PsExec = "&('C:\PSTools\PsExec.exe') -i 2 -d"
+$PsExec = "&('C:\PSTools\PsExec.exe') -d"
 
 function log($str) {
 	echo  "$str" >> $logFile
@@ -23,8 +23,12 @@ function remoteExecUsingKey($ip, $port, $username, $key, $cmd) {
 	exec("$SSH -P $port $ip -l $username -i $key `"$cmd`"")
 }
 
-function remotePsExec($ip, $username, $password, $programPath) {
-	exec("$PsExec \\$ip -u $username -p $password $programPath")
+function remotePsExec($ip, $remoteSessionId, $admPwd, $programPath) {
+	exec("$PsExec -i $remoteSessionId \\$ip -u administrator -p $admPwd $programPath")
+}
+
+function getRemoteSessionID($ip, $port, $username, $password){
+	return Invoke-Expression "$SSH -P $port $ip -l $username -pw $password `"query session $username`" | ? { `$_ -match '\s+$username\s+(\d+)' } | % { `$matches[1] } "
 }
 
 function upload($port, $localURI, $remoteURI, $user, $password) {

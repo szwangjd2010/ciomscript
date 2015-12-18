@@ -45,11 +45,13 @@ sub build() {
 	#end
 
 	my $cmdBuild = "xcodebuild -target $xcodeTarget -configuration Distribution -sdk iphoneos build";
+	my $outAppDirectory = "$AppWorkspaceOnSlave/$appMainModuleName/build/Release-iphoneos/${xcodeTarget}.app";
 	if (defined($xcodeWorkspace)) {
-		$cmdBuild = "xcodebuild -workspace ${xcodeWorkspace}.xcworkspace -scheme $xcodeWorkspace -configuration Release -sdk iphoneos build ARCHS='armv7 arm64' VALID_ARCHS='armv7 arm64'";
+		$cmdBuild = "xcodebuild -workspace ${xcodeWorkspace}.xcworkspace -scheme $xcodeWorkspace -configuration Release -sdk iphoneos build";
+		$outAppDirectory = "$AppWorkspaceOnSlave/$appMainModuleName/build/Products/Release-iphoneos/${xcodeTarget}.app";
 	}
 
-	my $outAppDirectory = "$AppWorkspaceOnSlave/$appMainModuleName/build/Release-iphoneos/${xcodeTarget}.app";
+	
 	my $ipaFile = "$AppWorkspaceOnSlave/$appMainModuleName/${xcodeTarget}.ipa";
 	my $cmdPackage = "xcrun -sdk iphoneos PackageApplication -v $outAppDirectory -o $ipaFile";
 	
