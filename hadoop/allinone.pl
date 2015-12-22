@@ -115,8 +115,8 @@ sub syncup() {
 	#syncupComponent('common');
 	#syncupComponent('hdfs');
 	#syncupComponent('journal');
-	#syncupComponent('hadoop');
-	syncupComponent('spark');
+	syncupComponent('hadoop');
+	#syncupComponent('spark');
 }
 
 sub startJournalDaemons() {
@@ -192,14 +192,14 @@ sub setSparkMasterIP() {
 
 sub main() {
 	#clean();
-	#syncup();
+	syncup();
 	#startJournalDaemons();
 	#formatNameNodes();
 	#syncupNN1ToNN2();
 	#initHAStateInZK();
 	#setSparkMasterIP();
 
-	syncupHbaseConf();
+	#syncupHbaseConf();
 }
 
 main();
