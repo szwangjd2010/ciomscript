@@ -104,7 +104,7 @@ sub generateStreameditFile($) {
 	my $items = $_[0];
 
 	my $cmds = "";
-	my $CmdStreameditTpl = "perl -CSDL %s-i -pE 's|%s|%s|mg' %s";
+	my $CmdStreameditTpl = "perl -CSDL %s-i -pE 's|%s|%s|mg' '%s'";
 	for my $file (keys %{$items}) {
 		my $v = $items->{$file};
 		my $cnt = $#{$v} + 1;
@@ -125,13 +125,13 @@ sub generateStreameditFile($) {
 }
 
 sub replacePmsInShellStreamedit() {
-	my $nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciompm>' $ShellStreamedit");
+	my $nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciompm>' '$ShellStreamedit'");
 	if ($nCiompmCnt == 0) {
 		return;
 	}
 
 	for my $key (keys %{$Pms}) {
-		$nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciompm>$key</ciompm>' $ShellStreamedit");
+		$nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciompm>$key</ciompm>' '$ShellStreamedit'");
 		if ($nCiompmCnt == 0) {
 			next;
 		}
@@ -139,7 +139,7 @@ sub replacePmsInShellStreamedit() {
 		my $v = $Pms->{$key};
 		$ciomUtil->log("\n\ninstancing $key ...");
 		$ciomUtil->exec("cat $ShellStreamedit");
-		$ciomUtil->exec("perl -CSDL -i -pE 's|<ciompm>$key</ciompm>|$v|mg' $ShellStreamedit");
+		$ciomUtil->exec("perl -CSDL -i -pE 's|<ciompm>$key</ciompm>|$v|mg' '$ShellStreamedit'");
 	}	
 }
 

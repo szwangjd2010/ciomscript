@@ -5,6 +5,7 @@ $SCP = "&('C:\PuTTY\pscp.exe') -scp"
 $ZIP = "&('C:\Program Files\2345Soft\HaoZip\HaoZipC')"
 # PsExec -i -2 means remoteExec with admin
 $PsExec = "&('C:\PSTools\PsExec.exe') -d"
+$invokeRsltFile = "c:\webrequest.log"
 
 function log($str) {
 	echo  "$str" >> $logFile
@@ -97,4 +98,16 @@ function rmFile($path) {
 
 function validatePath($path) {
 	return Test-Path $path
+}
+
+function invokeWebRequest($url){
+	log("visit $url")
+	"Invoke-WebRequest $url" | Out-File -Append $invokeRsltFile
+	Invoke-WebRequest $url -UseBasicParsin | Out-File -Append $invokeRsltFile
+}
+
+function cleanWebRequestResult(){
+	if (Test-Path $invokeRsltFile) {
+		echo "" > $invokeRsltFile
+	}
 }

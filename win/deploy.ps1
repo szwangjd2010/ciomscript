@@ -51,7 +51,19 @@ function deployUsingSSH($ip, $port, $username, $password, $app3wPath) {
 	$argus = "-timestamp $timestamp -appName $appName -siteName $siteName -app3wPath $app3wPath"
 	remoteExec $ip $port $username "$password" "powershell.exe -file c:\${deployScript} $argus"
 }
+
+function visitUrls($ip){
+	if ( $CIOM.visitUrls -ne $null) {
+		foreach ($item in $CIOM.visitUrls) {
+			$vUrl= "http://" + $ip + $item
+			echo "visit $vUrl"
+			invokeWebRequest $vUrl
+		}
+	}
+}
+
 function main(){
+	cleanWebRequestResult
 	foreach ($hostInfo in $CIOM.hosts) {
 		fillHostInfo $hostInfo
 
@@ -73,6 +85,8 @@ function main(){
 		if ($LASTEXITCODE -eq 1) {
 			break
 		}
+		
+		visitUrls $ip
 		
 		if ($appName -like "*mq") {
 			$mqProgramPath = "$app3wPath\OceanSoft.ServiceMgmt.exe"

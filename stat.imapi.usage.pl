@@ -10,6 +10,7 @@ use CiomUtil;
 use open ":encoding(utf8)";
 use open IN => ":encoding(utf8)", OUT => ":utf8";
 
+my $orgId = $ARGV[0] || '71028353-7246-463f-ab12-995144fb4cb2';
 my $ciomUtil = new CiomUtil(1);
 
 my $aggregatedUsersUsage = {};
@@ -59,7 +60,7 @@ sub parseEventLog() {
 		}
 
 		$line =~ s|[\r\n]+||g;
-		if ($line =~ m|(/v1/orgs/71028353-7246-463f-ab12-995144fb4cb2/todo\|/v1/figures)","","([^"]+).*"([\w-]+)","([\w-]+)"$|) {
+		if ($line =~ m|(/v1/orgs/\Q$orgId\E/todo\|/v1/figures)","","([^"]+).*"([\w-]+)","([\w-]+)"$|) {
 			$ua = $2;
 			$uid = $3;
 
@@ -121,7 +122,7 @@ sub main() {
 	parseEventLog();
 	my $hUser;
 	my $hImapiUsageResult;
-	my $fileUser = "$ENV{CIOM_SCRIPT_HOME}/user.csv";
+	my $fileUser = "$ENV{CIOM_SCRIPT_HOME}/user.${orgId}.csv";
 	if (!open($hUser, $fileUser)) {
 		$ciomUtil->log("Can not open $fileUser!\n");
 		return 1;
