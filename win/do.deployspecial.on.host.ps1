@@ -44,6 +44,7 @@ function restoreFromBackup() {
 	$backupRoot = $app3wPath + "\" + ${appName} + "_" + $timestamp
 	$folder1 = "Upload"
 	$folder2 = "Config\ApiCount"
+	$convertMgrBakFolder = "App_Data"
 	$file1 = "ping.htm"
 	$file2 = "CountSta.db"
 	
@@ -59,6 +60,11 @@ function restoreFromBackup() {
 	#exec("remove-item -recurse -force $backupRoot\$folder1")
 	if ($(test-path "$backupRoot\$file1")) {
 		exec("copy-item -recurse -force $backupRoot\$file1 $appRoot\")
+	}
+	
+	if ($appName -eq "convertmgmt"){
+		mkdirIfNotExist("$appRoot\$convertMgrBakFolder")
+		exec("copy-item -recurse -force $backupRoot\$convertMgrBakFolder\* $appRoot\$convertMgrBakFolder\")
 	}
 }
 
