@@ -19,7 +19,7 @@ our $cloudId = $ARGV[1];
 our $appName = $ARGV[2];
 our $orgCodes = $ARGV[3] || '*';
 
-our $doPublish = $ENV{UploadPackage} || '0';
+our $doPublish = $ENV{UploadPackage} || 'NO';
 
 our $ciomUtil = new CiomUtil(1);
 our $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
@@ -106,15 +106,14 @@ sub generateStreameditFile($) {
 		my $cnt = $#{$v} + 1;
 		
 		for (my $i = 0; $i < $cnt; $i++) {
-			my $lineMode = defined($v->[$i]->{single}) ? '-0 ' : '';
-
-			#@ add dynamic parameters key, map entry
+			#add dynamic parameters key, map entry
 			if ($v->[$i]->{to} =~ m|<ciompm>(\w+)</ciompm>|) {
 				my $key = $1;
 				$DynamicParams->{$key} = $ENV{$key} || '';
 			}
-			#@ end
+			#end
 
+			my $lineMode = defined($v->[$i]->{single}) ? '-0 ' : '';
 			$cmds .= sprintf($CmdStreameditTpl,
 				$lineMode,
 				$v->[$i]->{re},
@@ -256,7 +255,7 @@ sub main() {
 	iterateOrgsAndBuildEligibles();
 	extraPostAction();
 
-	if ($doPublish eq '1') {
+	if ($doPublish eq 'YES') {
 		uploadPkgs();
 	}
 
