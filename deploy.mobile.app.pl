@@ -109,7 +109,7 @@ sub generateStreameditFile($) {
 			my $lineMode = defined($v->[$i]->{single}) ? '-0 ' : '';
 
 			#@ add dynamic parameters key, map entry
-			if ($v->[$i]->{to} =~ m|<ciompm>(\w+)</ciom>|) {
+			if ($v->[$i]->{to} =~ m|<ciompm>(\w+)</ciompm>|) {
 				my $key = $1;
 				$DynamicParams->{$key} = $ENV{$key} || '';
 			}
