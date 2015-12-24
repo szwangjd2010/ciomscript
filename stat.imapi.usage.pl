@@ -94,6 +94,10 @@ sub percentageUsersUsage($$) {
 	my $deviceTimes = shift;
 	my $totalTimes = shift;
 
+	if ($totalTimes == 0) {
+		return "0";
+	}
+
 	return sprintf("%d(%.1f%%)",
 		$deviceTimes,
 		($deviceTimes + 0.00) / $totalTimes * 100.0

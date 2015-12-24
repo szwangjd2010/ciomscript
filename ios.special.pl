@@ -5,17 +5,10 @@ our $appName;
 our $ciomUtil;
 our $AppVcaHome;
 our $ApppkgPath;
-our $Pms;
 our $CiomData;
 
 my $AppWorkspaceOnSlave = "/Users/ciom/ciomws/$version/$cloudId/$appName";
-my $appMainModuleName = getAppMainModuleName();
-my $xcodeTarget = $CiomData->{scm}->{repos}->[0]->{xcodeTarget};
-my $xcodeWorkspace = $CiomData->{scm}->{repos}->[0]->{xcodeWorkspace};
-
-if (!defined($xcodeTarget)) {
-	$xcodeTarget = $xcodeWorkspace;
-}
+my $BuildInfo = $CiomData->{build};
 
 my $SshInfo = {
 	host => '172.17.124.199',
@@ -26,33 +19,54 @@ my $SshInfo = {
 sub extraPreAction() {}
 sub extraPostAction() {}
 
-sub fillPms() {
-	$Pms->{CFBundleShortVersionString} = $ENV{CFBundleShortVersionString};
-	$Pms->{CFBundleVersion} = $ENV{CFBundleVersion};
-}
-
 sub resyncSourceCode() {
 	$ciomUtil->exec("$ENV{CIOM_SCRIPT_HOME}/syncup.to.slave.sh $version $cloudId $appName osx");
+}
+
+sub generateBuildCmd() {
+	my $cmd;
+	if ($BuildInfo->{type} eq 'target') {
+		$cmd = sprintf("xcodebuild -target %s -configuration %s -sdk %s %s",
+			$BuildInfo->{typeTargetName},
+			$BuildInfo->{configuration},
+			$BuildInfo->{sdk},
+			$BuildInfo->{target}
+		);
+	} else {
+		$cmd = sprintf("xcodebuild -workspace %s.xcworkspace -scheme %s -configuration %s -sdk %s %s",
+			$BuildInfo->{typeTargetName},
+			$BuildInfo->{typeTargetName},
+			$BuildInfo->{configuration},
+			$BuildInfo->{sdk},
+			$BuildInfo->{target}
+		);		
+	}
+
+	return $cmd;
+}
+
+sub getAppBuiltOutLocation() {
+	if ($BuildInfo->{type} eq 'target') {
+		return "$AppWorkspaceOnSlave/$BuildInfo->{location}/build/Release-iphoneos/$BuildInfo->{typeTargetName}.app";
+	} else {
+		return "$AppWorkspaceOnSlave/$BuildInfo->{location}/build/Products/Release-iphoneos/$BuildInfo->{typeTargetName}.app";
+	}	
 }
 
 sub build() {
 	resyncSourceCode();
 
+	my $build = $CiomData->{build};
 	#following all directory are remote directory
-	my $cmd2Workspace = "cd $AppWorkspaceOnSlave/$appMainModuleName";
+	my $cmd2Workspace = "cd $AppWorkspaceOnSlave/$BuildInfo->{location}";
 	#fix issue - "User Interaction Is Not Allowed"
 	my $cmdUnlockKeychain = "security -v unlock-keychain -p pwdasdwx /Users/ciom/Library/Keychains/login.keychain";
 	#end
 
-	my $cmdBuild = "xcodebuild -target $xcodeTarget -configuration Distribution -sdk iphoneos build";
-	my $outAppDirectory = "$AppWorkspaceOnSlave/$appMainModuleName/build/Release-iphoneos/${xcodeTarget}.app";
-	if (defined($xcodeWorkspace)) {
-		$cmdBuild = "xcodebuild -workspace ${xcodeWorkspace}.xcworkspace -scheme $xcodeWorkspace -configuration Release -sdk iphoneos build";
-		$outAppDirectory = "$AppWorkspaceOnSlave/$appMainModuleName/build/Products/Release-iphoneos/${xcodeTarget}.app";
-	}
-
+	my $cmdBuild = generateBuildCmd();
+	my $outAppDirectory = getAppBuiltOutLocation();
 	
-	my $ipaFile = "$AppWorkspaceOnSlave/$appMainModuleName/${xcodeTarget}.ipa";
+	my $ipaFile = "$AppWorkspaceOnSlave/$BuildInfo->{location}/$BuildInfo->{typeTargetName}.ipa";
 	my $cmdPackage = "xcrun -sdk iphoneos PackageApplication -v $outAppDirectory -o $ipaFile";
 	
 	$SshInfo->{cmd} = "( $cmd2Workspace; $cmdUnlockKeychain; $cmdBuild; $cmdPackage )";
@@ -72,7 +86,7 @@ sub moveApppkgFile($) {
 	#/bin/cp: skipping file `WebSchool/eschool.ipa', as it was replaced while being copied
 	$ciomUtil->exec("sleep 5");
 	my $appFinalPkgName = getAppFinalPkgName($code);
-	my $orgIpaFile = "$ENV{CIOM_SLAVE_OSX_WORKSPACE}/$version/$cloudId/$appName/$appMainModuleName/${xcodeTarget}.ipa";
+	my $orgIpaFile = "$ENV{CIOM_SLAVE_OSX_WORKSPACE}/$version/$cloudId/$appName/$BuildInfo->{location}/$BuildInfo->{typeTargetName}.ipa";
 	$ciomUtil->exec("mv $orgIpaFile $ApppkgPath/$appFinalPkgName");
 }
 

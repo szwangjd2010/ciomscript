@@ -5,33 +5,21 @@ our $appName;
 our $ciomUtil;
 our $AppVcaHome;
 our $ApppkgPath;
-our $Pms;
 our $CiomData;
 
-my $appMainModuleName = getAppMainModuleName();
+my $BuildInfo = $CiomData->{build};
 
 sub extraPreAction() {}
 sub extraPostAction() {}
 
-sub fillPms() {
-	$Pms->{versionCode} = $ENV{versionCode};
-	$Pms->{versionName} = $ENV{versionName};
-}
-
 sub build() {
-	my $build = $CiomData->{build};
-	
-	my $builder = $build->{builder};
-	my $file = $build->{file};
-	my $target = $build->{target};
-
-	if ($builder eq 'ant') {
-		$ciomUtil->exec("ant -f $file $target");
+	if ($BuildInfo->{builder} eq 'ant') {
+		$ciomUtil->exec("ant -f $BuildInfo->{location}/$BuildInfo->{file} $BuildInfo->{target}");
 		return;
 	}
 
-	if ($builder eq 'gradle') {
-		$ciomUtil->exec("gradle -b $file $target");
+	if ($BuildInfo->{builder} eq 'gradle') {
+		$ciomUtil->exec("gradle -b $BuildInfo->{file} $BuildInfo->{target}");
 		return;
 	}
 }
@@ -48,7 +36,7 @@ sub moveApppkgFile($) {
 	my $code = $_[0];
 
 	my $appFinalPkgName = getAppFinalPkgName($code);
-	$ciomUtil->exec("mv -f /tmp/ciom.android/$appName/${appMainModuleName}-release.apk $ApppkgPath/$appFinalPkgName");
+	$ciomUtil->exec("mv -f /tmp/ciom.android/$appName/$BuildInfo->{location}-release.apk $ApppkgPath/$appFinalPkgName");
 }
 
 sub cleanAfterOrgBuild() {

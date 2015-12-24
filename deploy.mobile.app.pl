@@ -19,21 +19,17 @@ our $cloudId = $ARGV[1];
 our $appName = $ARGV[2];
 our $orgCodes = $ARGV[3] || '*';
 
-our $doPublish = $ENV{DoPublish} || '0';
+our $doPublish = $ENV{UploadPackage} || '0';
 
 our $ciomUtil = new CiomUtil(1);
 our $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
 our $ApppkgPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/app";
-our $Pms = {};
+our $DynamicParams = {};
 our $CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
 
 my $ShellStreamedit = "_streamedit.ciom";
 my $OldPwd = getcwd();
 my $orgCodesWhichNeedToBuild = [];
-
-sub getAppMainModuleName() {
-	return $CiomData->{scm}->{repos}->[0]->{name};
-}
 
 sub getBuildLogFile() {
 	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
@@ -111,6 +107,14 @@ sub generateStreameditFile($) {
 		
 		for (my $i = 0; $i < $cnt; $i++) {
 			my $lineMode = defined($v->[$i]->{single}) ? '-0 ' : '';
+
+			#@ add dynamic parameters key, map entry
+			if ($v->[$i]->{to} =~ m|<ciompm>(\w+)</ciom>|) {
+				my $key = $1;
+				$DynamicParams->{$key} = $ENV{$key} || '';
+			}
+			#@ end
+
 			$cmds .= sprintf($CmdStreameditTpl,
 				$lineMode,
 				$v->[$i]->{re},
@@ -124,19 +128,23 @@ sub generateStreameditFile($) {
 	$ciomUtil->writeToFile("$ShellStreamedit", $cmds);
 }
 
+sub clearDynamicParams() {
+	%{$DynamicParams} = ();
+}
+
 sub replacePmsInShellStreamedit() {
 	my $nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciompm>' '$ShellStreamedit'");
 	if ($nCiompmCnt == 0) {
 		return;
 	}
 
-	for my $key (keys %{$Pms}) {
+	for my $key (keys %{$DynamicParams}) {
 		$nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciompm>$key</ciompm>' '$ShellStreamedit'");
 		if ($nCiompmCnt == 0) {
 			next;
 		}
 
-		my $v = $Pms->{$key};
+		my $v = $DynamicParams->{$key};
 		$ciomUtil->log("\n\ninstancing $key ...");
 		$ciomUtil->exec("cat $ShellStreamedit");
 		$ciomUtil->exec("perl -CSDL -i -pE 's|<ciompm>$key</ciompm>|$v|mg' '$ShellStreamedit'");
@@ -183,6 +191,7 @@ sub iterateOrgsAndBuildEligibles() {
 		my $code = $orgCodesWhichNeedToBuild->[$i];
 		revertCode();
 		replaceOrgCustomizedFiles($code);
+		clearDynamicParams();
 		streameditConfs4AllOrgs();
 		streameditConfs4Org($code);
 		build();
@@ -219,8 +228,16 @@ sub uploadPkgs() {
 	if (!defined($publishto)) {
 		return;
 	}
+
+	my $ip = $publishto->{ip};
+	my $port = $publishto->{port} || 22;
+	my $user = $publishto->{user} || 'ciom';
+	my $path = $publishto->{path};
+	if (!defined($ip) || !defined($path)) {
+		return;
+	}	
 	
-	$ciomUtil->exec("scp -r -P $publishto->{port} $ApppkgPath/* ciom\@$publishto->{ip}:/$publishto->{path}/");
+	$ciomUtil->exec("scp -r -P $port $ApppkgPath/* $user\@$ip:/$path/");
 }
 
 sub main() {
@@ -235,7 +252,6 @@ sub main() {
 	enterWorkspace();
 	makeApppkgDirectory();
 	updateCode(0);
-	fillPms();
 	extraPreAction();
 	iterateOrgsAndBuildEligibles();
 	extraPostAction();
