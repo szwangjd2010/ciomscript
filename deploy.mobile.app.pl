@@ -145,8 +145,8 @@ sub replacePmsInShellStreamedit() {
 
 		my $v = $DynamicParams->{$key};
 		$ciomUtil->log("\n\ninstancing $key ...");
-		$ciomUtil->exec("cat $ShellStreamedit");
 		$ciomUtil->exec("perl -CSDL -i -pE 's|<ciompm>$key</ciompm>|$v|mg' '$ShellStreamedit'");
+		$ciomUtil->exec("cat '$ShellStreamedit'");
 	}	
 }
 
