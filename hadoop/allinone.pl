@@ -115,8 +115,8 @@ sub syncup() {
 	#syncupComponent('common');
 	#syncupComponent('hdfs');
 	#syncupComponent('journal');
-	syncupComponent('hadoop');
-	#syncupComponent('spark');
+	#syncupComponent('hadoop');
+	syncupComponent('spark');
 }
 
 sub startJournalDaemons() {

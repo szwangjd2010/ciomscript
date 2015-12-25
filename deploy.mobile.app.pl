@@ -131,7 +131,7 @@ sub clearDynamicParams() {
 	%{$DynamicParams} = ();
 }
 
-sub replacePmsInShellStreamedit() {
+sub instanceDynamicParams() {
 	my $nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciompm>' '$ShellStreamedit'");
 	if ($nCiompmCnt == 0) {
 		return;
@@ -153,7 +153,7 @@ sub replacePmsInShellStreamedit() {
 sub streamedit($) {
 	my $items = $_[0];
 	generateStreameditFile($items);
-	replacePmsInShellStreamedit();
+	instanceDynamicParams();
 	
 	$ciomUtil->exec("bash $ShellStreamedit");
 	$ciomUtil->exec("cat $ShellStreamedit");
