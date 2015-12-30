@@ -40,7 +40,7 @@ sub doPlatformDependencyInjection() {
 }
 
 sub enterWorkspace() {
-	my $appWorkspace = "$ENV{WORKSPACE}/$appName" || "/var/lib/jenkins/workspace/mobile.$cloudId-eschool/$appName";
+	my $appWorkspace = "$ENV{WORKSPACE}/$appName";
 	if (! -d $appWorkspace) {
 		$ciomUtil->exec("mkdir -p $appWorkspace");
 	}

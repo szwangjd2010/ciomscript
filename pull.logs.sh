@@ -9,7 +9,7 @@ LecaiApiHosts="10.10.73.235 10.10.76.73 10.10.75.138"
 LecaiAdminapiHosts="10.10.74.158"
 MallApiHosts="10.10.110.226"
 MallAdminapiHosts="10.10.74.158"
-ComponentapiHost="10.10.106.125"
+ComponentapiHost="10.10.125.17"
 
 pullLog() {
 	hosts=$1

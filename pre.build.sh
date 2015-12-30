@@ -24,6 +24,11 @@ leaveWorkspace() {
 }
 
 replaceEnvSpecialFiles() {
+	
+	if [ ! -d "$WORKSPACE/$appName" ]; then
+		mkdir "$WORKSPACE/$appName"
+	fi
+
 	execCmd "/bin/cp -rf $CnfLocation/$appName/* $WORKSPACE/$appName/"
 }
 

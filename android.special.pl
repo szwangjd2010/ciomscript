@@ -19,7 +19,7 @@ sub build() {
 	}
 
 	if ($BuildInfo->{builder} eq 'gradle') {
-		$ciomUtil->exec("gradle -b $BuildInfo->{file} $BuildInfo->{target}");
+		$ciomUtil->exec("gradle -b $BuildInfo->{location}/$BuildInfo->{file} $BuildInfo->{target}");
 		return;
 	}
 }

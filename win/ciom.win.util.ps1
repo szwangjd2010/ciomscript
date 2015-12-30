@@ -6,6 +6,7 @@ $ZIP = "&('C:\Program Files\2345Soft\HaoZip\HaoZipC')"
 # PsExec -i -2 means remoteExec with admin
 $PsExec = "&('C:\PSTools\PsExec.exe') -d"
 $invokeRsltFile = "c:\webrequest.log"
+$appCmd = "C:\Windows\System32\inetsrv\appcmd.exe"
 
 function log($str) {
 	echo  "$str" >> $logFile
@@ -26,6 +27,18 @@ function remoteExecUsingKey($ip, $port, $username, $key, $cmd) {
 
 function remotePsExec($ip, $remoteSessionId, $admPwd, $programPath) {
 	exec("$PsExec -i $remoteSessionId \\$ip -u administrator -p $admPwd $programPath")
+}
+
+function remoteStartSite($ip, $port, $username, $password, $siteName) {
+	$startSiteCmd = $appCmd + " start site /site.name:" + $siteName
+	#echo $startSiteCmd
+	remoteExec $ip $port $username $password $startSiteCmd
+}
+
+function remoteStopSite($ip, $port, $username, $password, $siteName) {
+	$stopSiteCmd = $appCmd + " stop site /site.name:" + $siteName
+	#echo $stopSiteCmd
+	remoteExec $ip $port $username $password $stopSiteCmd
 }
 
 function getRemoteSessionID($ip, $port, $username, $password){

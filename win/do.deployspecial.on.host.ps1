@@ -1,9 +1,18 @@
 param($timestamp, $appName, $siteName, $app3wPath)
 
 $logFile = "c:\ciom.log"
+$appCmd = "&('C:\Windows\System32\inetsrv\appcmd.exe')"
 
 function log($str) {
 	echo  "$str" >> $logFile
+}
+
+function startSite($sName) {
+	exec("$appCmd start site /site.name:$sName")
+}
+
+function stopSite($sName) {
+	exec("$appCmd stop site /site.name:$sName")
 }
 
 function exec($cmd) {
@@ -12,11 +21,19 @@ function exec($cmd) {
 }
 
 function startIIS() {
-	iisreset /START
+	if ($appName -eq "convertmgmt"){
+		startSite $siteName
+	} else {
+		iisreset /START
+	}
 }
 
 function stopIIS() {
-	iisreset /STOP
+	if ($appName -eq "convertmgmt"){
+		stopSite $siteName
+	} else {
+		iisreset /STOP
+	}
 }
 
 function mkdirIfNotExist($directory) {
@@ -42,22 +59,24 @@ function backup() {
 function restoreFromBackup() {
 	$appRoot = $app3wPath + "\" + $appName
 	$backupRoot = $app3wPath + "\" + ${appName} + "_" + $timestamp
-	$folder1 = "Upload"
+	$webBakFolder1 = "Upload"
 	$folder2 = "Config\ApiCount"
 	$convertMgrBakFolder = "App_Data"
 	$file1 = "ping.htm"
 	$file2 = "CountSta.db"
 	
 	if ($appName -like "*api"){
-		mkdirIfNotExist("$appRoot\$folder2")
-		exec("move-item -force $backupRoot\$folder2\$file2 $appRoot\$folder2\")
+		if ($(test-path "$backupRoot\$folder2\$file2")) {
+			mkdirIfNotExist("$appRoot\$folder2")
+			exec("move-item -force $backupRoot\$folder2\$file2 $appRoot\$folder2\")
+		}
 	}
 	
 	if (($appName -like "*web") -or ($appName -eq "eschool") -or ($appName -eq "elearning")){
-		exec("move-item -force $backupRoot\$folder1\* $appRoot\$folder1\")
+		exec("move-item -force $backupRoot\$webBakFolder1\* $appRoot\$webBakFolder1\")
 	}
 	
-	#exec("remove-item -recurse -force $backupRoot\$folder1")
+	#exec("remove-item -recurse -force $backupRoot\$webBakFolder1")
 	if ($(test-path "$backupRoot\$file1")) {
 		exec("copy-item -recurse -force $backupRoot\$file1 $appRoot\")
 	}
@@ -99,10 +118,11 @@ function logActionHeader() {
 }
 
 function main() {
+	echo $siteName
 	logActionHeader
 	closeExplorer #to aviod rename-item failed when execute backup
 	stopIIS
-	sleep 5
+	sleep 8
 	backup
 	clean
 	extract

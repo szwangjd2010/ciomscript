@@ -5,7 +5,7 @@ dayAgo=${1:-1}
 logFileYMD=$(date -d "$dayAgo days ago" +%04Y%02m%02d)
 Products="lecai wangxiao qida mall"
 LogCatalogs="access action"
-LogApiHosts="10.10.106.125"
+LogApiHosts="10.10.125.17"
 
 pullLog() {
 	hosts=$1

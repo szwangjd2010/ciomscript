@@ -90,8 +90,13 @@ function main(){
 		
 		if ($appName -like "*mq") {
 			$mqProgramPath = "$app3wPath\OceanSoft.ServiceMgmt.exe"
-			$sessionId = getRemoteSessionID $ip $hostInfo.port $hostInfo.activeAccName $hostInfo.activeAccPwd
-			remotePsExec $ip $sessionId $hostInfo.adminPwd $mqProgramPath
+			$executorName = $hostInfo.activeAccName
+			$executorPwd = $hostInfo.activeAccPwd
+			$hostAdminPwd = $hostInfo.adminPwd
+			echo "Executor is : $executorName"
+			$executorSessionId = getRemoteSessionID $ip $port $executorName $executorPwd
+			echo "Executor's session id: $executorSessionId" 
+			remotePsExec $ip $executorSessionId $hostAdminPwd $mqProgramPath
 			$LASTEXITCODE = 0
 		}
 	}

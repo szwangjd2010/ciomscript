@@ -15,4 +15,4 @@ mount -t cifs -o gid=jenkins,uid=jenkins,username=Administrator,password='yunxue
 
 mount -t cifs -o gid=jenkins,uid=jenkins,username=Administrator,password='yunxuetang0512!' //172.17.125.3/d$/oceansoft/elearningMedia/ /mnt/elmedia-dev-simulation/
 
-mount -t cifs -o gid=jenkins,uid=jenkins,username=oceansoft,password='6h+98e7f' //10.10.132.147/oceansoft/ /mnt/elesmedia-ucloud
+mount -t cifs -o gid=jenkins,uid=jenkins,username=oceansoft,password='6h+98e7f' //10.10.188.41/oceansoft/ /mnt/elesmedia-ucloud
