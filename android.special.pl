@@ -36,7 +36,14 @@ sub moveApppkgFile($) {
 	my $code = $_[0];
 
 	my $appFinalPkgName = getAppFinalPkgName($code);
-	$ciomUtil->exec("mv -f /tmp/ciom.android/$appName/$BuildInfo->{location}-release.apk $ApppkgPath/$appFinalPkgName");
+	my $builtApkFile;
+	if ($BuildInfo->{builder} eq 'ant') {
+		$builtApkFile = "/tmp/ciom.android/$appName/$BuildInfo->{location}-release.apk";
+	} else {
+		$builtApkFile = "$BuildInfo->{location}/build/outputs/apk/$BuildInfo->{packagePrefix}-release.apk";
+	}
+
+	$ciomUtil->exec("mv -f $builtApkFile $ApppkgPath/$appFinalPkgName");
 }
 
 sub cleanAfterOrgBuild() {

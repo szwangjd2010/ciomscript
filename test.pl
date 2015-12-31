@@ -21,10 +21,10 @@ my $a = {
 };
 
 #%{$a} = ();
-undef %{$a};
+#undef %{$a};
 
 print defined($a) . "\n";
-print $a->{a};
 $a->{c} = 3;
-print $a->{c};
+
+print "$a->{b}-release.apk";
 
