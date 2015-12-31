@@ -5,7 +5,7 @@ dayAgo=${1:-1}
 logLevels=${2:-debug error info event time}
 logFileYMD=$(date -d "$dayAgo days ago" +%04Y%02m%02d)
 
-LecaiApiHosts="10.10.73.235 10.10.76.73 10.10.75.138"
+LecaiApiHosts="10.10.73.235 10.10.76.73"
 LecaiAdminapiHosts="10.10.74.158"
 MallApiHosts="10.10.110.226"
 MallAdminapiHosts="10.10.74.158"

@@ -18,7 +18,6 @@ our $Clouds = {
 		hosts => [
 			{ip => "10.10.73.235", port => 22, tomcatParent => '/opt/ws'},
 			{ip => "10.10.76.73",  port => 22, tomcatParent => '/opt/ws'},
-			{ip => "10.10.75.138", port => 22, tomcatParent => '/opt/ws'},
 			{ip => "10.10.74.158", port => 22, tomcatParent => '/opt/ws'}
 		]
 	}
