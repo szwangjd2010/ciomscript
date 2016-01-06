@@ -4,10 +4,10 @@ LOAD DATA LOCAL
 --	'rpt_channel_daily.#ymd#.log'
 --	'rpt_channel_monthly.#ymd#.log'
 --	'rpt_channel_weekly.#ymd#.log'
---	'rpt_daily.log.#ymd#'
---	'rpt_monthly.log.#ymd#'
---	'rpt_retention.log.#ymd#'
---	'rpt_weekly.log.#ymd#'
+--	'rpt_daily.#ymd#.log'
+--	'rpt_monthly.#ymd#.log'
+--	'rpt_retention.#ymd#.log'
+--	'rpt_weekly.#ymd#.log'
 
 	REPLACE 
 --	INTO TABLE rpt_all_data
