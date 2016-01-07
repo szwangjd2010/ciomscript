@@ -1,13 +1,13 @@
 LOAD DATA LOCAL 
 	INFILE 
---	'rpt_all_data.#ymd#.log'
---	'rpt_channel_daily.#ymd#.log'
---	'rpt_channel_monthly.#ymd#.log'
---	'rpt_channel_weekly.#ymd#.log'
---	'rpt_daily.#ymd#.log'
---	'rpt_monthly.#ymd#.log'
---	'rpt_retention.#ymd#.log'
---	'rpt_weekly.#ymd#.log'
+--	'rpt_all_data.log'
+--	'rpt_channel_daily.log'
+--	'rpt_channel_monthly.log'
+--	'rpt_channel_weekly.log'
+--	'rpt_daily.log'
+--	'rpt_monthly.log'
+--	'rpt_retention.log'
+--	'rpt_weekly.log'
 
 	REPLACE 
 --	INTO TABLE rpt_all_data
