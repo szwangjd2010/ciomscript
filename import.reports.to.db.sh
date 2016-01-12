@@ -5,7 +5,7 @@
 #
 type=${1:-Base}
 
-ymd=$(date -d '1 days ago' +%04Y%02m%02d)
+ymd=$(date -d 'now' +%04Y%02m%02d)
 tpl="/data/ciomshare/ciom/load.data.tpl"
 tplInstance=""
 logFile="ld.log"
