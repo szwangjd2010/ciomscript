@@ -28,6 +28,13 @@ doDeploy() {
 		scp ${appName}.zip root@10.10.197.36:/data/www/
 		ssh root@10.10.197.36 "cd /data/www;mv app app_${timestamp};unzip ./${appName}.zip;mv ./${appName}/app/ ./;chown -R www:www app;rm -rf ${appName}"
 	fi
+
+	if [ "$appName" == "shequnh5web" ]; then
+		pwd
+		scp ${appName}.zip root@10.10.239.72:/usr/share/nginx/html/
+		ssh root@10.10.239.72 "cd /usr/share/nginx/html/;mv app app_${timestamp};unzip ./${appName}.zip;mv ./${appName}/app/ ./;chown -R www:www app;rm -rf ${appName}"
+	fi
+
 }
 
 

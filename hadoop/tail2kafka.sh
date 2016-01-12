@@ -1,15 +1,12 @@
 #!/bin/bash
 #
 
+products=${1:-qida lecai wangxiao mall}
+types=${2:-action access}
 
-#products="qida lecai wangxiao mall"
-#types="action access"
-products="qida"
-types="action"
 brokers="10.10.23.164"
-
 for product in $products; do
-	for type in $types; do
-		find /data -name ${product}_${type}.log -exec tail -F {} \; | nohup kafkacat -b $brokers -t ${product}.${type} & 
-	done
+    for type in $types; do
+		find /data -name ${product}_${type}.log -exec sh -c "tail -F {} | kafkacat -b $brokers -t ${product}.${type} &" \;
+    done
 done

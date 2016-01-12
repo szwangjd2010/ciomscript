@@ -36,3 +36,5 @@ perl -p0E 's|(?<g1><stringProp name="Argument.name">ServerIP</stringProp>\s+<str
 
 find /data/ -name catalina.sh -exec sed -i '/# OS specific support/i CATALINA_OPTS="-Djava.library.path=/usr/local/apr/lib"' {} \;
 find /data/ -name server.xml -exec sed -i 's/Http11NioProtocol/Http11AprProtocol/' {} \;
+
+find /data -name ${product}_${type}.log -exec sh -c "tail -F {} | kafkacat -b $brokers -t ${product}.${type} &" \;

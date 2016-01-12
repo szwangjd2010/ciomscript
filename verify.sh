@@ -29,4 +29,9 @@ if [ "$CiomPassphraseXKB" == "xkbjxf" ]; then
 	exit 0
 fi
 
+if [ "$CiomPassphraseShequn" == "shequnzj" ]; then
+	exit 0
+fi
+
+
 exit 1
