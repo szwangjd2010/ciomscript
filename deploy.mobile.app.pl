@@ -29,7 +29,7 @@ our $CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
 
 my $ShellStreamedit = "_streamedit.ciom";
 my $OldPwd = getcwd();
-my $orgCodesWhichNeedToBuild = [];
+my $NeedToBuildOrgCodes = [];
 
 sub getBuildLogFile() {
 	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
@@ -185,9 +185,9 @@ sub outputApppkgUrl() {
 }
 
 sub buildEligibleOrgs() {
-	my $cnt = $#{$orgCodesWhichNeedToBuild} + 1;
+	my $cnt = $#{$NeedToBuildOrgCodes} + 1;
 	for (my $i = 0; $i < $cnt; $i++) {
-		my $code = $orgCodesWhichNeedToBuild->[$i];
+		my $code = $NeedToBuildOrgCodes->[$i];
 		revertCode();
 		replaceOrgCustomizedFiles($code);
 		clearDynamicParams();
@@ -202,14 +202,14 @@ sub buildEligibleOrgs() {
 sub getNeedToBuildOrgCodes() {
 	if ($orgCodes eq '*') {
 		my @orgsKeys = keys %{$CiomData->{orgs}};
-		$orgCodesWhichNeedToBuild = \@orgsKeys;
+		$NeedToBuildOrgCodes = \@orgsKeys;
 		return;
 	}
 
 	for my $code (keys %{$CiomData->{orgs}}) {
 		my $re = '(^|,)' . $code . '($|,)';
 		if ($orgCodes =~ m/$re/) {
-			push(@{$orgCodesWhichNeedToBuild}, $code);
+			push(@{$NeedToBuildOrgCodes}, $code);
 		}
 	}
 }
@@ -217,11 +217,11 @@ sub getNeedToBuildOrgCodes() {
 sub validateInputOrgCodes() {
 	getNeedToBuildOrgCodes();
 	logNeedToBuildOrgCodes();
-	return $#{$orgCodesWhichNeedToBuild} >= 0;
+	return $#{$NeedToBuildOrgCodes} >= 0;
 }
 
 sub logNeedToBuildOrgCodes() {
-	$ciomUtil->log(Dumper($orgCodesWhichNeedToBuild));
+	$ciomUtil->log(Dumper($NeedToBuildOrgCodes));
 }
 
 sub uploadPkgs() {
