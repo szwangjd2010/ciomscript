@@ -35,7 +35,7 @@ sub getBuildLogFile() {
 	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
 }
 
-sub doPlatformDependencyInjection() {
+sub injectPlatformDependency() {
 	require "$cloudId.special.pl";	
 }
 
@@ -184,7 +184,7 @@ sub outputApppkgUrl() {
 	$ciomUtil->log("\n\n");
 }
 
-sub iterateOrgsAndBuildEligibles() {
+sub buildEligibleOrgs() {
 	my $cnt = $#{$orgCodesWhichNeedToBuild} + 1;
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $code = $orgCodesWhichNeedToBuild->[$i];
@@ -247,12 +247,12 @@ sub main() {
 		return 1;
 	}
 	
-	doPlatformDependencyInjection();
+	injectPlatformDependency();
 	enterWorkspace();
 	makeApppkgDirectory();
 	updateCode(0);
 	extraPreAction();
-	iterateOrgsAndBuildEligibles();
+	buildEligibleOrgs();
 	extraPostAction();
 
 	if ($doPublish eq 'YES') {
