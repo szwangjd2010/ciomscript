@@ -16,8 +16,10 @@ my $SshInfo = {
 	user => 'ciom'
 };
 
-sub extraPreAction() {}
-sub extraPostAction() {}
+sub globalPreAction() {}
+sub globalPostAction() {}
+sub preAction() {}
+sub postAction() {}
 
 sub resyncSourceCode() {
 	$ciomUtil->exec("$ENV{CIOM_SCRIPT_HOME}/syncup.to.slave.sh $version $cloudId $appName osx");
@@ -54,6 +56,8 @@ sub getAppBuiltOutLocation() {
 }
 
 sub build() {
+	preAction();
+
 	resyncSourceCode();
 
 	my $build = $CiomData->{build};
@@ -62,15 +66,15 @@ sub build() {
 	#fix issue - "User Interaction Is Not Allowed"
 	my $cmdUnlockKeychain = "security -v unlock-keychain -p pwdasdwx /Users/ciom/Library/Keychains/login.keychain";
 	#end
-
 	my $cmdBuild = generateBuildCmd();
 	my $outAppDirectory = getAppBuiltOutLocation();
-	
 	my $ipaFile = "$AppWorkspaceOnSlave/$BuildInfo->{location}/$BuildInfo->{typeTargetName}.ipa";
 	my $cmdPackage = "xcrun -sdk iphoneos PackageApplication -v $outAppDirectory -o $ipaFile";
 	
 	$SshInfo->{cmd} = "( $cmd2Workspace; $cmdUnlockKeychain; $cmdBuild; $cmdPackage )";
 	$ciomUtil->remoteExec($SshInfo);
+
+	postAction();
 }
 
 sub getAppFinalPkgName($) {

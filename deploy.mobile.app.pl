@@ -174,7 +174,7 @@ sub streameditConfs4AllOrgs() {
 	streamedit($streameditItems);
 }
 
-sub outputApppkgUrl() {
+sub logApppkgUrl() {
 	my $url = "$ENV{BUILD_URL}/app";
 	$url =~ s|:8080||;
 	$url =~ s|(/\d+/)|/builds/lastStableBuild|;
@@ -251,15 +251,15 @@ sub main() {
 	enterWorkspace();
 	makeApppkgDirectory();
 	updateCode(0);
-	extraPreAction();
+	globalPreAction();
 	buildEligibleOrgs();
-	extraPostAction();
+	globalPostAction();
+	logApppkgUrl();
 
 	if ($doPublish eq 'YES') {
 		uploadPkgs();
 	}
 
-	outputApppkgUrl();
 	leaveWorkspace();
 
 	return getBuildError();

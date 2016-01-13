@@ -9,10 +9,14 @@ our $CiomData;
 
 my $BuildInfo = $CiomData->{build};
 
-sub extraPreAction() {}
-sub extraPostAction() {}
+sub globalPreAction() {}
+sub globalPostAction() {}
+sub preAction() {}
+sub postAction() {}
 
 sub build() {
+	preAction();
+
 	if ($BuildInfo->{builder} eq 'ant') {
 		$ciomUtil->exec("ant -f $BuildInfo->{location}/$BuildInfo->{file} $BuildInfo->{target}");
 		return;
@@ -22,6 +26,8 @@ sub build() {
 		$ciomUtil->exec("gradle -b $BuildInfo->{location}/$BuildInfo->{file} $BuildInfo->{target}");
 		return;
 	}
+
+	postAction();
 }
 
 sub getAppFinalPkgName($) {
