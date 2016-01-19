@@ -8,6 +8,9 @@ logRootLocation="/usr/share/nginx/html/ciompub/behavior"
 fullActionLogFile="qida.action.log"
 actionLogFile="$logRootLocation/$logFileYMD/qida_action.$logFileYMD.all-instances.log"
 
+#clean data, remove useless log4j prefix
+$CIOM_SCRIPT_HOME/clean.data-action.log.sh "$actionLogFile"
+
 logFileHdfsLocation="hdfs://yxtdfs/log.action/"
 hdfsBin="/opt/hadoop-2.7.1/bin/hdfs"
 
