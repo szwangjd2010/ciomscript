@@ -35,3 +35,14 @@ perl -ne '/\x{7528}\x{6237}.*"502"/ && print' qida_action.20160113.all-instances
 python -c "print repr('用户登录'.decode('utf-8'))[2:-1]"
 python -c "import re;print re.sub('u(\w{4})', 'x{\g<1>}', repr(' 用户登录'.decode('utf-8'))[2:-1])"
 \x{7528}\x{6237}\x{767b}\x{5f55}
+
+#dump http response
+tcpdump -s 0 -A 'src port 80 and tcp[((tcp[12:1]&0xf0)>>2):4]=0x48545450'
+tcpdump -s 0 -A 'src port 80 and tcp[((tcp[12:1]&0xf0)>>2):4]='$(python -c "print '0x' + ''.join(hex(ord(i))[2:] for i in 'HTTP')")
+
+#dump http post request, following two are equal, 0x504f5354 <-> POST
+tcpdump -s 0 -A 'dst port 80 and tcp[((tcp[12:1]&0xf0)>>2):4]=0x504f5354'
+tcpdump -s 0 -A 'dst port 80 and tcp[((tcp[12:1]&0xf0)>>2):4]='$(python -c "print '0x' + ''.join(hex(ord(i))[2:] for i in 'POST')")
+
+#dump http get request
+tcpdump -s 0 -A 'dst port 80 and tcp[((tcp[12:1]&0xf0)>>2):4]='$(python -c "print '0x' + ''.join(hex(ord(i))[2:] for i in 'GET ')")
