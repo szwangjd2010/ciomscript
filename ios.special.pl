@@ -77,11 +77,6 @@ sub build() {
 	postAction();
 }
 
-sub getAppFinalPkgName($) {
-	my $code = $_[0];
-	return "$code.ipa";
-}
-
 sub moveApppkgFile($) {
 	my $code = $_[0];
 

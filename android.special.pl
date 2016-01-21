@@ -30,14 +30,6 @@ sub build() {
 	postAction();
 }
 
-sub getAppFinalPkgName($) {
-	my $code = $_[0];
-	my $pkgName = $CiomData->{orgs}->{$code}->{pkgName} || $CiomData->{pkgName};
-	$pkgName =~ s|#code#|$code|;
-
-	return "${pkgName}.apk";
-}
-
 sub moveApppkgFile($) {
 	my $code = $_[0];
 

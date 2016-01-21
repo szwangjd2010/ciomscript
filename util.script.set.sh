@@ -46,3 +46,5 @@ tcpdump -s 0 -A 'dst port 80 and tcp[((tcp[12:1]&0xf0)>>2):4]='$(python -c "prin
 
 #dump http get request
 tcpdump -s 0 -A 'dst port 80 and tcp[((tcp[12:1]&0xf0)>>2):4]='$(python -c "print '0x' + ''.join(hex(ord(i))[2:] for i in 'GET ')")
+
+tcpdump -e -s 0 -A 'dst port 80 and tcp[((tcp[12:1]&0xf0)>>2):4]='$(python -c "print '0x' + ''.join(hex(ord(i))[2:] for i in 'GET ')")' and tcp[(((tcp[12:1]&0xf0)>>2)+4):4]='$(python -c "print '0x' + ''.join(hex(ord(i))[2:] for i in '/v1/')")

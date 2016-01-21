@@ -36,7 +36,7 @@ sub getBuildLogFile() {
 }
 
 sub injectPlatformDependency() {
-	require "$cloudId.special.pl";	
+	require "$ENV{CIOM_SCRIPT_HOME}/$cloudId.special.pl";	
 }
 
 sub enterWorkspace() {
@@ -106,13 +106,6 @@ sub generateStreameditFile($) {
 		my $cnt = $#{$v} + 1;
 		
 		for (my $i = 0; $i < $cnt; $i++) {
-			#add dynamic parameters key, map entry
-			if ($v->[$i]->{to} =~ m|<ciompm>(\w+)</ciompm>|) {
-				my $key = $1;
-				$DynamicParams->{$key} = $ENV{$key} || '';
-			}
-			#end
-
 			my $lineMode = defined($v->[$i]->{single}) ? '-0 ' : '';
 			$cmds .= sprintf($CmdStreameditTpl,
 				$lineMode,
@@ -127,33 +120,68 @@ sub generateStreameditFile($) {
 	$ciomUtil->writeToFile("$ShellStreamedit", $cmds);
 }
 
-sub clearDynamicParams() {
-	%{$DynamicParams} = ();
+sub constructDynamicParamsMap() {
+	while ( my ($key, $value) = each(%ENV) ) {
+		if ($key =~ m/^CIOMPM_(\w+)$/) {
+			$DynamicParams->{$1} = $value;
+		}
+    }
 }
 
-sub instanceDynamicParams() {
+sub instantiateDynamicParamsInStreameditFile() {
 	my $nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciompm>' '$ShellStreamedit'");
 	if ($nCiompmCnt == 0) {
 		return;
 	}
 
 	for my $key (keys %{$DynamicParams}) {
-		$nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciompm>$key</ciompm>' '$ShellStreamedit'");
+		my $keyPlaceholder = "<ciompm>$key</ciompm>";
+		$nCiompmCnt = $ciomUtil->execWithReturn("grep -c '$keyPlaceholder' '$ShellStreamedit'");
 		if ($nCiompmCnt == 0) {
 			next;
 		}
 
 		my $v = $DynamicParams->{$key};
-		$ciomUtil->log("\n\ninstancing $key ...");
-		$ciomUtil->exec("perl -CSDL -i -pE 's|<ciompm>$key</ciompm>|$v|mg' '$ShellStreamedit'");
+		$ciomUtil->log("instancing $keyPlaceholder ...");
+		$ciomUtil->exec("perl -CSDL -i -pE 's|$keyPlaceholder|$v|mg' '$ShellStreamedit'");
 		$ciomUtil->exec("cat '$ShellStreamedit'");
 	}	
+}
+
+sub instantiateDynamicParamsInStr($) {
+	my $str = shift;
+	if (index($str, '<ciompm>') == -1 )  {
+		return;
+	}
+
+	for my $key (keys %{$DynamicParams}) {
+		my $keyPlaceholder = "<ciompm>$key</ciompm>";
+		if (index($str, $keyPlaceholder) == -1 )  {
+			next;
+		}		
+
+		my $v = $DynamicParams->{$key};
+		$ciomUtil->log("instancing $keyPlaceholder in $str...");
+		$str =~ s|$keyPlaceholder|$v|g;
+		$ciomUtil->log($str);
+	}
+
+	return $str;	
+}
+
+sub getAppFinalPkgName($) {
+	my $code = $_[0];
+	my $pkgName = $CiomData->{orgs}->{$code}->{pkgName} || $CiomData->{pkgName};
+	$pkgName =~ s|#code#|$code|;
+	$pkgName = instantiateDynamicParamsInStr($pkgName);
+
+	return "${pkgName}.apk";
 }
 
 sub streamedit($) {
 	my $items = $_[0];
 	generateStreameditFile($items);
-	instanceDynamicParams();
+	instantiateDynamicParamsInStreameditFile();
 	
 	$ciomUtil->exec("bash $ShellStreamedit");
 	$ciomUtil->exec("cat $ShellStreamedit");
@@ -190,7 +218,6 @@ sub buildEligibleOrgs() {
 		my $code = $NeedToBuildOrgCodes->[$i];
 		revertCode();
 		replaceOrgCustomizedFiles($code);
-		clearDynamicParams();
 		streameditConfs4AllOrgs();
 		streameditConfs4Org($code);
 		build();
@@ -247,8 +274,9 @@ sub main() {
 		return 1;
 	}
 	
-	injectPlatformDependency();
 	enterWorkspace();
+	injectPlatformDependency();
+	constructDynamicParamsMap();
 	makeApppkgDirectory();
 	updateCode(0);
 	globalPreAction();
