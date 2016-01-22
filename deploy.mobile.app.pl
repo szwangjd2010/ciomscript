@@ -175,7 +175,8 @@ sub getAppFinalPkgName($) {
 	$pkgName =~ s|#code#|$code|;
 	$pkgName = instantiateDynamicParamsInStr($pkgName);
 
-	return "${pkgName}.apk";
+	my $appExtName = $cloudId eq 'ios' ? 'ipa' : 'apk';
+	return "${pkgName}.${appExtName}";
 }
 
 sub streamedit($) {

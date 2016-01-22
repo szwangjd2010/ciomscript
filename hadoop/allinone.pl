@@ -10,6 +10,8 @@ use CiomUtil;
 
 my $seed = '172.17.128.210';
 my $slaves = [
+	'172.17.128.188',
+	'172.17.128.189',
 	'172.17.128.208',
 	'172.17.128.209',
 	'172.17.128.211',
@@ -34,8 +36,10 @@ my $journalNodes = [
 	'172.17.128.209'
 ];
 
-my $hbaseMaster = '172.17.128.211';
+my $hbaseMaster = '172.17.128.188';
 my $hbaseRegionservers = [
+	'172.17.128.189',
+	'172.17.128.211',
 	'172.17.128.212',
 	'172.17.128.213',
 	'172.17.128.214',
@@ -112,10 +116,10 @@ sub syncupComponent($) {
 }
 
 sub syncup() {
-	#syncupComponent('common');
+	syncupComponent('common');
 	#syncupComponent('hdfs');
 	#syncupComponent('journal');
-	syncupComponent('hadoop');
+	#syncupComponent('hadoop');
 	#syncupComponent('spark');
 }
 

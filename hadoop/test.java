@@ -8,7 +8,7 @@ class test
 		InetAddress Address = InetAddress.getLocalHost(); 
 		
 		System.out.println(Address); 
-		System.out.println(InetAddress.getCanonicalHostName()); 
+		//System.out.println(InetAddress.getCanonicalHostName()); 
 		
 		Address = InetAddress.getByName("starwave.com"); 
 		System.out.println(Address); 
