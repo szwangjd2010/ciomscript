@@ -151,7 +151,7 @@ sub instantiateDynamicParamsInStreameditFile() {
 sub instantiateDynamicParamsInStr($) {
 	my $str = shift;
 	if (index($str, '<ciompm>') == -1)  {
-		return;
+		return $str;
 	}
 
 	for my $key (keys %{$DynamicParams}) {
