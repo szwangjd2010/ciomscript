@@ -9,7 +9,7 @@ enabled=1
 gpgcheck=0
 
 
-2. remove exists subversion packages, and clean yum cache
+2. remove existing subversion packages, and clean yum cache
 # yum remove subversion*
 # yum clean all
 
