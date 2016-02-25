@@ -31,4 +31,26 @@ host.name=%ip.or.name%
 advertised.host.name=%ip.or.name%
 then broker accessible from remote client
 
+2. ambari-server启动时的警告解决方法，WARNING: setpgid(5947, 0) failed - [Errno 13] Permission denied
+标签： ambaripython
+2016-01-06 14:49 253人阅读 评论(2) 收藏 举报
+ 分类：  hadoop（14）   web（2）  
+版权声明：本文为博主原创文章，未经博主允许不得转载。
+ambari-server启动时的警告
+XZ@AM:$ sudo ambari-server start
+Using python  /usr/bin/python2
+Starting ambari-server
+Ambari Server running with administrator privileges.
+Organizing resource files at /var/lib/ambari-server/resources...
+WARNING: setpgid(5947, 0) failed - [Errno 13] Permission denied
+Server PID at: /var/run/ambari-server/ambari-server.pid
+Server out at: /var/log/ambari-server/ambari-server.out
+Server log at: /var/log/ambari-server/ambari-server.log
+Waiting for server start....................
+
+解决方法：
+安装补丁
+AMBARI-14466 warning setpgid failed issued when starting ambari serve…
+https://github.com/apache/ambari/commit/ff4e90e4d76060f1143bcf9efca09e857e367e2a
+
 

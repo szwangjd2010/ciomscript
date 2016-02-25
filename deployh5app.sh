@@ -34,6 +34,18 @@ doDeploy() {
 		scp ${appName}.zip root@10.10.239.72:/usr/share/nginx/html/
 		ssh root@10.10.239.72 "cd /usr/share/nginx/html/;mv app app_${timestamp};unzip ./${appName}.zip;mv ./${appName}/app/ ./;chown -R www:www app;rm -rf ${appName}"
 	fi
+	
+	if [ "$appName" == "shequnh5web-dev" ]; then
+		(cd shequnh5web; zip -r ../html.zip *)
+		scp html.zip root@172.17.128.225:/usr/share/nginx/html/
+		ssh root@172.17.128.225 "mkdir -p /usr/share/nginx/html/shequnh5web; cd /usr/share/nginx/html/shequnh5web; rm -rf *; cp ../html.zip ./; unzip ./html.zip"
+	fi
+	
+	if [ "$appName" == "lecaih5mobile-dev" ]; then
+		(cd lecaih5mobile; zip -r ../html.zip *)
+		scp html.zip root@172.17.128.225:/usr/share/nginx/html/
+		ssh root@172.17.128.225 "mkdir -p /usr/share/nginx/html/lecaih5mobile; cd /usr/share/nginx/html/lecaih5mobile; rm -rf *; cp ../html.zip ./; unzip ./html.zip"
+	fi
 
 }
 
