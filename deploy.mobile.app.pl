@@ -35,8 +35,21 @@ sub getBuildLogFile() {
 	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
 }
 
+sub getPlatformName() {
+	my $platform = '';
+	if (index($cloudId, 'ios') == 0)  {
+		$platform = 'ios';
+	}
+	if (index($cloudId, 'android') == 0)  {
+		$platform = 'android';
+	}
+
+	return $platform;
+}
+
 sub injectPlatformDependency() {
-	require "$ENV{CIOM_SCRIPT_HOME}/$cloudId.special.pl";	
+	my $platform = getPlatformName();
+	require "$ENV{CIOM_SCRIPT_HOME}/${platform}.special.pl";	
 }
 
 sub enterWorkspace() {

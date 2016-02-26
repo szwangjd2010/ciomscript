@@ -12,4 +12,7 @@ yum install -y gmp-devel
 2. cd HUE
 make install
 
+
+
+
 - http://gethue.com/hadoop-hue-3-on-hdp-installation-tutorial/
