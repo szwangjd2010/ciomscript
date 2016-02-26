@@ -14,11 +14,14 @@ use open IN => ":encoding(utf8)", OUT => ":utf8";
 use IO::Handle;
 STDOUT->autoflush(1);
 
+sub getPlatform();
+
 our $version = $ARGV[0];
-our $cloudId = $ARGV[1];
+our $cloudId = $ARGV[1]; #$cloudId, should be "andriod[.*]", "ios[.*]"
 our $appName = $ARGV[2];
 our $orgCodes = $ARGV[3] || '*';
 
+our $platform = getPlatform();
 our $doPublish = $ENV{UploadPackage} || 'NO';
 
 our $ciomUtil = new CiomUtil(1);
@@ -31,11 +34,12 @@ my $ShellStreamedit = "_streamedit.ciom";
 my $OldPwd = getcwd();
 my $NeedToBuildOrgCodes = [];
 
+
 sub getBuildLogFile() {
 	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
 }
 
-sub getPlatformName() {
+sub getPlatform() {
 	my $platform = '';
 	if (index($cloudId, 'ios') == 0)  {
 		$platform = 'ios';
@@ -48,7 +52,6 @@ sub getPlatformName() {
 }
 
 sub injectPlatformDependency() {
-	my $platform = getPlatformName();
 	require "$ENV{CIOM_SCRIPT_HOME}/${platform}.special.pl";	
 }
 
@@ -188,7 +191,7 @@ sub getAppFinalPkgName($) {
 	$pkgName =~ s|#code#|$code|;
 	$pkgName = instantiateDynamicParamsInStr($pkgName);
 
-	my $appExtName = $cloudId eq 'ios' ? 'ipa' : 'apk';
+	my $appExtName = $platform eq 'ios' ? 'ipa' : 'apk';
 	return "${pkgName}.${appExtName}";
 }
 
