@@ -1,18 +1,40 @@
-HUE compile on centos7.x
-1. yum install
-yum group install -y "Development Tools"
-yum install -y python-devel krb5-devel
-yum install -y libxslt-devel mysql-devel sqlite-devel
-yum install -y openldap-devel saslwrapper-devel
-yum install -y apache-maven
-yum install -y openssl-devel
-yum install -y gmp-devel
+1. hue + HDP guide: 
+http://gethue.com/hadoop-hue-3-on-hdp-installation-tutorial/
+
+hue compile guide: 
+https://github.com/cloudera/hue/tree/master/apps/spark/java
 
 
-2. cd HUE
-make install
+2. HUE compile on centos7.x
+2.1 yum install
+	yum group install -y "Development Tools"
+	yum install -y python-devel krb5-devel
+	yum install -y libxslt-devel mysql-devel sqlite-devel
+	yum install -y openldap-devel saslwrapper-devel
+	yum install -y apache-maven
+	yum install -y openssl-devel
+	yum install -y gmp-devel
+2.2 cd hue
+2.3. make install
 
 
+3. livy server 
+hue + spark
+* if on HDP or CDH, all yarn node(NodeManager node) should have spark installed, 
+cause spark yarn cluster mode, yarn will dispatch spark application to yarn node randomly!
+
+* cd hue-3.9.0/apps/spark/java
+vim livy-server/src/main/scala/com/cloudera/hue/livy/server/interactive/InteractiveSessionYarn.scala
+in --driver-java-options add -Dhdp.version=xxx
+
+* mvn -DskipTests clean package
+
+* to compile with special version spark, use
+mven -DskipTests -Dspark.version=1.5.0-cdh5.5.0-SNAPSHOT -clean package
+available version in:
+https://repository.cloudera.com/content/repositories/snapshots/org/apache/spark/spark-assembly_2.10/
 
 
-- http://gethue.com/hadoop-hue-3-on-hdp-installation-tutorial/
+=====================================================================
+t=sc.textFile("hdfs://172.17.128.166:8020/yarn-env.sh")
+print(t.count())

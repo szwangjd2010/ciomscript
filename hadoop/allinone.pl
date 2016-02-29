@@ -57,22 +57,22 @@ my $sparkConfDir = '/opt/spark-1.4.0-bin-hadoop2.6/conf';
 my $hbaseConfDir = '/opt/hbase-1.1.2/conf';
 
 my $componentSyncupItems = {
-	common => [
-		'/etc/hosts'
-	],
-	hdfs => [
-		'/opt/hdfsroot/'
-	],
-	journal => [
-		'/opt/journal/'
-	],
-	hadoop => [
-		'/etc/profile.d/hadoop.sh',
-		"$hadoopConfDir/"
-	],
+	# common => [
+	# 	'/etc/hosts'
+	# ],
+	# hdfs => [
+	# 	'/opt/hdfsroot/'
+	# ],
+	# journal => [
+	# 	'/opt/journal/'
+	# ],
+	# hadoop => [
+	# 	'/etc/profile.d/hadoop.sh',
+	# 	"$hadoopConfDir/"
+	# ],
 	spark => [
-		'/etc/profile.d/spark.sh',
-		"$sparkConfDir/"
+		'/etc/profile.d/spark.sh'
+		# "$sparkConfDir/"
 	]
 };
 
@@ -120,7 +120,7 @@ sub syncup() {
 	#syncupComponent('hdfs');
 	#syncupComponent('journal');
 	#syncupComponent('hadoop');
-	#syncupComponent('spark');
+	syncupComponent('spark');
 }
 
 sub startJournalDaemons() {
@@ -196,14 +196,14 @@ sub setSparkMasterIP() {
 
 sub main() {
 	#clean();
-	#syncup();
+	syncup();
 	#startJournalDaemons();
 	#formatNameNodes();
 	#syncupNN1ToNN2();
 	#initHAStateInZK();
 	#setSparkMasterIP();
 
-	syncupHbaseConf();
+	#syncupHbaseConf();
 }
 
 main();
