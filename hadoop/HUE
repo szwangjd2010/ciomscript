@@ -6,7 +6,7 @@ https://github.com/cloudera/hue/tree/master/apps/spark/java
 
 
 2. HUE compile on centos7.x
-2.1 yum install
+a. yum install
 	yum group install -y "Development Tools"
 	yum install -y python-devel krb5-devel
 	yum install -y libxslt-devel mysql-devel sqlite-devel
@@ -14,14 +14,13 @@ https://github.com/cloudera/hue/tree/master/apps/spark/java
 	yum install -y apache-maven
 	yum install -y openssl-devel
 	yum install -y gmp-devel
-2.2 cd hue
-2.3. make install
+b. cd hue
+c. make install
 
 
 3. livy server 
 hue + spark
-* if on HDP or CDH, all yarn node(NodeManager node) should have spark installed, 
-cause spark yarn cluster mode, yarn will dispatch spark application to yarn node randomly!
+* if on HDP or CDH, when using yarn mode, all yarn node(NodeManager node) should have spark installed, 
 
 * cd hue-3.9.0/apps/spark/java
 vim livy-server/src/main/scala/com/cloudera/hue/livy/server/interactive/InteractiveSessionYarn.scala
@@ -34,7 +33,31 @@ mven -DskipTests -Dspark.version=1.5.0-cdh5.5.0-SNAPSHOT -clean package
 available version in:
 https://repository.cloudera.com/content/repositories/snapshots/org/apache/spark/spark-assembly_2.10/
 
+* compiled out livy configure file
+hue-3.9.0/apps/spark/java/conf/livy-defaults.conf
+livy.server.host = x.x.x.x
+shoud be a ip which can be accessed from other node, cause it will be included in livy.repl.callback-url
+-Dlivy.repl.callback-url=http://172.17.128.169:8998/sessions/0/callback
+
 
 =====================================================================
-t=sc.textFile("hdfs://172.17.128.166:8020/yarn-env.sh")
+t=sc.textFile("hdfs://172.17.128.166:8020/user/hue/yarn-env.sh")
 print(t.count())
+
+
+hue runing spark
+success:
+http://hdc-167:8088/cluster/app/application_1456822056667_0003, on 169
+http://hdc-167:8088/cluster/app/application_1456822056667_0004, on 169
+
+
+
+
+trick issue:
+accepted -> running failed
+hue spark at org.apache.hadoop.util.Shell.runCommand(Shell.java:576)
+...
+solution
+YES 1. export SPARK_HOME env variable on all yarn node 
+?   2. yarn.application.classpath, add spark-client/lib/*,mapreduce-client/*,mapreduce-client/lib/*
+
