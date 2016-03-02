@@ -41,6 +41,7 @@ shoud be a ip which can be accessed from other node, cause it will be included i
 
 
 =====================================================================
+spark python, sample snippet code
 t=sc.textFile("hdfs://172.17.128.166:8020/user/hue/yarn-env.sh")
 print(t.count())
 
