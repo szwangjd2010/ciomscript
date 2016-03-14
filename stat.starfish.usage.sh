@@ -24,6 +24,8 @@ main() {
 	cat _1 >> $fileHZMergedLog
 	cat _2 >> $fileHZMergedLog
 
+	pwd
+	python $CIOM_SCRIPT_HOME/get.org.user.profile.csv.py $orgId
 
 	#grep -P -o '[\w-]+(?=","[\w-]+"$)' $fileHZMergedLog | sort | uniq -c | sort -nr > hz.imapi.todo.userid.times.result
 

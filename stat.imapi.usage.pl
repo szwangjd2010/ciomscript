@@ -144,7 +144,8 @@ sub main() {
 		}
 
 		$line =~ s|[\r\n]+||g;
-		if ($line =~ m|"(.*)","(.*)","(.*)","(.*)"|) {
+		#if ($line =~ m|"(.*)","(.*)","(.*)","(.*)"|) {
+		if ($line =~ m|(.*),(.*),(.*),(.*)|) {
 			$name = $1;
 			$department = $2;
 			$email = $3;
@@ -156,6 +157,11 @@ sub main() {
 				&& $uid ne "")) {
 				next;
 			}
+			
+			if ($uid eq "ID") {
+				next;
+			}
+			
 			if (!defined($aggregatedUsersUsage->{$uid})) {
 				$aggregatedUsersUsage->{$uid} = {};
 			}

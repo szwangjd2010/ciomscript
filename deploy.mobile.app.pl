@@ -15,6 +15,7 @@ use IO::Handle;
 STDOUT->autoflush(1);
 
 sub getPlatform();
+sub uploadOrgPkgs($);
 
 our $version = $ARGV[0];
 our $cloudId = $ARGV[1]; #$cloudId, should be "andriod[.*]", "ios[.*]"
@@ -22,7 +23,8 @@ our $appName = $ARGV[2];
 our $orgCodes = $ARGV[3] || '*';
 
 our $platform = getPlatform();
-our $doPublish = $ENV{UploadPackage} || 'NO';
+our $doUpload = $ENV{UploadPackage} || 'NO';
+our $uploadImmediately = 1;
 
 our $ciomUtil = new CiomUtil(1);
 our $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
@@ -240,6 +242,10 @@ sub buildEligibleOrgs() {
 		build();
 		moveApppkgFile($code);
 		cleanAfterOrgBuild();
+
+		if ($doUpload eq 'YES' && $uploadImmediately == 1) {
+			uploadOrgPkgs($code);
+		}
 	}	
 }
 
@@ -268,21 +274,34 @@ sub logNeedToBuildOrgCodes() {
 	$ciomUtil->log(Dumper($NeedToBuildOrgCodes));
 }
 
-sub uploadPkgs() {
+sub getUploadRemoteURI() {
 	my $publishto = $CiomData->{publishto};
-	if (!defined($publishto)) {
+	my $ip = $publishto->{ip};
+	my $user = $publishto->{user} || 'ciom';
+	my $path = $publishto->{path};
+
+	return "$user\@$ip:/$path/";
+}
+
+sub uploadOrgPkgs($) {
+	my $code = shift;
+
+	if (!defined($CiomData->{publishto})) {
 		return;
 	}
 
-	my $ip = $publishto->{ip};
-	my $port = $publishto->{port} || 22;
-	my $user = $publishto->{user} || 'ciom';
-	my $path = $publishto->{path};
-	if (!defined($ip) || !defined($path)) {
+	my $remoteURI = getUploadRemoteURI();
+	my $pkgName = getAppFinalPkgName($code);
+	$ciomUtil->exec("scp $ApppkgPath/$pkgName $remoteURI");
+}
+
+sub uploadAllPkgs() {
+	if (!defined($CiomData->{publishto})) {
 		return;
-	}	
-	
-	$ciomUtil->exec("scp -r -P $port $ApppkgPath/* $user\@$ip:/$path/");
+	}
+
+	my $remoteURI = getUploadRemoteURI();
+	$ciomUtil->exec("scp -r $ApppkgPath/* $remoteURI");
 }
 
 sub main() {
@@ -301,8 +320,8 @@ sub main() {
 	globalPostAction();
 	logApppkgUrl();
 
-	if ($doPublish eq 'YES') {
-		uploadPkgs();
+	if ($doUpload eq 'YES' && $uploadImmediately != 1) {
+		uploadAllPkgs();
 	}
 
 	leaveWorkspace();
