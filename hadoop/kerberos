@@ -1,0 +1,27 @@
+https://gist.github.com/ashrithr/4767927948eca70845db
+
+1. to enable renewable
+kdc.conf must be modified to support renewable before create principle database
+- kdb5_util create -r realm -s 
+
+kdc.conf
+  max_renewable_life = 7d 0h 0m 0s
+  default_principal_flags = +renewable, +forwardable
+
+krb5.conf
+ renew_lifetime = 7d
+
+
+2. hue + hive (kerberos enabled hdp cluster)
+a. hue self-check prompt "The application won't work without a running HiveServer2"
+even hive2 is running
+
+fix solution: 
+"yum install -y cyrus-sasl-plain cyrus-sasl-gssapi" on hue server node
+-- https://community.cloudera.com/t5/Web-UI-Hue-Beeswax/The-application-won-t-work-without-a-running-HiveServer2/td-p/30627
+
+
+3. hue + spark (kerberos enabled hdp cluster)
+a. need to authenticate hue server principle first 
+   kinit -k -t /etc/security/keytabs/hue.service.keytab hue/hdc-169
+b. run ./bin/livy-yarn-server
