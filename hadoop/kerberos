@@ -12,16 +12,71 @@ krb5.conf
  renew_lifetime = 7d
 
 
-2. hue + hive (kerberos enabled hdp cluster)
+hue + components in kerberos enabled hdp cluster 
+2. hue + hive
 a. hue self-check prompt "The application won't work without a running HiveServer2"
 even hive2 is running
 
-fix solution: 
+solution: 
 "yum install -y cyrus-sasl-plain cyrus-sasl-gssapi" on hue server node
 -- https://community.cloudera.com/t5/Web-UI-Hue-Beeswax/The-application-won-t-work-without-a-running-HiveServer2/td-p/30627
 
+b. hue web ui, can not open tez session issue
+solution: hive-site.xml
+By default HiveServer2 performs the query processing as the user who submitted the query. But if the following parameter is set to false, the query will run as the user that the hiveserver2 process runs as.
 
-3. hue + spark (kerberos enabled hdp cluster)
+    <property>
+      <name>hive.server2.enable.doAs</name>
+      <value>false</value>
+    </property>
+
+c. To prevent memory leaks in unsecure mode, disable file system caches by setting the following parameters to true (see HIVE-4501):
+fs.hdfs.impl.disable.cache – Disable HDFS filesystem cache, default false.
+fs.file.impl.disable.cache – Disable local filesystem cache, default false.
+
+
+3. hue + spark
 a. need to authenticate hue server principle first 
    kinit -k -t /etc/security/keytabs/hue.service.keytab hue/hdc-169
 b. run ./bin/livy-yarn-server
+
+
+4. hue + hbase
+http://doc.mapr.com/display/MapR/Configure+Kerberos+Authentication+for+the+HBase+Thrift+1+Gateway
+
+hbase-site.xml
+
+<property>
+    <name>hbase.thrift.keytab.file</name>
+    <value>/etc/hbase/conf/hbase.keytab</value>
+</property>
+<property>
+    <name>hbase.thrift.kerberos.principal</name>
+    <value>$USER/_HOST@HADOOP.LOCALDOMAIN</value>
+    <!-- TODO: This may need to be HTTP/_HOST@<REALM> and _HOST may not work. You may have to put the concrete full hostname. -->
+</property>
+
+
+
+
+
+???hbase, why hue can not connect hbase thrift server when with kerberos security?
+
+hbased.Hbase.Client, 172.17.128.166, 9090, Hue HBase Thrift Client for Cluster, True, hbase, 30, GSSAPI, hue, False, None, None, None, False, buffered, False, socket, http://172.17.128.166:9090
+
+  def __init__(self, klass, host, port, service_name,
+               use_sasl=False,
+               use_ssl=False,
+               kerberos_principal="thrift",
+               mechanism='GSSAPI',
+               username='hue',
+               password='hue',
+               ca_certs=None,
+               keyfile=None,
+               certfile=None,
+               validate=False,
+               timeout_seconds=45,
+               transport='buffered',
+               multiple=False,
+               transport_mode='socket',
+               http_url=''):
