@@ -29,7 +29,7 @@ in --driver-java-options add -Dhdp.version=xxx
 * mvn -DskipTests clean package
 
 * to compile with special version spark, use
-mven -DskipTests -Dspark.version=1.5.0-cdh5.5.0-SNAPSHOT -clean package
+mvn -DskipTests -Dspark.version=1.5.0-cdh5.5.0-SNAPSHOT -clean package
 available version in:
 https://repository.cloudera.com/content/repositories/snapshots/org/apache/spark/spark-assembly_2.10/
 
@@ -44,14 +44,6 @@ shoud be a ip which can be accessed from other node, cause it will be included i
 spark python, sample snippet code
 t=sc.textFile("hdfs://172.17.128.166:8020/user/hue/yarn-env.sh")
 print(t.count())
-
-
-hue runing spark
-success:
-http://hdc-167:8088/cluster/app/application_1456822056667_0003, on 169
-http://hdc-167:8088/cluster/app/application_1456822056667_0004, on 169
-
-
 
 
 trick issue:
