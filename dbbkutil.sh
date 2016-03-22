@@ -1,27 +1,31 @@
 #!/bin/bash
 
+dbs="mall component lecai2"
 today=$(date +%04Y%02m%02d.%02k%02M%02S)
-dumpoutFileBz2="yxt.all-$today.bz2"
+dumpoutFilesPackage="yxt.all-$today.tgz"
 
 enterWorkspace() {
 	cd /mysql/backup
 }
 
-getLecai2IgnoreTablesString() {
+getLecai2RptTables() {
+	echo -n $(mysql -BNe "show tables" lecai2 | grep -P "^rpt_")
+}
+
+getLecai2IgnoreRptTablesString() {
 	ignores=""
-	for tb in $(mysql -BNe "show tables" lecai2 | grep -P "^rpt_"); do
-		ignores="$ignores --ignore-tables=lecai2.$tb"
+	for tb in $(getLecai2RptTables); do
+		ignores="$ignores --ignore-table=lecai2.$tb"
 	done
 	echo -n "$ignores"
 }
 
 dump() {
-	dbs="mall component lecai2"
 	for db in $dbs; do
 		dbDumpOutFile="yxt.$db-$today"
 		ignoreTables=""
 		if [ $db == "lecai2" ]; then
-			ignoreTables=$(getLecai2IgnoreTablesString)
+			ignoreTables=$(getLecai2IgnoreRptTablesString)
 		fi
 		
 		mysqldump \
@@ -29,6 +33,7 @@ dump() {
 			--add-drop-database \
 			--add-drop-table \
 			--single-transaction \
+			--set-gtid-purged=OFF \
 			--flush-logs \
 			--master-data=2 \
 			$ignoreTables \
@@ -36,16 +41,39 @@ dump() {
 	done
 }
 
+schemaDump() {
+	for db in $dbs; do
+		mysqldump --no-data --databases $db > yxt.schema.$db-$today
+	done
+
+	mysqldump --no-data lecai2 $(getLecai2RptTables) > yxt.schema.lecai2.rpts-$today	
+}
+
 tarFiles() {
-	tar -cjvf $dumpoutFileBz2 yxt-*-$today
+	tar -czvf $dumpoutFilesPackage yxt.*-$today
 }
 
 backupToStorage() {
-	scp $dumpoutFileBz2 10.10.73.166:/data/dbbackup/prod/	
+	scp $dumpoutFilesPackage 10.10.73.166:/data/dbbackup/prod/	
 }
 
 clean() {
-	rm -rf yxt-*-$today	
+	rm -rf yxt.*-$today	
+}
+
+backupLecai2Rpts() {
+	rptFile=yxt.lecai2.rpts-$today
+	mysqldump \
+		--default-character-set=utf8 \
+		--add-drop-table \
+		--single-transaction \
+		--set-gtid-purged=OFF \
+		--flush-logs \
+		--master-data=2 \
+		lecai2 $(getLecai2RptTables) > $rptFile
+
+	tar -czvf $rptFile.tgz $rptFile
+	scp $rptFile.tgz 10.10.73.166:/data/dbbackup/prod/
 }
 
 leaveWorkspace() {
@@ -54,9 +82,16 @@ leaveWorkspace() {
 
 main() {
 	enterWorkspace
+
+	schemaDump
 	dump
 	tarFiles
 	backupToStorage
+
+	if [ $(date +%u) -eq 7 ]; then
+		backupLecai2Rpts
+	fi
+	
 	clean
 	leaveWorkspace
 }
