@@ -31,8 +31,8 @@ sub installJdk($) {
 			securityLocation => '/usr/java/jdk1.7.0_76/jre/lib/security/'
 		},
 		'1.8' =>  {
-			rpmfile => 'jdk-8u25-linux-x64.rpm',
-			securityLocation => '/usr/java/jdk1.8.0_25/jre/lib/security/'
+			rpmfile => 'jdk-8u91-linux-x64.rpm',
+			securityLocation => '/usr/java/jdk1.8.0_91/jre/lib/security/'
 		}
 	};
 
