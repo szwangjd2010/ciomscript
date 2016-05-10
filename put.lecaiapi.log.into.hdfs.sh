@@ -10,7 +10,7 @@ fullEventLogFile="event-full.log"
 timeLogFile="$logRootLocation/$logFileYMD/time.$logFileYMD.all-instances.log"
 eventLogFile="$logRootLocation/$logFileYMD/event.$logFileYMD.all-instances.log"
 
-logFileHdfsLocation="hdfs://yxtdfs/raw/lecai/"
+logFileHdfsLocation="hdfs://hdc-54/raw/lecai/"
 hdfsBin="/opt/hadoop-2.7.1/bin/hdfs"
 
 $hdfsBin dfs -put "$timeLogFile" "$logFileHdfsLocation"
