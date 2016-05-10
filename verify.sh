@@ -37,5 +37,10 @@ if [ "$CiomPassphraseFd" == "fdTMTY2016" ]; then
 	exit 0
 fi
 
+if [ "$CiomPassphrase-PlatformNG" == "platformng" ]; then
+	exit 0
+fi
+
+
 
 exit 1

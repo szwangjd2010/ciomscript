@@ -15,7 +15,7 @@ fi
 
 TIMESTAMP=`date  +%Y%m%d -d '-1 days'`
 OUTFILE_NAME=slowsql@${MYSQLHOST}.csv
-LOCAL_ROOT=/home/jenkins/ciompub/mysql.slowsql/${TIMESTAMP}
+LOCAL_ROOT=/sdc/ciompub/mysql.slowsql/${TIMESTAMP}
 REMOTE_ROOT=/tmp
 REMOTE_FILE=${REMOTE_ROOT}/${OUTFILE_NAME}
 LOCAL_FILE=${LOCAL_ROOT}/${OUTFILE_NAME}
