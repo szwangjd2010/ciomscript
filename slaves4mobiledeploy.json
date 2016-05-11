@@ -1,0 +1,27 @@
+{
+	"ios": [
+		{
+			"ip":"172.17.125.246", 
+			"capacity": "1", 
+			"ciSlaveId": "1" 
+		},
+		{
+			"ip":"172.17.125.245", 
+			"capacity": "1", 
+			"ciSlaveId": "0" 
+		},
+		{
+			"ip":"172.17.125.247",
+			"capacity": "1", 
+			"ciSlaveId": "2" 
+		}
+	],
+
+	"android": [
+		{
+			"ip":"172.17.128.240", 
+			"capacity": "6", 
+			"ciSlaveId": "0" 
+		}
+	]
+}
