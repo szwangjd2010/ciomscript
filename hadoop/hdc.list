@@ -1,0 +1,20 @@
+CREATE DATABASE cmf DEFAULT CHARACTER SET utf8;
+CREATE DATABASE activitymonitor DEFAULT CHARACTER SET utf8;
+CREATE DATABASE reportsmanager DEFAULT CHARACTER SET utf8;
+CREATE DATABASE hive DEFAULT CHARACTER SET utf8;
+CREATE DATABASE oozie DEFAULT CHARACTER SET utf8;
+CREATE DATABASE hue DEFAULT CHARACTER SET utf8;
+grant all privileges on cmf.* to cmf@'%' identified by 'yxtHDC';
+grant all privileges on activitymonitor.* to activitymonitor@'%' identified by 'yxtHDC';
+grant all privileges on reportsmanager.* to reportsmanager@'%' identified by 'yxtHDC';
+grant all privileges on hive.* to hive@'%' identified by 'yxtHDC';
+grant all privileges on oozie.* to oozie@'%' identified by 'yxtHDC';
+grant all privileges on hue.* to hue@'%' identified by 'yxtHDC';
+flush privileges;
+
+
+CM & CDH local repo and parcel
+http://172.17.128.240/local.repos/cdh5/parcels/5.7/
+http://172.17.128.240/local.repos/cm5/
+http://172.17.128.240/local.repos/cm5/RPM-GPG-KEY-cloudera
+
