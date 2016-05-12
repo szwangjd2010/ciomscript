@@ -8,7 +8,7 @@ getProdFile() {
 }
 
 getLocalFile() {
-	echo -n "/sdc/ciompub/behavior/$1/qida_action.$1.all-instances.log"
+	echo -n "/sdc/ciompub/behavior/_clean/$1/qida_action.$1.all-instances.log"
 }
 
 getFile() {
@@ -24,7 +24,7 @@ showFieldsSeparatorInfo() {
 }
 
 main () {
-	for (( i=1; i<180; i++)); do
+	for (( i=1; i<180; i++ )); do
 		ymd=$(date -d "$i days ago" +%04Y%02m%02d)
 
 		f=$(getFile $ymd)

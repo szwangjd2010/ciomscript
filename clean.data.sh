@@ -2,8 +2,10 @@
 # 
 #
 product=${1:-qida}
+logType=${2:-action}
 logRoot=/sdc/ciompub/behavior
 workspace=$logRoot/_clean
+itemTotalCost=0
 
 getFileName() {
 	ymd=$1
@@ -30,44 +32,33 @@ createYmdWorkspace() {
 	/bin/cp -rf $fileOriginal $fileOperated
 }
 
-truncateLog4jPrefix() {
-	f=$1
+doClean() {
 	t0=$(date +%s)
-	perl -i.origin -pE 's/^.+ \[\w+\.java:\d+\] - //g' $f
+	eval $1
 	t1=$(date +%s)
-	echo truncateLog4jPrefix: $(( $t1 - $t0 )) secs	
+	cost=$(( $t1 - $t0 ))
+	itemTotalCost=$(( $itemTotalCost + $cost ))
+	echo ${FUNCNAME[1]}: $cost secs	
+}
+
+truncateLog4jPrefix() {
+	doClean "perl -i.origin -pE '"'s/^.+ \[\w+\.java:\d+\] - //g'"' $1"
 }
 
 nullToEmpty() {
-	f=$1
-	t0=$(date +%s)
-	perl -i.truncateLog4jPrefix -pE 's/(?<=,)null(?=,)/""/g' $f
-	t1=$(date +%s)
-	echo nullToEmpty: $(( $t1 - $t0 )) secs
+	doClean "perl -i.truncateLog4jPrefix -pE '"'s/(?<=,)null(?=,)/""/g'"' $1"
 }
 
 filedValueTabToSpace() {
-	f=$1
-	t0=$(date +%s)
-	perl -i.nullToEmpty -pE 's/\t/ /g' $f
-	t1=$(date +%s)
-	echo filedValueTabToSpace: $(( $t1 - $t0 )) secs	
+	doClean "perl -i.nullToEmpty -pE '"'s/\t/ /g'"' $1"
 }
 
 FieldSeparator_CommaToTab() {
-	f=$1
-	t0=$(date +%s)
-	perl -i.filedValueTabToSpace -pE 's/","/"\t"/g' $f
-	t1=$(date +%s)
-	echo FieldSeparator_CommaToTab: $(( $t1 - $t0 )) secs	
+	doClean "perl -i.FieldSeparator_CommaToTab -pE '"'s/","/"\t"/g'"' $1"
 }
 
 removeFieldClosureSignDoubleQuotes() {
-	f=$1
-	t0=$(date +%s)
-	perl -i.FieldSeparator_CommaToTab -pE 's/(^"|"$|(?<=\t)"|"(?=\t))//g' $f
-	t1=$(date +%s)
-	echo removeFieldClosureSignDoubleQuotes: $(( $t1 - $t0 )) secs	
+	doClean "perl -i.FieldSeparator_CommaToTab -pE '"'s/(^"|"$|(?<=\t)"|"(?=\t))//g'"' $1"
 }
 
 showFieldsSeparatorInfo() {
@@ -84,7 +75,8 @@ showFieldsSeparatorInfo() {
 # after 20160510, 	FS->'\t'	null value -> ""		field clouser sign -> no clouser sign
 main () {
 	begin="2015-12-30" # end date: 20160510
-	for (( i=0; i<=132; i++)); do
+	for (( i=0; i<=132; i++ )); do
+	#for (( i=0; i<1; i++ )); do
 		ymd=$(date -d "$begin +$i days" +%04Y%02m%02d)
 		fileOriginal=$(getFileOriginalFullPath $ymd)
 		if [ ! -e $fileOriginal ]; then
@@ -97,6 +89,7 @@ main () {
 
 		fileOperated=$(getFileOperatedFullPath $ymd)
 		createYmdWorkspace $ymd $fileOriginal $fileOperated
+		itemTotalCost=0
 
 		echo ------------------------------------------------------------
 		printf "%03d - %s - %s\n" $i $ymd $fileOperated
@@ -108,10 +101,9 @@ main () {
 			FieldSeparator_CommaToTab $fileOperated
 		fi
 		removeFieldClosureSignDoubleQuotes $fileOperated
-		
-		showFieldsSeparatorInfo $fileOperated
+		echo file total cost: $itemTotalCost secs
 
-		echo
+		showFieldsSeparatorInfo $fileOperated
 	done
 }
 
