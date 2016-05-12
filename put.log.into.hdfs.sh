@@ -18,11 +18,6 @@ putProductLog2Hdfs() {
 	$hdfsBin dfs -appendToFile "$logFile" "$hdfsFullLogFile"	
 }
 
-cleanLogData() {
-	logFile=$1
-	$CIOM_SCRIPT_HOME/clean.data-action.log.sh "$logFile"
-}
-
 getProductLogLocalFile() {
 	product=$1
 	echo -n "$logRootLocation/$logFileYMD/${product}_${logType}.$logFileYMD.all-instances.log"
@@ -37,8 +32,6 @@ main() {
 	for product in $Products; do
 		logFile=$(getProductLogLocalFile $product)
 		hdfsFullLogFile=$(getProductLogHdfsFullFile $product)
-
-		cleanLogData "$logFile"
 		putProductLog2Hdfs "$logFile" "$hdfsFullLogFile"
 	done
 }
