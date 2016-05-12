@@ -9,7 +9,7 @@ itemTotalCost=0
 
 getFileName() {
 	ymd=$1
-	echo -n "${product}_action.${ymd}.all-instances.log"
+	echo -n "${product}_${logType}.${ymd}.all-instances.log"
 }
 
 getFileOriginalFullPath() {
@@ -26,8 +26,11 @@ createYmdWorkspace() {
 	ymd=$1
 	fileOriginal=$2
 	fileOperated=$3
-	ymdLocation=$workspace/$ymd
+	if [ -e $fileOperated ]; then
+		return
+	fi
 
+	ymdLocation=$workspace/$ymd
 	mkdir -p $ymdLocation
 	/bin/cp -rf $fileOriginal $fileOperated
 }
@@ -76,7 +79,7 @@ showFieldsSeparatorInfo() {
 main () {
 	begin="2015-12-30" # end date: 20160510
 	for (( i=0; i<=132; i++ )); do
-	#for (( i=0; i<1; i++ )); do
+	#for (( i=0; i<=1; i++ )); do
 		ymd=$(date -d "$begin +$i days" +%04Y%02m%02d)
 		fileOriginal=$(getFileOriginalFullPath $ymd)
 		if [ ! -e $fileOriginal ]; then
@@ -89,10 +92,15 @@ main () {
 
 		fileOperated=$(getFileOperatedFullPath $ymd)
 		createYmdWorkspace $ymd $fileOriginal $fileOperated
-		itemTotalCost=0
 
 		echo ------------------------------------------------------------
 		printf "%03d - %s - %s\n" $i $ymd $fileOperated
+
+		if [ -e "$fileOperated.clean-done" ]; then
+			continue
+		fi
+
+		itemTotalCost=0
 
 		if (( $ymd < 20160226 )); then
 			truncateLog4jPrefix $fileOperated
@@ -101,6 +109,7 @@ main () {
 			FieldSeparator_CommaToTab $fileOperated
 		fi
 		removeFieldClosureSignDoubleQuotes $fileOperated
+		touch $fileOperated.clean-done
 		echo file total cost: $itemTotalCost secs
 
 		showFieldsSeparatorInfo $fileOperated
