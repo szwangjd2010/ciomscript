@@ -27,7 +27,7 @@ main () {
 	for product in $Products; do
 		for logType in $LogTypes; do
 			fileNamePattern=$(getFileNamePattern $product $logType)
-			for f in $(find $Location -name $fileNamePattern); do
+			for f in $(find $Location -name $fileNamePattern | sort); do
 				echo -n "inspecting $f ... "
 				inspectingOutFile=$(getInspectingOutFile $f)
 				inspectedOutFile=$(getInspectedOutFile $f)
