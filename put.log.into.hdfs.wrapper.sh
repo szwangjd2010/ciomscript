@@ -18,10 +18,9 @@ main () {
 			continue
 		fi
 
-		echo ---------------------------------------------------------
-		echo $ymd
+		echo -n "put $ymd ... "
 		./put.log.into.hdfs.sh $ymd
-		echo
+		echo "done"
 	done
 }
 
