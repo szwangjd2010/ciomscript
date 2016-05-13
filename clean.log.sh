@@ -1,8 +1,11 @@
 #!/bin/bash
 # 
-#
-product=${1:-qida}
-logType=${2:-action}
+
+begin=${1:-2015-12-30}
+end=${1:-2016-05-10}
+product=${3:-qida}
+logType=${4:-action}
+
 logRoot=/sdc/ciompub/behavior
 workspace=$logRoot/_clean
 itemTotalCost=0
@@ -77,20 +80,24 @@ showFieldsSeparatorInfo() {
 # after 20160226, 	FS->'\t'	null value -> ""		field clouser sign -> '"'
 # after 20160510, 	FS->'\t'	null value -> ""		field clouser sign -> no clouser sign
 main () {
-	begin="2015-12-30" # end date: 20160510
-	for (( i=0; i<=132; i++ )); do
-	#for (( i=0; i<=1; i++ )); do
-		ymd=$(date -d "$begin +$i days" +%04Y%02m%02d)
-		fileOriginal=$(getFileOriginalFullPath $ymd)
-		if [ ! -e $fileOriginal ]; then
-			continue
-		fi
+	ymdEnd=$(date -d "$end" +%04Y%02m%02d)
 
+	for (( i=0; i<1000; i++ )); do
+		ymd=$(date -d "$begin +$i days" +%04Y%02m%02d)
+
+		if (( $ymd > $ymdEnd )); then
+			break
+		fi
+		
 		if [ "$ymd" = "20160226" ]; then
 			continue
 		fi
 
+		fileOriginal=$(getFileOriginalFullPath $ymd)
 		fileOperated=$(getFileOperatedFullPath $ymd)
+		if [ ! -e $fileOriginal ]; then
+			continue
+		fi
 		createYmdWorkspace $ymd $fileOriginal $fileOperated
 
 		echo ------------------------------------------------------------

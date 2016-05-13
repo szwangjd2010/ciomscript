@@ -1,11 +1,10 @@
 #!/bin/bash
 #
 
-dayAgo=${1:-1}
+ymd=${1:-$(date -d "1 days ago" +%04Y%02m%02d)}
 logType=${2:-action}
 
-logFileYMD=$(date -d "$dayAgo days ago" +%04Y%02m%02d)
-logRootLocation="/usr/share/nginx/html/ciompub/behavior"
+logRootLocation="/sdc/ciompub/behavior/_clean"
 logFileHdfsLocation="hdfs://hdc-54/raw/${logType}log/"
 hdfsBin="/opt/hadoop-2.7.1/bin/hdfs"
 Products="lecai wangxiao qida mall"
@@ -20,7 +19,7 @@ putProductLog2Hdfs() {
 
 getProductLogLocalFile() {
 	product=$1
-	echo -n "$logRootLocation/$logFileYMD/${product}_${logType}.$logFileYMD.all-instances.log"
+	echo -n "$logRootLocation/$ymd/${product}_${logType}.$ymd.all-instances.log"
 }
 
 getProductLogHdfsFullFile() {

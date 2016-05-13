@@ -3,7 +3,7 @@
 #
 
 Products="qida lecai mall wangxiao"
-Types="action access"
+LogTypes="action access"
 
 for product in $Products; do
 	for logType in $LogTypes; do
