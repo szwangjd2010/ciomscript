@@ -25,8 +25,9 @@ main () {
 		fi
 
 		for logType in $LogTypes; do
-			echo put $logType log files to hdfs...
+			echo -n "put $logType log files to hdfs ... "
 			#./put.log.into.hdfs.sh $ymd $logType
+			echo 'done'
 		done
 	done
 }
