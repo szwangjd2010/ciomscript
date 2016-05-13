@@ -2,7 +2,7 @@
 # 
 
 begin=${1:-2015-12-30}
-end=${1:-2016-05-10}
+end=${2:-2016-05-10}
 product=${3:-qida}
 logType=${4:-action}
 
@@ -109,13 +109,14 @@ main () {
 
 		itemTotalCost=0
 
+		truncateLog4jPrefix $fileOperated
 		if (( $ymd < 20160226 )); then
-			truncateLog4jPrefix $fileOperated
 			nullToEmpty $fileOperated
 			filedValueTabToSpace $fileOperated
 			FieldSeparator_CommaToTab $fileOperated
 		fi
 		removeFieldClosureSignDoubleQuotes $fileOperated
+		
 		touch $fileOperated.clean-done
 		echo file total cost: $itemTotalCost secs
 
