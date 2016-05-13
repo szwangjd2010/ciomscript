@@ -1,5 +1,5 @@
-drop table if exist qida_actionlog;
-create table qida_actionlog (
+DROP TABLE IF EXISTS qida_actionlog;
+CREATE TABLE qida_actionlog (
 	orgid String,
 	orgname String,
 	logtitle String,
@@ -32,10 +32,10 @@ create table qida_actionlog (
 	referstr5 String,
 	referstr6 String,
 	logtime timestamp
-) row format delimited fields terminated by '\t';
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
 
-drop table if exist qida_accesslog;
-create table qida_accesslog (
+DROP TABLE IF EXISTS qida_accesslog;
+CREATE TABLE qida_accesslog (
 	orgid String,
 	orgname String,
 	logtitle String,
@@ -56,10 +56,10 @@ create table qida_accesslog (
 	method String,
 	source String,
 	logtime timestamp
-) row format delimited fields terminated by '\t';
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
 
-drop table if exist lecai_actionlog;
-create table lecai_actionlog (
+DROP TABLE IF EXISTS lecai_actionlog;
+CREATE TABLE lecai_actionlog (
 	orgid String,
 	orgname String,
 	logtitle String,
@@ -92,10 +92,10 @@ create table lecai_actionlog (
 	referstr5 String,
 	referstr6 String,
 	logtime timestamp
-) row format delimited fields terminated by '\t';
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
 
-drop table if exist lecai_accesslog;
-create table lecai_accesslog (
+DROP TABLE IF EXISTS lecai_accesslog;
+CREATE TABLE lecai_accesslog (
 	orgid String,
 	orgname String,
 	logtitle String,
@@ -116,10 +116,10 @@ create table lecai_accesslog (
 	method String,
 	source String,
 	logtime timestamp
-) row format delimited fields terminated by '\t';
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
 
-drop table if exist mall_actionlog;
-create table mall_actionlog (
+DROP TABLE IF EXISTS mall_actionlog;
+CREATE TABLE mall_actionlog (
 	orgid String,
 	orgname String,
 	logtitle String,
@@ -152,10 +152,10 @@ create table mall_actionlog (
 	referstr5 String,
 	referstr6 String,
 	logtime timestamp
-) row format delimited fields terminated by '\t';
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
 
-drop table if exist mall_accesslog;
-create table mall_accesslog (
+DROP TABLE IF EXISTS mall_accesslog;
+CREATE TABLE mall_accesslog (
 	orgid String,
 	orgname String,
 	logtitle String,
@@ -176,10 +176,10 @@ create table mall_accesslog (
 	method String,
 	source String,
 	logtime timestamp
-) row format delimited fields terminated by '\t';
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
 
-drop table if exist wangxiao_actionlog;
-create table wangxiao_actionlog (
+DROP TABLE IF EXISTS wangxiao_actionlog;
+CREATE TABLE wangxiao_actionlog (
 	orgid String,
 	orgname String,
 	logtitle String,
@@ -212,10 +212,10 @@ create table wangxiao_actionlog (
 	referstr5 String,
 	referstr6 String,
 	logtime timestamp
-) row format delimited fields terminated by '\t';
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
 
-drop table if exist wangxiao_accesslog;
-create table wangxiao_accesslog (
+DROP TABLE IF EXISTS wangxiao_accesslog;
+CREATE TABLE wangxiao_accesslog (
 	orgid String,
 	orgname String,
 	logtitle String,
@@ -236,5 +236,5 @@ create table wangxiao_accesslog (
 	method String,
 	source String,
 	logtime timestamp
-) row format delimited fields terminated by '\t';
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
 

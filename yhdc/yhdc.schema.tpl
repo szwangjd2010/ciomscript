@@ -1,5 +1,5 @@
-drop table if exist #TABLE_NAME#;
-create table #TABLE_NAME# (
+DROP TABLE IF EXISTS #TABLE_NAME#;
+CREATE TABLE #TABLE_NAME# (
 #FIELDS#
-) row format delimited fields terminated by '\t';
+) ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
 

@@ -2,36 +2,36 @@
 #
 
 ymd=${1:-$(date -d "1 days ago" +%04Y%02m%02d)}
-logType=${2:-action}
 
 logRootLocation="/sdc/ciompub/behavior/_clean"
-logFileHdfsLocation="hdfs://hdc-54/raw/${logType}log/"
 hdfsBin="/opt/hadoop-2.7.1/bin/hdfs"
 Products="lecai wangxiao qida mall"
+LogTypes="action access"
 
-putProductLog2Hdfs() {
-	logFile=$1
-	hdfsFullLogFile=$2
-	
-	$hdfsBin dfs -put "$logFile" "$logFileHdfsLocation/"
-	$hdfsBin dfs -appendToFile "$logFile" "$hdfsFullLogFile"	
+product=''
+logType=''
+
+getLogFileHdfsLocation() {
+	echo -n "hdfs://hdc-54/raw/${logType}log"
 }
 
 getProductLogLocalFile() {
-	product=$1
 	echo -n "$logRootLocation/$ymd/${product}_${logType}.$ymd.all-instances.log"
 }
 
 getProductLogHdfsFullFile() {
-	product=$1
-	echo -n "$logFileHdfsLocation/${product}.${logType}.log"	
+	echo -n "$(getLogFileHdfsLocation)/${product}.${logType}.log"	
 }
 
 main() {
 	for product in $Products; do
-		logFile=$(getProductLogLocalFile $product)
-		hdfsFullLogFile=$(getProductLogHdfsFullFile $product)
-		putProductLog2Hdfs "$logFile" "$hdfsFullLogFile"
+		for logType in $LogTypes; do
+			logFile=$(getProductLogLocalFile)
+			$hdfsBin dfs -put $logFile $(getLogFileHdfsLocation)/
+			$hdfsBin dfs -appendToFile $logFile $(getProductLogHdfsFullFile)
+			#echo $hdfsBin dfs -put $logFile $(getLogFileHdfsLocation)/
+			#echo $hdfsBin dfs -appendToFile $logFile $(getProductLogHdfsFullFile)
+		done
 	done
 }
 
