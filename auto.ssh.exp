@@ -1,0 +1,45 @@
+#!/usr/bin/expect
+# micro li
+#
+
+set timeout 30
+
+set argvs [llength $argv]
+set ip [lindex $argv 0]
+set rootPwd [lindex $argv 1]
+
+for {set i 0} {$i < 10} {incr i} {
+	if {$argvs > 2} {
+		set sshCmd [lindex $argv 2]
+		spawn ssh "root@$ip" $sshCmd
+	} else {
+		spawn ssh "root@$ip"
+	}
+	
+	expect {
+		"password" {
+			send "$rootPwd\n"
+			break
+		}
+		"yes/no" {
+			send "yes\n"
+
+			expect {
+				"password" {
+					send "$rootPwd\r"
+					break
+				}
+			}
+		}
+		-indices -re "Offending key in (.*known_hosts)" {
+			set knowHost $expect_out(1,string)
+			close
+			exec sed -i /$ip/d $knowHost 
+			
+			continue
+		}
+	}
+	break
+}
+
+interact
