@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS ${tableName};
 CREATE TABLE ${tableName} (
   <#include filedsFile>
 ) 
-PARTITIONED BY (year int, month int) 
+PARTITIONED BY (year INT, month INT) 
 ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
 
 ALTER TABLE ${tableName} ADD PARTITION (year=2015, month=12);
