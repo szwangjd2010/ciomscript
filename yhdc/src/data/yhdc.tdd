@@ -1,0 +1,11 @@
+Products: [
+	"qida",
+	"mall",
+	"wangxiao",
+	"lecai"
+],
+
+LogTypes: [
+	"action",
+	"access"
+]
