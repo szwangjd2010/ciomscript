@@ -7,14 +7,16 @@ DROP TABLE IF EXISTS ${tableName};
 CREATE TABLE ${tableName} (
   <#include filedsFile>
 ) 
-PARTITIONED BY (year INT, month INT) 
+PARTITIONED BY (year STRING, month STRING) 
 ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
 
-ALTER TABLE ${tableName} ADD PARTITION (year=2015, month=12);
+ALTER TABLE ${tableName} ADD PARTITION (year="2015", month='12');
 <#list 1..12 as month>
-ALTER TABLE ${tableName} ADD PARTITION (year=2016, month=${month});
+ALTER TABLE ${tableName} ADD PARTITION (year='2016', month='${month?left_pad(2, '0')}');
 </#list>
 
 
   </#list>
 </#list>
+
+<@pp.renameOutputFile extension='sql' />
