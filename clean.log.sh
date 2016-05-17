@@ -115,7 +115,9 @@ main () {
 			filedValueTabToSpace $fileOperated
 			FieldSeparator_CommaToTab $fileOperated
 		fi
-		removeFieldClosureSignDoubleQuotes $fileOperated
+		if (( $ymd < 20160510 )); then
+			removeFieldClosureSignDoubleQuotes $fileOperated
+		fi
 		
 		touch $fileOperated.clean-done
 		echo file total cost: $itemTotalCost secs
