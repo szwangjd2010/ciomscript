@@ -1,21 +1,9 @@
 #!/bin/bash
 #
-yesterday=$(date -d "1 days ago" +%04Y%02m%02d)
-begin=${1:-$yesterday}
-end=${2:-$yesterday}
+source $CIOM_SCRIPT_HOME/log.common.sh
 
 logRootLocation="/sdc/ciompub/behavior/_clean"
 hdfsBin="/opt/hadoop-2.7.1/bin/hdfs"
-Products="lecai wangxiao qida mall"
-LogTypes="action access"
-
-product=''
-logType=''
-ymd=''
-year=''
-month=''
-ym=''
-
 
 getLogFileHdfsLocation() {
 	echo -n "hdfs://hdc-54/raw/${logType}log"
@@ -61,10 +49,10 @@ main() {
 		for product in $Products; do
 			for logType in $LogTypes; do
 				logFile=$(getLogLocalFile)
-				$hdfsBin dfs -put $logFile $(getLogFileHdfsLocation)/
-				$hdfsBin dfs -appendToFile $logFile $(getLogHdfsMonthlyFile)
-				$hdfsBin dfs -appendToFile $logFile $(getLogHdfsFullFile)
-				$hdfsBin dfs -appendToFile $logFile $(getHiveTablePartitionHdfsFile)
+				echo $hdfsBin dfs -put $logFile $(getLogFileHdfsLocation)/
+				echo $hdfsBin dfs -appendToFile $logFile $(getLogHdfsMonthlyFile)
+				echo $hdfsBin dfs -appendToFile $logFile $(getLogHdfsFullFile)
+				echo $hdfsBin dfs -appendToFile $logFile $(getHiveTablePartitionHdfsFile)
 			done
 		done
 	done	

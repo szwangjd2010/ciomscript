@@ -1,22 +1,17 @@
 #!/bin/bash
 #
-yesterday=$(date -d "1 days ago" +%04Y%02m%02d)
-begin=${1:-$yesterday}
-end=${2:-$yesterday}
+source $CIOM_SCRIPT_HOME/log.common.sh
 
-Products="lecai wangxiao qida mall"
-LogCatalogs="access action"
 LogApiHosts="10.10.125.17"
-ymd=''
 
 pullLog() {
 	hosts=$1
 	svrTomcatParent=$2
 	localLogLocation=$3
-	reLogCatalogs=$LogCatalogs
-	reLogCatalogs=${reLogCatalogs// /\|}
+	reLogTypes=$LogTypes
+	reLogTypes=${reLogTypes// /\|}
 	for host in $hosts; do
-		ssh root@$host "cd $svrTomcatParent; mkdir -p /data/tmp; find -regextype posix-extended -regex '.*/\w+_($reLogCatalogs).$ymd.log' > /tmp/_pulllog; tar -cjvf /data/tmp/$host.tomcat.logs.bz2 --files-from /tmp/_pulllog"
+		ssh root@$host "cd $svrTomcatParent; mkdir -p /data/tmp; find -regextype posix-extended -regex '.*/\w+_($reLogTypes).$ymd.log' > /tmp/_pulllog; tar -cjvf /data/tmp/$host.tomcat.logs.bz2 --files-from /tmp/_pulllog"
 		
 		localHostLogLocation=$localLogLocation/$host
 		mkdir -p $localHostLogLocation
@@ -31,8 +26,8 @@ mergeLog() {
 	localLogLocation=$2	
 
 	for product in $Products; do
-		for catalog in $LogCatalogs; do
-			find "$localLogLocation" -name "${product}_${catalog}.${ymd}.log" -exec cat {} >> "$localLogLocation/${product}_${catalog}.${ymd}.all-instances.log" \;
+		for logType in $LogTypes; do
+			find "$localLogLocation" -name "${product}_${logType}.${ymd}.log" -exec cat {} >> "$localLogLocation/${product}_${logType}.${ymd}.all-instances.log" \;
 		done
 	done
 }

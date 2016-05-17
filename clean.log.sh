@@ -1,10 +1,6 @@
 #!/bin/bash
 # 
-
-begin=${1:-2015-12-30}
-end=${2:-2016-05-10}
-product=${3:-qida}
-logType=${4:-action}
+source $CIOM_SCRIPT_HOME/log.common.sh
 
 logRoot=/sdc/ciompub/behavior
 workspace=$logRoot/_clean
@@ -79,7 +75,7 @@ showFieldsSeparatorInfo() {
 # first: 			FS->','		null value -> null 		field clouser sign -> '"'
 # after 20160226, 	FS->'\t'	null value -> ""		field clouser sign -> '"'
 # after 20160510, 	FS->'\t'	null value -> ""		field clouser sign -> no clouser sign
-main () {
+clean() {
 	ymdEnd=$(date -d "$end" +%04Y%02m%02d)
 
 	for (( i=0; i<1000; i++ )); do
@@ -123,6 +119,18 @@ main () {
 		echo file total cost: $itemTotalCost secs
 
 		showFieldsSeparatorInfo $fileOperated
+	done
+}
+
+main() {
+	for product in $Products; do
+		for logType in $LogTypes; do
+			echo =====================================================================
+			echo "$product - $logType"
+			clean
+			echo
+			echo
+		done
 	done
 }
 
