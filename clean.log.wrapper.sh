@@ -1,8 +1,9 @@
 #!/bin/bash
 # 
 #
-begin=${1:-2015-12-30}
-end=${1:-2016-05-10}
+yesterday=$(date -d "1 days ago" +%04Y%02m%02d)
+begin=${1:-$yesterday}
+end=${2:-$yesterday}
 
 Products="qida lecai mall wangxiao"
 LogTypes="action access"
