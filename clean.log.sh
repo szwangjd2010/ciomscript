@@ -1,6 +1,6 @@
 #!/bin/bash
 # 
-source $CIOM_SCRIPT_HOME/log.common.sh
+source $CIOM_SCRIPT_HOME/log.common.sh "$@"
 
 logRoot=/sdc/ciompub/behavior
 workspace=$logRoot/_clean
@@ -34,7 +34,7 @@ createYmdWorkspace() {
 	/bin/cp -rf $fileOriginal $fileOperated
 }
 
-doClean() {
+cleanExec() {
 	t0=$(date +%s)
 	eval $1
 	t1=$(date +%s)
@@ -44,23 +44,23 @@ doClean() {
 }
 
 truncateLog4jPrefix() {
-	doClean "perl -i.origin -pE '"'s/^.+ \[\w+\.java:\d+\] - //g'"' $1"
+	cleanExec "perl -i.origin -pE '"'s/^.+ \[\w+\.java:\d+\] - //g'"' $1"
 }
 
 nullToEmpty() {
-	doClean "perl -i.truncateLog4jPrefix -pE '"'s/(?<=,)null(?=,)/""/g'"' $1"
+	cleanExec "perl -i.truncateLog4jPrefix -pE '"'s/(?<=,)null(?=,)/""/g'"' $1"
 }
 
 filedValueTabToSpace() {
-	doClean "perl -i.nullToEmpty -pE '"'s/\t/ /g'"' $1"
+	cleanExec "perl -i.nullToEmpty -pE '"'s/\t/ /g'"' $1"
 }
 
 FieldSeparator_CommaToTab() {
-	doClean "perl -i.FieldSeparator_CommaToTab -pE '"'s/","/"\t"/g'"' $1"
+	cleanExec "perl -i.FieldSeparator_CommaToTab -pE '"'s/","/"\t"/g'"' $1"
 }
 
 removeFieldClosureSignDoubleQuotes() {
-	doClean "perl -i.FieldSeparator_CommaToTab -pE '"'s/(^"|"$|(?<=\t)"|"(?=\t))//g'"' $1"
+	cleanExec "perl -i.FieldSeparator_CommaToTab -pE '"'s/(^"|"$|(?<=\t)"|"(?=\t))//g'"' $1"
 }
 
 showFieldsSeparatorInfo() {
@@ -96,7 +96,6 @@ clean() {
 		fi
 		createYmdWorkspace $ymd $fileOriginal $fileOperated
 
-		echo ------------------------------------------------------------
 		printf "%03d - %s - %s\n" $i $ymd $fileOperated
 
 		if [ -e "$fileOperated.clean-done" ]; then

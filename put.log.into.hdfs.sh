@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-source $CIOM_SCRIPT_HOME/log.common.sh
+source $CIOM_SCRIPT_HOME/log.common.sh "$@"
 
 logRootLocation="/sdc/ciompub/behavior/_clean"
 hdfsBin="/opt/hadoop-2.7.1/bin/hdfs"
@@ -49,10 +49,10 @@ main() {
 		for product in $Products; do
 			for logType in $LogTypes; do
 				logFile=$(getLogLocalFile)
-				echo $hdfsBin dfs -put $logFile $(getLogFileHdfsLocation)/
-				echo $hdfsBin dfs -appendToFile $logFile $(getLogHdfsMonthlyFile)
-				echo $hdfsBin dfs -appendToFile $logFile $(getLogHdfsFullFile)
-				echo $hdfsBin dfs -appendToFile $logFile $(getHiveTablePartitionHdfsFile)
+				$hdfsBin dfs -put $logFile $(getLogFileHdfsLocation)/
+				$hdfsBin dfs -appendToFile $logFile $(getLogHdfsMonthlyFile)
+				$hdfsBin dfs -appendToFile $logFile $(getLogHdfsFullFile)
+				$hdfsBin dfs -appendToFile $logFile $(getHiveTablePartitionHdfsFile)
 			done
 		done
 	done	

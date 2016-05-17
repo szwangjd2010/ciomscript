@@ -1,7 +1,8 @@
 #!/bin/bash
 #
-source $CIOM_SCRIPT_HOME/log.common.sh
+source $CIOM_SCRIPT_HOME/log.common.sh "$@"
 
+Flag_Force_Repull=0
 LogApiHosts="10.10.125.17"
 
 pullLog() {
@@ -11,13 +12,21 @@ pullLog() {
 	reLogTypes=$LogTypes
 	reLogTypes=${reLogTypes// /\|}
 	for host in $hosts; do
-		ssh root@$host "cd $svrTomcatParent; mkdir -p /data/tmp; find -regextype posix-extended -regex '.*/\w+_($reLogTypes).$ymd.log' > /tmp/_pulllog; tar -cjvf /data/tmp/$host.tomcat.logs.bz2 --files-from /tmp/_pulllog"
-		
 		localHostLogLocation=$localLogLocation/$host
-		mkdir -p $localHostLogLocation
-		scp root@$host:/data/tmp/$host.tomcat.logs.bz2 $localHostLogLocation/
+		if [ -e $localHostLogLocation/$host.tomcat.logs.tgz ]; then
+			continue
+		fi
 
-		(cd $localHostLogLocation; tar -xjvf $host.tomcat.logs.bz2 --no-same-owner)
+		mkdir -p $localHostLogLocation
+
+		ssh root@$host "\
+			cd $svrTomcatParent; \
+			mkdir -p /data/tmp; \
+			find -regextype posix-extended -regex '.*/\w+_($reLogTypes).$ymd.log' > /tmp/_pulllog; \
+			tar -czvf /data/tmp/$host.tomcat.logs.tgz --files-from /tmp/_pulllog;\
+		"
+		scp root@$host:/data/tmp/$host.tomcat.logs.tgz $localHostLogLocation/
+		(cd $localHostLogLocation; tar -xzvf $host.tomcat.logs.tgz --no-same-owner)
 	done	
 }
 
@@ -27,7 +36,13 @@ mergeLog() {
 
 	for product in $Products; do
 		for logType in $LogTypes; do
-			find "$localLogLocation" -name "${product}_${logType}.${ymd}.log" -exec cat {} >> "$localLogLocation/${product}_${logType}.${ymd}.all-instances.log" \;
+			toFile="$localLogLocation/${product}_${logType}.${ymd}.all-instances.log"
+			if [ -e $toFile ]; then
+				continue
+			fi
+
+			find "$localLogLocation" -name "${product}_${logType}.${ymd}.log" -exec cat {} >> ${toFile}.merging \;
+			mv ${toFile}.merging $toFile
 		done
 	done
 }
@@ -43,12 +58,12 @@ handleComponentLog() {
 	componentName=$3
 
 	localLogLocation=$(getComponentLocalLogLocation $componentName)
-echo $localLogLocation
-
-return
 
 	mkdir -p $localLogLocation
-	rm -rf $localLogLocation/*
+	if [ $Flag_Force_Repull -eq 1 ]; then
+		rm -rf $localLogLocation/*
+	fi
+	
 	pullLog "$hosts" "$tomcatParent" "$localLogLocation"
 	mergeLog "$hosts" "$localLogLocation"
 }
@@ -62,9 +77,9 @@ main() {
 		if (( $ymd > $ymdEnd )); then
 			break
 		fi
-
-
+		echo "pull $ymd logs ... "
 		handleComponentLog "$LogApiHosts" /data behavior
+		echo "done"
 	done
 }
 
