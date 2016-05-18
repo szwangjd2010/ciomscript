@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-source $CIOM_SCRIPT_HOME/log.common.sh "$@"
+source $CIOM_SCRIPT_HOME/yhdc/log.common.sh "$@"
 
 Flag_Force_Repull=0
 LogApiHosts="10.10.125.17"

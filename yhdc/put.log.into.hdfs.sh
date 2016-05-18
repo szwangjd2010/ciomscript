@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-source $CIOM_SCRIPT_HOME/log.common.sh "$@"
+source $CIOM_SCRIPT_HOME/yhdc/log.common.sh "$@"
 
 logRootLocation="/sdc/ciompub/behavior/_clean"
 hdfsBin="/opt/hadoop-2.7.1/bin/hdfs"
