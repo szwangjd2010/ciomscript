@@ -12,8 +12,10 @@ pullLog() {
 	reLogTypes=$LogTypes
 	reLogTypes=${reLogTypes// /\|}
 	for host in $hosts; do
+		echo -n "pull $host logs ... "
 		localHostLogLocation=$localLogLocation/$host
 		if [ -e $localHostLogLocation/$host.tomcat.logs.tgz ]; then
+			echo "already exists"
 			continue
 		fi
 
@@ -27,6 +29,7 @@ pullLog() {
 		"
 		scp root@$host:/data/tmp/$host.tomcat.logs.tgz $localHostLogLocation/
 		(cd $localHostLogLocation; tar -xzvf $host.tomcat.logs.tgz --no-same-owner)
+		echo "done"
 	done	
 }
 
