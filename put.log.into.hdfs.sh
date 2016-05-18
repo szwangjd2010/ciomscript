@@ -13,8 +13,12 @@ getHiveDbHdfsRoot() {
 	echo -n "hdfs://hdc-54/user/hive/warehouse/yxt.db"
 }
 
+getLogLocalFileName() {
+	echo -n "${product}_${logType}.${ymd}.all-instances.log"
+}
+
 getLogLocalFile() {
-	echo -n "$logRootLocation/$ymd/${product}_${logType}.$ymd.all-instances.log"
+	echo -n "$logRootLocation/$ymd/$(getLogLocalFileName)"
 }
 
 getLogMonthlyFileName() {
@@ -48,11 +52,22 @@ main() {
 
 		for product in $Products; do
 			for logType in $LogTypes; do
+				logFileName=$(getLogLocalFileName)
 				logFile=$(getLogLocalFile)
+				hdfsFile=$(getLogFileHdfsLocation)/$logFileName
+
+				echo "put $logFile to hdfs ... "
+				$hdfsBin dfs -test -f $hdfsFile
+				if [ $? -eq 0 ]; then
+					echo "already exists"
+					continue
+				fi
+				
 				$hdfsBin dfs -put $logFile $(getLogFileHdfsLocation)/
 				$hdfsBin dfs -appendToFile $logFile $(getLogHdfsMonthlyFile)
 				$hdfsBin dfs -appendToFile $logFile $(getLogHdfsFullFile)
 				$hdfsBin dfs -appendToFile $logFile $(getHiveTablePartitionHdfsFile)
+				echo "done"
 			done
 		done
 	done	

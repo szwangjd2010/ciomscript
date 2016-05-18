@@ -96,14 +96,13 @@ clean() {
 		fi
 		createYmdWorkspace $ymd $fileOriginal $fileOperated
 
-		printf "%03d - %s - %s\n" $i $ymd $fileOperated
-
+		printf "%s - %s ... \n" $ymd $fileOperated
 		if [ -e "$fileOperated.clean-done" ]; then
+			echo "already cleaned"
 			continue
 		fi
 
 		itemTotalCost=0
-
 		truncateLog4jPrefix $fileOperated
 		if (( $ymd < 20160226 )); then
 			nullToEmpty $fileOperated
@@ -124,11 +123,7 @@ clean() {
 main() {
 	for product in $Products; do
 		for logType in $LogTypes; do
-			echo =====================================================================
-			echo "$product - $logType"
 			clean
-			echo
-			echo
 		done
 	done
 }
