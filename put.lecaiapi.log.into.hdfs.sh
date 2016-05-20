@@ -4,7 +4,7 @@
 dayAgo=${1:-1}
 logFileYMD=$(date -d "$dayAgo days ago" +%04Y%02m%02d)
 
-logRootLocation="/usr/share/nginx/html/ciompub/lecai.api"
+logRootLocation="/sdc/ciompub/lecai.api"
 logFileHdfsLocation="hdfs://hdc-54/raw/lecai/"
 hdfsBin="/opt/hadoop-2.7.1/bin/hdfs"
 
@@ -16,7 +16,7 @@ put() {
 }
 
 main() {
-	put "evevt"
+	put "event"
 	put "time"
 }
 
