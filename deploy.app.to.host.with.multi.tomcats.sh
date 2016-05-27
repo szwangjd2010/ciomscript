@@ -53,7 +53,12 @@ preDeployApp() {
 	sleep 3
 }
 
+removeCatalinaLog() {
+	execRemoteCmd $host $port "rm -rf $tomcatParent/tomcat*/logs/catalina.out"
+}
+
 postDeployApp() {
+	removeCatalinaLog
 	startTomcats $host $port $tomcatParent
 }
 

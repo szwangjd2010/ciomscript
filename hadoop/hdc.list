@@ -18,3 +18,9 @@ http://172.17.128.240/local.repos/cdh5/parcels/5.7/
 http://172.17.128.240/local.repos/cm5/
 http://172.17.128.240/local.repos/cm5/RPM-GPG-KEY-cloudera
 
+
+HDP local repo
+HDP-2.4
+http://172.17.128.240/local.repos/HDP/centos7/2.x/updates/2.4.2.0
+http://172.17.128.240/local.repos/HDP-UTILS-1.1.0.20/repos/centos7
+

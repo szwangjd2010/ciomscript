@@ -1,10 +1,14 @@
 #!/usr/bin/perl -W
 #
 use Data::Dumper;
+use bigint;
 use JSON::Parse 'json_file_to_perl';
 use JSON;
 use Cwd;
 use POSIX qw(strftime);
+use Digest::MD5 qw(md5 md5_hex md5_base64);
+use Digest::xxHash qw[xxhash xxhash_hex];
+
 
 sub write_to_file {
 	my $data  = shift;
@@ -12,25 +16,7 @@ sub write_to_file {
 	print $fh encode_json($data);
 	close $fh;
 }
+print hex("0x55b0f902776841c190374d51a9652acd"),"\n";
 
-#our $CiomData = json_file_to_perl("ciom.json");
-
-#write_to_file($CiomData);
-
-#my $CD = json_file_to_perl("data_out.json");
-
-#print Dumper($CD);
-
-#chdir("win");
-
-#print getcwd();
-#print "\n";
-
-#chdir("..");
-
-#print getcwd();
-#print "\n";
-$now_string = strftime "%Y-%m-%d %H:%M:%S", localtime;
-
-print "$now_string";
+print xxhash_hex("55b0f902776841c190374d51a9652"),"\n";
 

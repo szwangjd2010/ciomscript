@@ -28,4 +28,11 @@ main () {
 	done
 }
 
-main
+test () {
+	app="test"
+	if [ "${app}" == "test" ]; then
+		echo "app is test"
+	fi
+}
+
+test

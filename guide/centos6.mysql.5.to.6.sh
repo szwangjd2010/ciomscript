@@ -29,3 +29,6 @@ CREATE DATABASE yxt DEFAULT CHARACTER SET utf8;
 SHOW GRANTS FOR 'rfc'@'localhost';
 REVOKE UPDATE, DELETE ON classicmodels.*  FROM 'rfc'@'localhost';
 REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'rfc'@'localhost';
+
+grant all privileges on hive.* to hive@'%' identified by 'lle';
+grant all privileges on oozie.* to oozie@'%' identified by 'lle';
