@@ -17,9 +17,7 @@ git pull
 cd /service
 
 ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/clean-model-cache-prd-${appName}-run/ . > /dev/null 2>&1
-if [ "$appName" == "lecai" ]; then
-	ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/ensure-index-exists-prd-${appName}-run/ . > /dev/null 2>&1
-fi
+ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/ensure-index-exists-prd-${appName}-run/ . > /dev/null 2>&1
 ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/index-worker-prd-${appName}-run/ . > /dev/null 2>&1
 ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/starfish-ws-apollo-inner-prd-${appName}-run/ . > /dev/null 2>&1
 ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/starfish-ws-apollo-msg-prd-${appName}-run/ . > /dev/null 2>&1
