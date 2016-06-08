@@ -3,7 +3,6 @@
 source $CIOM_SCRIPT_HOME/yhdc/log.common.sh "$@"
 
 Flag_Force_Repull=0
-LogApiHosts="10.10.125.17"
 
 pullLog() {
 	hosts=$1
@@ -81,7 +80,7 @@ main() {
 			break
 		fi
 		echo "pull $ymd logs ... "
-		handleComponentLog "$LogApiHosts" /data behavior
+		handleComponentLog "$HostsLogPresentin" /data behavior
 		echo "done"
 	done
 }
