@@ -25,8 +25,8 @@ put() {
 }
 
 main() {
-	put "event"
-	put "time"
+	put "lecaiapi_event"
+	put "lecaiapi_time"
 }
 
 main

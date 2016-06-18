@@ -1,6 +1,6 @@
 ---
 - name: hdc tuning
-  hosts: hdc
+  hosts: cdh-dev
   remote_user: root
 
   tasks:

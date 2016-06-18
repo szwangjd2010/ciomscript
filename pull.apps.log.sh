@@ -19,7 +19,7 @@ pullLog() {
 	reLogLevels=$logLevels
 	reLogLevels=${reLogLevels// /\|}
 	for host in $hosts; do
-		ssh root@$host "cd $svrTomcatParent; mkdir -p /data/tmp; find -regextype posix-extended -regex '.*/($reLogLevels).$logFileYMD.log' > /tmp/_pulllog; tar -cjvf /data/tmp/$host.tomcat.logs.bz2 --files-from /tmp/_pulllog"
+		ssh root@$host "cd $svrTomcatParent; mkdir -p /data/tmp; find -regextype posix-extended -regex '.*/lecaiapi_($reLogLevels).$logFileYMD.log' > /tmp/_pulllog; tar -cjvf /data/tmp/$host.tomcat.logs.bz2 --files-from /tmp/_pulllog"
 		
 		localHostLogLocation=$localLogLocation/$host
 		mkdir -p $localHostLogLocation
@@ -34,7 +34,7 @@ mergeLog() {
 	localLogLocation=$2	
 
 	for level in $logLevels; do
-		find "$localLogLocation" -name "$level.$logFileYMD.log" -exec cat {} >> "$localLogLocation/$level.$logFileYMD.all-instances.log" \;
+		find "$localLogLocation" -name "lecaiapi_$level.$logFileYMD.log" -exec cat {} >> "$localLogLocation/lecaiapi_$level.$logFileYMD.all-instances.log" \;
 	done
 }
 
@@ -58,12 +58,12 @@ handleComponentLog() {
 
 main() {
 	handleComponentLog "$LecaiApiHosts" 		/data/ws 	lecai.api
-	handleComponentLog "$LecaiAdminapiHosts" 	/data/ws-1 	lecai.adminapi
+	#handleComponentLog "$LecaiAdminapiHosts" 	/data/ws-1 	lecai.adminapi
 
-	handleComponentLog "$MallApiHosts" 			/data 		mall.api
-	handleComponentLog "$MallAdminapiHosts" 	/data/ws-4 	mall.adminapi
+	#handleComponentLog "$MallApiHosts" 			/data 		mall.api
+	#handleComponentLog "$MallAdminapiHosts" 	/data/ws-4 	mall.adminapi
 
-	handleComponentLog "$ComponentapiHost" 		/data 		component.api
+	#handleComponentLog "$ComponentapiHost" 		/data 		component.api
 }
 
 main

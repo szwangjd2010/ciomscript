@@ -65,10 +65,6 @@ sub getPlatform() {
 	return $platform;
 }
 
-sub getBuildLogFile() {
-	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
-}
-
 sub enterWorkspace() {
 	my $appWorkspace = "$ENV{WORKSPACE}";
 	#print $appWorkspace ;

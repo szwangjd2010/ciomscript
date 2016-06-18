@@ -24,3 +24,7 @@ HDP-2.4
 http://172.17.128.240/local.repos/HDP/centos7/2.x/updates/2.4.2.0
 http://172.17.128.240/local.repos/HDP-UTILS-1.1.0.20/repos/centos7
 
+CREATE DATABASE cmf DEFAULT CHARACTER SET utf8;
+grant all privileges on cmf.* to cmf@'%' identified by 'lle' with grant option;
+
+
