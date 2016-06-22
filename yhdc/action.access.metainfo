@@ -1,6 +1,7 @@
 env: ucloud
 logs: action access
 logroot: /data
+loglocalroot: /sdc/ciompub
 
 #lecai
 10.10.125.17

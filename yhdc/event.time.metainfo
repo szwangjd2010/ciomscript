@@ -1,6 +1,7 @@
 env: ucloud
 logs: event time
 logroot: /data
+loglocalroot: /sdc/ciompub
 
 #lecaiapi
 10.10.73.235

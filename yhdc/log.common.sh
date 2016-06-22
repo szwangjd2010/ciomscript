@@ -25,14 +25,19 @@ getLogRoot() {
 	echo -n $(grep -o -P '(?<=^logroot: )[/\w]+' $logMetainfoFile)
 }
 
+getLogLocalRoot() {
+	echo -n $(grep -o -P '(?<=^loglocalroot: )[/\w]+' $logMetainfoFile)
+}
+
 Env=$(getEnv)
 HostsLogPresentin=$(getHostsLogPresentin)
 Products=$(getProducts)
 LogTypes=$(getLogTypes)
 LogRoot=$(getLogRoot)
+LogLocalRoot=$(getLogLocalRoot)
 
 LogRoot=/data
-LogLocalHome=/sdc/ciompub/$Env/${LogTypes// /+}
+LogLocalHome=$LogLocalRoot/$Env/${LogTypes// /+}
 
 if [ ! -e $LogLocalHome ]; then
 	mkdir -p $LogLocalHome
@@ -43,6 +48,7 @@ echo $HostsLogPresentin
 echo $Products
 echo $LogTypes
 echo $LogRoot
+echo $LogLocalRoot
 echo $LogLocalHome
 
 product=''
