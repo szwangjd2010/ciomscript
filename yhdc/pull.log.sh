@@ -22,6 +22,7 @@ pullLog() {
 		ssh root@$host "\
 			cd $LogRoot; \
 			mkdir -p tmp; \
+			rm -rf ./tmp/$host.tomcat.logs.tgz; \
 			find -regextype posix-extended -regex '.*/\w+_($reLogTypes).$ymd.log' > ./tmp/_pulllog; \
 			tar -czvf ./tmp/$host.tomcat.logs.tgz --files-from ./tmp/_pulllog;\
 		"

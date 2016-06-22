@@ -34,6 +34,10 @@ LogRoot=$(getLogRoot)
 LogRoot=/data
 LogLocalHome=/sdc/ciompub/$Env/${LogTypes// /+}
 
+if [ ! -e $LogLocalHome ]; then
+	mkdir -p $LogLocalHome
+fi
+
 echo $Env
 echo $HostsLogPresentin
 echo $Products
