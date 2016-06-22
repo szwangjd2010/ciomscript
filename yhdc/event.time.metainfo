@@ -1,4 +1,6 @@
+env: ucloud
 logs: event time
+logroot: /data
 
 #lecaiapi
 10.10.73.235

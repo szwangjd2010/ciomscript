@@ -1,9 +1,13 @@
 #!/bin/bash
 # 
+logMetainfoFile=$CIOM_SCRIPT_HOME/yhdc/${1:-action.access.metainfo}
 yesterday=$(date -d "1 days ago" +%04Y%02m%02d)
-begin=${1:-$yesterday}
-end=${2:-$yesterday}
-logMetainfoFile=$CIOM_SCRIPT_HOME/yhdc/${3:-action.access.metainfo}
+begin=${2:-$yesterday}
+end=${3:-$yesterday}
+
+getEnv() {
+	echo -n $(grep -o -P '(?<=^env: )[\w]+' $logMetainfoFile)
+}
 
 getHostsLogPresentin() {
 	echo -n $(grep -o -P '^[\d\.]+' $logMetainfoFile | sort -u |  perl -pE 's/\n/ /g' | perl -pE 's/ $//')
@@ -17,13 +21,25 @@ getLogTypes() {
 	echo -n $(grep -o -P '(?<=^logs: )[\w ]+' $logMetainfoFile)
 }
 
+getLogRoot() {
+	echo -n $(grep -o -P '(?<=^logroot: )[/\w]+' $logMetainfoFile)
+}
+
+Env=$(getEnv)
 HostsLogPresentin=$(getHostsLogPresentin)
 Products=$(getProducts)
 LogTypes=$(getLogTypes)
+LogRoot=$(getLogRoot)
 
+LogRoot=/data
+LogLocalHome=/sdc/ciompub/$Env/${LogTypes// /+}
+
+echo $Env
 echo $HostsLogPresentin
 echo $Products
 echo $LogTypes
+echo $LogRoot
+echo $LogLocalHome
 
 product=''
 logType=''

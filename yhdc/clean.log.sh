@@ -2,7 +2,7 @@
 # 
 source $CIOM_SCRIPT_HOME/yhdc/log.common.sh "$@"
 
-logRoot=/sdc/ciompub/behavior
+logRoot=$LogLocalHome
 workspace=$logRoot/_clean
 itemTotalCost=0
 

@@ -1,4 +1,6 @@
+env: ucloud
 logs: action access
+logroot: /data
 
 #lecai
 10.10.125.17
