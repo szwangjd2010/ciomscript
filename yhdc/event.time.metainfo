@@ -1,0 +1,22 @@
+logs: event time
+
+#lecaiapi
+10.10.73.235
+10.10.76.73
+
+#lecaiadminapi
+10.10.74.158
+
+#mallapi
+10.10.110.226
+
+#malladminapi
+10.10.74.158
+
+#qidaapi
+10.10.198.61
+10.10.177.221
+10.10.24.115
+
+#componentapi
+10.10.125.17
