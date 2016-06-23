@@ -19,4 +19,4 @@ ALTER TABLE ${tableName} ADD PARTITION (year='2016', month='${month?left_pad(2, 
   </#list>
 </#list>
 
-<@pp.renameOutputFile extension='sql' />
+<@pp.renameOutputFile extension='${LogTypes?join(".")}.sql' />

@@ -1,0 +1,12 @@
+	pid STRING,
+	actionType STRING,
+	resultType STRING,
+	target STRING,
+	url STRING,
+	description STRING,
+	userAgent STRING,
+	clientIp STRING,
+	eventTime timestamp,
+	source STRING,
+	operator STRING,
+	orgId STRING

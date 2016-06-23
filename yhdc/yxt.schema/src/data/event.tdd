@@ -1,0 +1,11 @@
+Products: [
+	"lecaiapi",
+	"lecaiadminapi",
+	"mallapi",
+	"malladminapi",
+	"qidaapi"
+],
+
+LogTypes: [
+	"event"
+]
