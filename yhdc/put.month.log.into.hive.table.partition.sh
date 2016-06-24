@@ -1,29 +1,18 @@
 #!/bin/bash
 #
 source $CIOM_SCRIPT_HOME/ciom.util.sh
-setMode ${1:-0}
+source $CIOM_SCRIPT_HOME/yhdc/log.common.sh "$@"
 
-Products="lecai wangxiao qida mall"
-LogTypes="action access"
+setMode 1
 
-year=''
-month=''
-product=''
-logType=''
+hdfsBin="/opt/hadoop-2.7.1/bin/hdfs"
 
 getSrcFile() {
-	echo -n "/raw/${logType}log/${product}.${logType}.${year}${month}.log"	
+	echo -n "hdfs://hdc-54/raw/${logType}log/${product}.${logType}.${year}${month}.log"	
 }
 
 getDstLocation() {
-	echo -n "/user/hive/warehouse/yxt.db/${product}_${logType}log/year=${year}/month=${month}/"	
-}
-
-cp2015() {
-	year=2015
-	month=12
-
-	execCmd "hdfs dfs -cp $(getSrcFile) $(getDstLocation)"
+	echo -n "hdfs://hdc-54/user/hive/warehouse/yxt.db/${product}_${logType}log/year=${year}/month=${month}/"	
 }
 
 cp2016() {
@@ -31,7 +20,17 @@ cp2016() {
 	
 	for (( i=1; i<=12; i++ )); do
 		month=$(printf "%02d" $i)
-		execCmd "hdfs dfs -cp $(getSrcFile) $(getDstLocation)"
+		src=$(getSrcFile)
+		dst=$(getDstLocation)
+
+		echo "check if local exist ... "
+		execCmd "$hdfsBin dfs -test -f $src"
+		if [ $? -ne 0 ]; then
+			echo "raw data $src not exists"
+			continue
+		fi
+
+		execCmd "$hdfsBin dfs -cp -f $src $dst"
 	done
 }
 
@@ -39,7 +38,6 @@ cp2016() {
 main() {
 	for product in $Products; do
 		for logType in $LogTypes; do
-			cp2015
 			cp2016
 		done
 	done

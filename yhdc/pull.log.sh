@@ -9,10 +9,12 @@ pullLog() {
 	localLogYmdLocation=$2
 	reLogTypes=$LogTypes
 	reLogTypes=${reLogTypes// /\|}
+	joinedLogTypes=${LogTypes// /+}
 	for host in $hosts; do
 		echo -n "pull $host logs ... "
 		localHostLogLocation=$localLogYmdLocation/$host
-		if [ -e $localHostLogLocation/$host.tomcat.logs.tgz ]; then
+		logTgzFile=${joinedLogTypes}.${host}.logs.tgz 
+		if [ -e $localHostLogLocation/$logTgzFile ]; then
 			echo "already exists"
 			continue
 		fi
@@ -22,12 +24,12 @@ pullLog() {
 		ssh root@$host "\
 			cd $LogRoot; \
 			mkdir -p tmp; \
-			rm -rf ./tmp/$host.tomcat.logs.tgz; \
+			rm -rf ./tmp/$logTgzFile; \
 			find -regextype posix-extended -regex '.*/\w+_($reLogTypes).$ymd.log' > ./tmp/_pulllog; \
-			tar -czvf ./tmp/$host.tomcat.logs.tgz --files-from ./tmp/_pulllog;\
+			tar -czvf ./tmp/$logTgzFile --files-from ./tmp/_pulllog;\
 		"
-		scp root@$host:$LogRoot/tmp/$host.tomcat.logs.tgz $localHostLogLocation/
-		(cd $localHostLogLocation; tar -xzvf $host.tomcat.logs.tgz --no-same-owner)
+		scp root@$host:$LogRoot/tmp/$logTgzFile ${localHostLogLocation}/
+		(cd $localHostLogLocation; tar -xzvf $logTgzFile --no-same-owner)
 		echo "done"
 	done	
 }

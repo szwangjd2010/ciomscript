@@ -1,5 +1,5 @@
 env: ucloud
-logs: event time
+logs: event
 logroot: /data
 loglocalroot: /sdc/ciompub
 

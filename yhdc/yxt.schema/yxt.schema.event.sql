@@ -168,4 +168,38 @@ ALTER TABLE qidaapi_eventlog ADD PARTITION (year='2016', month='11');
 ALTER TABLE qidaapi_eventlog ADD PARTITION (year='2016', month='12');
 
 
+-----------------------------------------------------------------------------
+DROP TABLE IF EXISTS componentapi_eventlog;
+CREATE TABLE componentapi_eventlog (
+	pid STRING,
+	actionType STRING,
+	resultType STRING,
+	target STRING,
+	url STRING,
+	description STRING,
+	userAgent STRING,
+	clientIp STRING,
+	eventTime timestamp,
+	source STRING,
+	operator STRING,
+	orgId STRING
+) 
+PARTITIONED BY (year STRING, month STRING) 
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
+
+ALTER TABLE componentapi_eventlog ADD PARTITION (year="2015", month='12');
+ALTER TABLE componentapi_eventlog ADD PARTITION (year='2016', month='01');
+ALTER TABLE componentapi_eventlog ADD PARTITION (year='2016', month='02');
+ALTER TABLE componentapi_eventlog ADD PARTITION (year='2016', month='03');
+ALTER TABLE componentapi_eventlog ADD PARTITION (year='2016', month='04');
+ALTER TABLE componentapi_eventlog ADD PARTITION (year='2016', month='05');
+ALTER TABLE componentapi_eventlog ADD PARTITION (year='2016', month='06');
+ALTER TABLE componentapi_eventlog ADD PARTITION (year='2016', month='07');
+ALTER TABLE componentapi_eventlog ADD PARTITION (year='2016', month='08');
+ALTER TABLE componentapi_eventlog ADD PARTITION (year='2016', month='09');
+ALTER TABLE componentapi_eventlog ADD PARTITION (year='2016', month='10');
+ALTER TABLE componentapi_eventlog ADD PARTITION (year='2016', month='11');
+ALTER TABLE componentapi_eventlog ADD PARTITION (year='2016', month='12');
+
+
 

@@ -3,7 +3,8 @@ Products: [
 	"lecaiadminapi",
 	"mallapi",
 	"malladminapi",
-	"qidaapi"
+	"qidaapi",
+	"componentapi"
 ],
 
 LogTypes: [

@@ -75,6 +75,25 @@ showFieldsSeparatorInfo() {
 # first: 			FS->','		null value -> null 		field clouser sign -> '"'
 # after 20160226, 	FS->'\t'	null value -> ""		field clouser sign -> '"'
 # after 20160510, 	FS->'\t'	null value -> ""		field clouser sign -> no clouser sign
+cleanActionAccessLog() {
+	fileOperated=$1
+	truncateLog4jPrefix $fileOperated
+	if (( $ymd < 20160226 )); then
+		nullToEmpty $fileOperated
+		filedValueTabToSpace $fileOperated
+		FieldSeparator_CommaToTab $fileOperated
+	fi
+	if (( $ymd < 20160510 )); then
+		removeFieldClosureSignDoubleQuotes $fileOperated
+	fi
+}
+
+cleanEventLog() {
+	fileOperated=$1
+	FieldSeparator_CommaToTab $fileOperated
+	removeFieldClosureSignDoubleQuotes $fileOperated
+}
+
 clean() {
 	ymdEnd=$(date -d "$end" +%04Y%02m%02d)
 
@@ -103,14 +122,11 @@ clean() {
 		fi
 
 		itemTotalCost=0
-		truncateLog4jPrefix $fileOperated
-		if (( $ymd < 20160226 )); then
-			nullToEmpty $fileOperated
-			filedValueTabToSpace $fileOperated
-			FieldSeparator_CommaToTab $fileOperated
+		if [ "$LogTypes" == "event" ]; then
+			cleanEventLog $fileOperated
 		fi
-		if (( $ymd < 20160510 )); then
-			removeFieldClosureSignDoubleQuotes $fileOperated
+		if [ "$LogTypes" == "action access" ]; then
+			cleanActionAccessLog $fileOperated
 		fi
 		
 		touch $fileOperated.clean-done
