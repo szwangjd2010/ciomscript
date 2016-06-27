@@ -65,7 +65,7 @@ main() {
 				
 				$hdfsBin dfs -put $logFile $(getLogFileHdfsLocation)/
 				$hdfsBin dfs -appendToFile $logFile $(getLogHdfsMonthlyFile)
-				$hdfsBin dfs -appendToFile $logFile $(getLogHdfsFullFile)
+				#$hdfsBin dfs -appendToFile $logFile $(getLogHdfsFullFile)
 				$hdfsBin dfs -appendToFile $logFile $(getHiveTablePartitionHdfsFile)
 				echo "done"
 			done
