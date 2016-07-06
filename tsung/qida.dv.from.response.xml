@@ -64,7 +64,7 @@
         method="POST" 
         version="1.1"
         content_type="application/json" 
-        contents="{&quot;deviceId&quot;: &quot;&quot;,&quot;domainName&quot;: &quot;hz.yunxuetang.cn&quot;,&quot;isCheck&quot;: 1,&quot;password&quot;: &quot;JtwmY8.15&quot;,&quot;userName&quot;: &quot;lile&quot;}">
+        contents="{&quot;deviceId&quot;: &quot;&quot;,&quot;domainName&quot;: &quot;test20141031.yunxuetang.cn&quot;,&quot;isCheck&quot;: 1,&quot;userName&quot;: &quot;%%_username%%&quot;,&quot;password&quot;: &quot;%%_password%%&quot;}">
     
       </http>      
     </request>
