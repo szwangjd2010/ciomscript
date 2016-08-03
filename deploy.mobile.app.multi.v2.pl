@@ -22,7 +22,7 @@ our $ciomUtil = new CiomUtil(1);
 
 our $ApppkgPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/app";
 our $DistInfo = json_file_to_perl("$ENV{WORKSPACE}/DistInfo.json");
-my $ShellStreamedit = "_streamedit.ciom";
+our $ShellStreamedit = "_streamedit.ciom";
 my $OldPwd = getcwd();
 our $ExcutorsStatus = [];
 our $Platform = "";
@@ -37,7 +37,7 @@ our	$cloudId = "";
 our $wsLog = "build.log";
 
 sub injectPlatformDependency() {
-	require "$ENV{CIOM_SCRIPT_HOME}/${Platform}.spec.pl";
+	require "$ENV{CIOM_SCRIPT_HOME}/${Platform}.spec.v2.pl";
 }
 
 sub intialGlobalVars(){
@@ -82,7 +82,6 @@ sub updateCode($) {
 	#my $password = $CiomData->{scm}->{password};
 	my $username = "jenkins";
 	my $password = "pwdasdwx";
-
 	my $cnt = $#{$repos} + 1;
 
 	my $cmdSvnPrefix = "svn --non-interactive --username $username --password '$password'";
@@ -265,41 +264,34 @@ sub buildOrgs() {
 	my $need2BuildOrgCodes = $distDetail->{needToBuildOrgCodes};
 	my $cnt = $#{$need2BuildOrgCodes} + 1;
 	clearBuilingLog();
+	
+	if ($Platform eq 'ios') {
+		streameditConfs4AllOrgs();
+		initCmds();
+		buildWithoutPackage();
+	}
+
+
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $code = $need2BuildOrgCodes->[$i];
 		logBuildingStatus(1,"###############Start to build org <$code> on executor${executorIdx}################");
-		revertCode();
-		replaceOrgCustomizedFiles($code);
-		streameditConfs4AllOrgs();
-		streameditConfs4Org($code);
-		build();
+		if ($Platform eq 'ios') {
+			updateResourceAndPackage($code);
+		}
+		else {
+			revertCode();
+			replaceOrgCustomizedFiles($code);
+			streameditConfs4AllOrgs();
+			streameditConfs4Org($code);
+			build();
+		}
 		cleanAfterOrgBuild();
 		moveApppkgFile($code);
 		if ($doUpload eq 'YES' ) {
-			my $pid = fork();
-			if (!defined($pid)) {
-        		print "Error in fork for uploadOrgPkgs: $!";
-        		exit 1;
-    		}
-                                  
-    		if ($pid == 0) {
-    			#print "Child $i$j : My pid = $$\n";
-				uploadOrgPkgs($code);
-        		#print "Child $i$j : end\n";
-        		exit 0;
-        	}
-        	else {
-        		push(@childs, $pid);
-        	}
+			uploadOrgPkgs($code);
 		}
 		logBuildingStatus(1,"###############Finish building org <$code> on executor${executorIdx}###############\n");
 		logBuildFinishedOrgs($code);
-	}
-
-	if ($doUpload eq 'YES' ) {
-		foreach (@childs) {
-			waitpid($_, 0);
-		}
 	}
 }
 
@@ -345,12 +337,6 @@ sub main() {
 	leaveWorkspace();
  
 	#return getBuildError();
-}
-
-sub main2() {
-	intialGlobalVars();
-	print "executorIdx is $executorIdx \n";
-	print Dumper($DistInfo);
 }
 
 exit main();
