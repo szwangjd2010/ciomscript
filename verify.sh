@@ -41,6 +41,10 @@ if [ "$CiomPassphrasePlatformNG" == "platformng" ]; then
 	exit 0
 fi
 
+if [ "$CiomPassphraseOp" == "yxtfbop" ]; then
+	exit 0
+fi
+
 
 
 exit 1
