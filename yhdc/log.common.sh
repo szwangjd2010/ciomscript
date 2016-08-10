@@ -5,8 +5,25 @@ yesterday=$(date -d "1 days ago" +%04Y%02m%02d)
 begin=${2:-$yesterday}
 end=${3:-$yesterday}
 
+getValue() {
+	key=$1
+	echo -n $(grep -o -P '(?<=^'$key': )[/\w]+' $logMetainfoFile)
+}
+
 getEnv() {
-	echo -n $(grep -o -P '(?<=^env: )[\w]+' $logMetainfoFile)
+	echo -n $(getValue 'env')
+}
+
+getLogTypes() {
+	echo -n $(getValue 'logs')
+}
+
+getLogRoot() {
+	echo -n $(getValue 'logroot')
+}
+
+getLogLocalRoot() {
+	echo -n $(getValue 'loglocalroot')
 }
 
 getHostsLogPresentin() {
@@ -17,17 +34,6 @@ getProducts() {
 	echo -n $(grep -o -P '(?<=^#)[\w]+' $logMetainfoFile | sort -u | perl -pE 's/\n/ /g' | perl -pE 's/ $//')
 }
 
-getLogTypes() {
-	echo -n $(grep -o -P '(?<=^logs: )[\w ]+' $logMetainfoFile)
-}
-
-getLogRoot() {
-	echo -n $(grep -o -P '(?<=^logroot: )[/\w]+' $logMetainfoFile)
-}
-
-getLogLocalRoot() {
-	echo -n $(grep -o -P '(?<=^loglocalroot: )[/\w]+' $logMetainfoFile)
-}
 
 Env=$(getEnv)
 HostsLogPresentin=$(getHostsLogPresentin)
