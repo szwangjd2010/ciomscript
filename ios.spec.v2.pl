@@ -193,7 +193,7 @@ sub moveApppkgFile($) {
 	#sleep for fixing following issue
 	#/bin/cp -rf WebSchool/eschool.ipa /var/lib/jenkins/jobs/mobile.ios-eschool/builds/37/app/eschool_ios_barcotest.ipa 
 	#/bin/cp: skipping file `WebSchool/eschool.ipa', as it was replaced while being copied
-	$ciomUtil->exec("sleep 5");
+	#$ciomUtil->exec("sleep 2");
 	my $appFinalPkgName = getAppFinalPkgName($code);
 	my $slaveENV = getCiomEnv($slaveId);
 	my $orgIpaFile = "$ENV{$slaveENV}/ws${wsId}/$version/$cloudId/$appName/$BuildInfo->{location}/$BuildInfo->{typeTargetName}.ipa";
