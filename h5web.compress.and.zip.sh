@@ -23,12 +23,22 @@ leaveWorkspace() {
 
 gruntCompress() {
 	if [ "$skipGrunt" != "skipgrunt" ]; then
-        	execCmd "grunt"
+		if [ "$appName" == "mallh5mobile" ]; then
+            execCmd "grunt release"
+    	elif [ "$appName" == "mallh5mobile2" ]; then
+    		execCmd "grunt release"
+        else
+            execCmd "grunt"
+        fi
 	fi
 }
 
 generateAppPackage() {
-	execCmd "cd ..;rm -rf $AppPackageFile; zip -r $AppPackageFile $appName/app/*"
+	if [ "$appName" == "mallh5mobile2" ]; then
+		execCmd "cd ..;rm -rf $AppPackageFile; zip -r $AppPackageFile $appName/src/*"
+	else
+        execCmd "cd ..;rm -rf $AppPackageFile; zip -r $AppPackageFile $appName/app/*"
+    fi
 }
 
 
