@@ -23,7 +23,14 @@ doDeploy() {
 		#ssh root@10.10.73.181 "mkdir -p /data/$appName; cd /data/$appName; rm -rf *; cp ../html.zip ./; unzip ./html.zip"
 		scp lecaih5mobile.zip root@10.10.73.181:/data/ciom/
 		ssh root@10.10.73.181 "cd /data/ciom/;unzip ./lecaih5mobile.zip;mv ../lecaih5mobile lecaih5mobile_${timestamp}; mv lecaih5mobile/app ../lecaih5mobile;rm -rf lecaih5mobile"
-	
+	fi
+
+	if [ "$appName" == "zhidah5mobile" ]; then
+		#(cd ${appName}; zip -r ../html.zip *)
+		#scp html.zip root@10.10.73.181:/data/
+		#ssh root@10.10.73.181 "mkdir -p /data/$appName; cd /data/$appName; rm -rf *; cp ../html.zip ./; unzip ./html.zip"
+		scp zhidah5mobile.zip root@10.10.73.181:/data/ciom/
+		ssh root@10.10.73.181 "cd /data/ciom/;unzip ./zhidah5mobile.zip;mv ../zhidah5mobile lecaih5mobile_${timestamp}; mv zhidah5mobile/app ../zhidah5mobile;rm -rf zhidah5mobile"
 	fi
 
 	if [ "$appName" == "mallh5mobile" ]; then
@@ -32,6 +39,19 @@ doDeploy() {
 		#ssh root@10.10.73.181 "mkdir -p /data/$appName; cd /data/$appName; rm -rf *; cp ../html.zip ./; unzip ./html.zip"
 		scp mallh5mobile.zip root@10.10.73.181:/data/ciom/
 		ssh root@10.10.73.181 "cd /data/ciom/;unzip ./mallh5mobile.zip;mv ../mallh5mobile mallh5mobile_${timestamp}; mv mallh5mobile/app ../mallh5mobile;rm -rf mallh5mobile"
+	fi
+
+	if [ "$appName" == "mallh5mobile2" ]; then
+		scp mallh5mobile2.zip root@10.10.73.181:/data/ciom/
+		ssh root@10.10.73.181 "cd /data/ciom/;unzip ./mallh5mobile2.zip;mv ../mallh5mobile2 mallh5mobile2_${timestamp}; mv mallh5mobile2/src ../mallh5mobile2;rm -rf mallh5mobile2"
+	fi
+
+	if [ "$appName" == "mall-gzh" ]; then
+		#(cd ${appName}; zip -r ../html.zip *)
+		#scp html.zip root@10.10.73.181:/data/
+		#ssh root@10.10.73.181 "mkdir -p /data/$appName; cd /data/$appName; rm -rf *; cp ../html.zip ./; unzip ./html.zip"
+		scp mall-gzh.zip root@10.10.73.181:/data/ciom/
+		ssh root@10.10.73.181 "cd /data/ciom/;unzip ./mall-gzh.zip;mv ../mall-gzh mall-gzh_${timestamp}; mv mall-gzh/app ../mall-gzh;rm -rf mall-gzh"
 	fi
 	
 	if [ "$appName" == "qidah5web" ]; then
@@ -80,6 +100,11 @@ doDeploy() {
 #		ssh root@172.17.128.225 "mkdir -p /usr/share/nginx/html/lecaih5mobile; cd /usr/share/nginx/html/lecaih5mobile; rm -rf *; cp ../html.zip ./; unzip ./html.zip"
 		scp lecaih5mobile.zip root@172.17.128.225:/usr/share/nginx/html/ciom/
 		ssh root@172.17.128.225 "cd /usr/share/nginx/html/ciom/;unzip ./lecaih5mobile.zip;mv ../lecaih5mobile lecaih5mobile_${timestamp}; mv lecaih5mobile/app ../lecaih5mobile;rm -rf lecaih5mobile"
+	fi
+
+	if [ "$appName" == "zhidah5mobile-dev" ]; then
+		scp zhidah5mobile.zip root@172.17.128.225:/usr/share/nginx/html/ciom/
+		ssh root@172.17.128.225 "cd /usr/share/nginx/html/ciom/;unzip ./zhidah5mobile.zip;mv ../zhidah5mobile lecaih5mobile_${timestamp}; mv zhidah5mobile/app ../zhidah5mobile;rm -rf zhidah5mobile"
 	fi
 
 	if [ "$appName" == "mallh5web-dev" ]; then
