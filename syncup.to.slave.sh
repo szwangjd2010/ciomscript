@@ -10,7 +10,21 @@ excludePackagesDir=${5-:1}
 src="$WORKSPACE/$appName"
 slaveWorkspaceEnvVarName="CIOM_SLAVE_${os^^}_WORKSPACE"
 dst_win="${!slaveWorkspaceEnvVarName}/$ver/$env/$appName"
+dst_win7="${!slaveWorkspaceEnvVarName}/$ver/$env/$appName"
 dst_osx="${!slaveWorkspaceEnvVarName}/ws/$ver/$env/$appName"
+
+syncup_win7() {
+	if [ ! -d $dst_win7 ]; then
+		mkdir -p $dst_win7
+	fi
+
+	rsync -azL \
+		--safe-links \
+		--exclude .git \
+		--delete \
+		--force \
+		$src/ $dst_win7/
+}
 
 syncup_win() {
 	if [ ! -d $dst_win ]; then
