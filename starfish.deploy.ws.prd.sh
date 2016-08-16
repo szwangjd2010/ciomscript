@@ -19,9 +19,11 @@ cd /service
 ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/clean-model-cache-prd-${appName}-run/ . > /dev/null 2>&1
 ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/ensure-index-exists-prd-${appName}-run/ . > /dev/null 2>&1
 ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/index-worker-prd-${appName}-run/ . > /dev/null 2>&1
+ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/msg-index-worker-prd-${appName}-run/ . > /dev/null 2>&1
 ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/starfish-ws-apollo-inner-prd-${appName}-run/ . > /dev/null 2>&1
 ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/starfish-ws-apollo-msg-prd-${appName}-run/ . > /dev/null 2>&1
 ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/starfish-ws-apollo-org-prd-${appName}-run/ . > /dev/null 2>&1
+ln -s /opt/mos/codebase/starfish-ws-apollo-${appName}/scripts/starfish-ws-g3-prd-${appName}-run/ . > /dev/null 2>&1
 
 # 切换 python virtual-env
 . /opt/mos/python-env/bin/activate
