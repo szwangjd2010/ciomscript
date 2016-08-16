@@ -5,6 +5,7 @@
 # then get other useful info from the select job
 # 
 
+source /etc/profile
 
 jobConfigFile="${JENKINS_HOME}/jobs/${jobName}/config.xml"
 backupRoot="/home/jenkins/jenkins.backup/"$(date +%04Y%02m%02d.%02k%02M%02S)
