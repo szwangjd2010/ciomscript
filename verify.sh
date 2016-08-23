@@ -45,6 +45,9 @@ if [ "$CiomPassphraseOp" == "yxtfbop" ]; then
 	exit 0
 fi
 
+if [ "$CiomPassphraseStarfish" == "sf2016" ]; then
+	exit 0
+fi
 
 
 exit 1

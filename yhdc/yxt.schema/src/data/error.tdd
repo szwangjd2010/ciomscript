@@ -1,0 +1,10 @@
+Products: [
+	"qida",
+	"mall",
+	"wangxiao",
+	"lecai"
+],
+
+LogTypes: [
+	"error"
+]

@@ -7,7 +7,7 @@ end=${3:-$yesterday}
 
 getValue() {
 	key=$1
-	echo -n $(grep -o -P '(?<=^'$key': )[/\w]+' $logMetainfoFile)
+	echo -n $(grep -o -P '(?<=^'$key': )[/\w ]+' $logMetainfoFile)
 }
 
 getEnv() {

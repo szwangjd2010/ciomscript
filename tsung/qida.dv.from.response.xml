@@ -69,7 +69,7 @@
       </http>      
     </request>
 
-    <thinktime value="0.1" random="true"></thinktime>
+    <thinktime value="1" random="true"></thinktime>
 
     <request subst="true">
       <http 

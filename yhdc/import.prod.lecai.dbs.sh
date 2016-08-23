@@ -7,6 +7,7 @@ cd /data/dbbackup
 today=$(date +%04Y%02m%02d)
 remoteHost="10.10.73.166"
 remoteLocation="/data/dbbackup/prod"
+mysqlDataDir=$(grep -o -P "(?<=^datadir=).+" /etc/my.cnf)
 
 fileDbDumpoutFullName=$(ssh ${remoteHost} "find ${remoteLocation} -name yxt.all-${today}.*.tgz")
 fileDbDumpoutName=$(expr match "$fileDbDumpoutFullName" '.*/\(yxt\.all.*\.tgz\)')

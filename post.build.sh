@@ -21,6 +21,10 @@ if [ "$bTarget" == "win" ]; then
 	AppDirectory="$CIOM_SLAVE_WIN_WORKSPACE/$version/$deployToEnv/build/$appName"
 fi
 
+if [ "$bTarget" == "none" ]; then
+	AppDirectory="$CIOM_SLAVE_WIN_WORKSPACE/$version/$deployToEnv/$appName"
+fi
+
 CnfLocation="$CIOM_VCA_HOME/$version/post/$deployToEnv"
 
 enterWorkspace() {
