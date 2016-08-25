@@ -128,6 +128,9 @@ clean() {
 		if [ "$LogTypes" == "action access" ]; then
 			cleanActionAccessLog $fileOperated
 		fi
+		if [ "$LogTypes" == "error" ]; then
+			truncateLog4jPrefix $fileOperated
+		fi
 		
 		touch $fileOperated.clean-done
 		echo file total cost: $itemTotalCost secs

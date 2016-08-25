@@ -10,7 +10,6 @@ CREATE TABLE ${tableName} (
 PARTITIONED BY (year STRING, month STRING) 
 ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
 
-ALTER TABLE ${tableName} ADD PARTITION (year="2015", month='12');
 <#list 1..12 as month>
 ALTER TABLE ${tableName} ADD PARTITION (year='2016', month='${month?left_pad(2, '0')}');
 </#list>
