@@ -1,0 +1,16 @@
+env: ucloud
+logs: action access
+logroot: /data
+loglocalroot: /sdc/ciompub
+
+#lecai
+10.10.125.17
+
+#qida
+10.10.125.17
+
+#wangxiao
+10.10.125.17
+
+#mall
+10.10.125.17
