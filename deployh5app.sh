@@ -30,7 +30,7 @@ doDeploy() {
 		#scp html.zip root@10.10.73.181:/data/
 		#ssh root@10.10.73.181 "mkdir -p /data/$appName; cd /data/$appName; rm -rf *; cp ../html.zip ./; unzip ./html.zip"
 		scp zhidah5mobile.zip root@10.10.73.181:/data/ciom/
-		ssh root@10.10.73.181 "cd /data/ciom/;unzip ./zhidah5mobile.zip;mv ../zhidah5mobile lecaih5mobile_${timestamp}; mv zhidah5mobile/app ../zhidah5mobile;rm -rf zhidah5mobile"
+		ssh root@10.10.73.181 "cd /data/ciom/;unzip ./zhidah5mobile.zip;mv ../zhidah5mobile zhidah5mobile_${timestamp}; mv zhidah5mobile/app ../zhidah5mobile;rm -rf zhidah5mobile"
 	fi
 
 	if [ "$appName" == "mallh5mobile" ]; then
@@ -60,6 +60,12 @@ doDeploy() {
 		ssh root@10.10.197.36 "cd /data/www;mv app app_${timestamp};unzip ./${appName}.zip;mv ./${appName}/app/ ./;chown -R www:www app;rm -rf ${appName}"
 	fi
 
+	if [ "$appName" == "qidah5webc" ]; then
+		pwd
+		scp ${appName}.zip root@10.10.197.36:/data/www/
+		ssh root@10.10.197.36 "cd /data/www;mv c c_${timestamp};unzip ./${appName}.zip;mv ./${appName}/app/ ./c;chown -R www:www c;rm -rf ${appName}"
+	fi
+	
 	if [ "$appName" == "shequnh5web" ]; then
 		pwd
 		scp ${appName}.zip root@10.10.239.72:/usr/share/nginx/html/
@@ -104,7 +110,13 @@ doDeploy() {
 
 	if [ "$appName" == "zhidah5mobile-dev" ]; then
 		scp zhidah5mobile.zip root@172.17.128.225:/usr/share/nginx/html/ciom/
-		ssh root@172.17.128.225 "cd /usr/share/nginx/html/ciom/;unzip ./zhidah5mobile.zip;mv ../zhidah5mobile lecaih5mobile_${timestamp}; mv zhidah5mobile/app ../zhidah5mobile;rm -rf zhidah5mobile"
+		ssh root@172.17.128.225 "cd /usr/share/nginx/html/ciom/;unzip ./zhidah5mobile.zip;mv ../zhidah5mobile zhidah5mobile_${timestamp}; mv zhidah5mobile/app ../zhidah5mobile;rm -rf zhidah5mobile"
+	fi
+
+	if [ "$appName" == "skyeyeweb-dev" ]; then
+		(cd skyeyeweb; zip -r ../skyeyeweb.zip *)
+		scp skyeyeweb.zip root@172.17.128.225:/usr/share/nginx/html/ciom/
+		ssh root@172.17.128.225 "mkdir -p /usr/share/nginx/html/skyeyeweb; cd /usr/share/nginx/html/skyeyeweb; rm -rf *; unzip ../ciom/skyeyeweb.zip"
 	fi
 
 	if [ "$appName" == "mallh5web-dev" ]; then
@@ -112,6 +124,29 @@ doDeploy() {
 		scp html.zip root@172.17.128.225:/usr/share/nginx/html/
 		ssh root@172.17.128.225 "mkdir -p /usr/share/nginx/html/mallh5web; cd /usr/share/nginx/html/mallh5web; rm -rf *; cp ../html.zip ./; unzip ./html.zip"
 	fi
+
+	if [ "$appName" == "crmh5web" ]; then
+		scp ${appName}.zip root@10.10.73.181:/data/ciom/
+		ssh root@10.10.73.181 "cd /data/; rm -rf ${appName}; unzip ./ciom/${appName}.zip"
+	fi
+
+	if [ "$appName" == "crmh5web-dev" ]; then
+		(cd crmh5web; zip -r ../html.zip *)
+		scp html.zip root@172.17.128.225:/usr/share/nginx/html/
+		ssh root@172.17.128.225 "mkdir -p /usr/share/nginx/html/crmh5web; cd /usr/share/nginx/html/crmh5web; rm -rf *; cp ../html.zip ./; unzip ./html.zip"
+    fi
+
+    if [ "$appName" == "crmadmin" ]; then
+    	zip -r ${appName}.zip $appName/*
+		scp ${appName}.zip root@10.10.73.181:/data/ciom/
+		ssh root@10.10.73.181 "cd /data/; rm -rf ${appName}; unzip ./ciom/${appName}.zip"
+	fi
+
+	if [ "$appName" == "crmadmin-dev" ]; then
+		(cd crmadmin; zip -r ../html.zip *)
+		scp html.zip root@172.17.128.225:/usr/share/nginx/html/
+		ssh root@172.17.128.225 "mkdir -p /usr/share/nginx/html/crmadmin; cd /usr/share/nginx/html/crmadmin; rm -rf *; cp ../html.zip ./; unzip ./html.zip"
+    fi	
 
 }
 
