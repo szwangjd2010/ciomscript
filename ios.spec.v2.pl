@@ -159,10 +159,14 @@ sub remoteStreameditConfs4Org($) {
 	remoteStreamedit($streameditItems);
 	logBuildingStatus(0,"=== end streameditConfs4Org ===");
 }
-
-sub reCodeSign() {
-	my $cmdCodeSign = "/usr/bin/codesign -f -s \"iPhone Distribution: Jiangsu Yunxuetang Network Technology  Co.,Ltd\" --entitlements $appWorkspaceOnSlave/Entitlements.plist $appWorkspaceOnSlave/$BuildInfo->{typeTargetName}.app";
+sub replaceEntitlementsPlist() {
 	$ciomUtil->exec("scp -P $SshInfo->{port} -r $AppVcaHome/Entitlements.plist $SshInfo->{user}\@$SshInfo->{host}:$appWorkspaceOnSlave/");
+}
+
+sub reCodeSign($) {
+	my $code = $_[0];
+	my $certname = $CiomData->{orgs}->{$code}->{certname};
+	my $cmdCodeSign = "/usr/bin/codesign -f -s \"$certname\" --entitlements $appWorkspaceOnSlave/Entitlements.plist $appWorkspaceOnSlave/$BuildInfo->{typeTargetName}.app";
 	$SshInfo->{cmd} = "( $cmdUnlockKeychain; $cmdCodeSign )";
 	$ciomUtil->remoteExec($SshInfo);
 }
@@ -178,10 +182,11 @@ sub packageIpa() {
 sub updateResourceAndPackage($) {
 	my $code = $_[0];
 	syncAppFolder();
+	replaceEntitlementsPlist();
 	replaceOrgCustomizedFilesToSlave($code);
 	removeCodeSign();
 	remoteStreameditConfs4Org($code);
-	reCodeSign();
+	reCodeSign($code);
 	packageIpa();
 }
 
