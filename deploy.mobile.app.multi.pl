@@ -22,6 +22,7 @@ our $ciomUtil = new CiomUtil(1);
 
 our $ApppkgPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/app";
 our $DistInfo = json_file_to_perl("$ENV{WORKSPACE}/DistInfo.json");
+
 my $ShellStreamedit = "_streamedit.ciom";
 my $OldPwd = getcwd();
 our $ExcutorsStatus = [];
@@ -267,12 +268,18 @@ sub buildOrgs() {
 	clearBuilingLog();
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $code = $need2BuildOrgCodes->[$i];
+		$DynamicParams->{OrgCode} = $code;
 		logBuildingStatus(1,"###############Start to build org <$code> on executor${executorIdx}################");
 		revertCode();
 		replaceOrgCustomizedFiles($code);
 		streameditConfs4AllOrgs();
 		streameditConfs4Org($code);
-		build();
+		if ( $Platform eq 'ios') {
+			build($code);
+		}
+		else {
+			build();
+		}
 		cleanAfterOrgBuild();
 		moveApppkgFile($code);
 		if ($doUpload eq 'YES' ) {
