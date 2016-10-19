@@ -26,7 +26,12 @@ sub build() {
 
 	if ($BuildInfo->{builder} eq 'gradle') {
 		logBuildingStatus(0,"=== Start remote execute build with gradle ===");
-		$ciomUtil->exec("gradle -b $BuildInfo->{location}/$BuildInfo->{file} $BuildInfo->{target}");
+		#if ( $appName eq 'daxue' ) {
+		#	$ciomUtil->exec("/opt/gradle-2.14.1/bin/gradle -b $BuildInfo->{location}/$BuildInfo->{file} $BuildInfo->{target}");
+		#}
+		#else {
+			$ciomUtil->exec("gradle -b $BuildInfo->{location}/$BuildInfo->{file} $BuildInfo->{target}");
+		#}
 		logBuildingStatus(0,"=== end remote execute build with gradle ===");
 		return;
 	}
