@@ -28,6 +28,7 @@ our $ApppkgPath = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMB
 our $DynamicParams = {};
 our $CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
 our $Slave4MobileDeploy = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/slaves4mobiledeploy.json");
+our $AppCertData = json_file_to_perl("$ENV{CIOM_APPCERT_HOME}/$appName/cert.json");
 
 my $OldPwd = getcwd();
 my $NeedToBuildOrgCodes = [];
@@ -115,9 +116,18 @@ sub logBuildFinishedOrgs($$) {
 }
 
 sub getNeedToBuildOrgCodes() {
-	if ($orgCodes eq '*') {
+	if ($orgCodes eq '*' and $cloudId eq 'android') {
 		my @orgsKeys = keys %{$CiomData->{orgs}};
 		$NeedToBuildOrgCodes = \@orgsKeys;
+		return;
+	}
+
+	if ($orgCodes eq '*' and $cloudId eq 'ios') {
+		for my $code (keys %{$CiomData->{orgs}}) {
+			if ($AppCertData->{$code}->{certname} ne '') {
+				push(@{$NeedToBuildOrgCodes}, $code);
+			}
+		}
 		return;
 	}
 
@@ -241,7 +251,7 @@ sub main() {
     	if ($pid == 0) {     
     		#print "Child $i$j : My pid = $$\n";
 			#print "building for executor$i\n";
-			$ciomUtil->exec("$ENV{CIOM_SCRIPT_HOME}/deploy.mobile.app.multi.pl $i");
+			#$ciomUtil->exec("$ENV{CIOM_SCRIPT_HOME}/deploy.mobile.app.multi.pl $i");
         	#print "Child $i$j : end\n";
         	exit 0;
         }
