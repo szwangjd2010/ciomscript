@@ -12,6 +12,7 @@ our $executorIdx;
 my $AppWorkspaceOnSlave = "/Users/ciom/ciomws/$version/$cloudId/$appName";
 my $BuildInfo = $CiomData->{build};
 my $Slave4MobileDeploy = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/slaves4mobiledeploy.json");
+my $AppCertData = json_file_to_perl("$ENV{CIOM_APPCERT_HOME}/$appName/cert.json");
 
 my $SshInfo = {
 	port => '22',
@@ -20,7 +21,9 @@ my $SshInfo = {
 
 sub globalPreAction() {}
 sub globalPostAction() {}
+
 sub preAction() {}
+
 sub postAction() {}
 
 sub getCiomEnv($) {
@@ -60,8 +63,22 @@ sub resyncSourceCode() {
 	logBuildingStatus(0,"=== end sync SourceCode to osx salve ===");
 }
 
-sub generateBuildCmd() {
+sub generateReplaceIdentifierCmd($) {
+	my $code = $_[0];
+	my $cmd =""; 
+	my $identifier = $appCertData->{$code}->{appidentifier};
+	if ( $appName eq 'daxue' ) {
+		#$cmd = "sed -i '' 's/cn.yunxuetang.daxue/$identifier/g' $appName.xcodeproj/project.pbxproj";
+		$cmd = "perl -0 -i -pE \"s|(?<g1>PRODUCT_BUNDLE_IDENTIFIER = )(?<g2>[^<>]+)(?<g3>;)|\$\+{g1}$identifier\$\+{g3}|sg\" $appName.xcodeproj/project.pbxproj";
+	}
+	return $cmd;
+}
+
+sub generateBuildCmd($) {
+	my $code = $_[0];
 	my $cmd;
+	my $csIdentify = $AppCertData->{$code}->{certname}; 
+	my $uuid = $AppCertData->{$code}->{uuid};
 	if ($BuildInfo->{type} eq 'target') {
 		$cmd = sprintf("xcodebuild -target %s -configuration %s -sdk %s %s",
 			$BuildInfo->{typeTargetName},
@@ -70,15 +87,16 @@ sub generateBuildCmd() {
 			$BuildInfo->{target}
 		);
 	} else {
-		$cmd = sprintf("xcodebuild -workspace %s.xcworkspace -scheme %s -configuration %s -sdk %s %s",
+		$cmd = sprintf("xcodebuild -workspace %s.xcworkspace -scheme %s -configuration %s -sdk %s %s CODE_SIGN_IDENTITY=\"%s\" PROVISIONING_PROFILE=\"%s\"",
 			$BuildInfo->{typeTargetName},
 			$BuildInfo->{typeTargetName},
 			$BuildInfo->{configuration},
 			$BuildInfo->{sdk},
-			$BuildInfo->{target}
+			$BuildInfo->{target},
+			$csIdentify,
+			$uuid
 		);		
 	}
-
 	return $cmd;
 }
 
@@ -91,7 +109,8 @@ sub getAppBuiltOutLocation($) {
 	}	
 }
 
-sub build() {
+sub build($) {
+	my $code = $_[0];
 	preAction();
 	resyncSourceCode();
 	my $appWorkspaceOnSlave = getAppWorkspaceOnSlave();
@@ -102,16 +121,18 @@ sub build() {
 	#fix issue - "User Interaction Is Not Allowed"
 	my $cmdUnlockKeychain = "security -v unlock-keychain -p pwdasdwx /Users/ciom/Library/Keychains/login.keychain";
 	#end
-	my $cmdBuild = generateBuildCmd();
+	my $cmdBuild = generateBuildCmd($code);
 	my $outAppDirectory = getAppBuiltOutLocation($appWorkspaceOnSlave);
 	my $ipaFile = "$appWorkspaceOnSlave/$BuildInfo->{location}/$BuildInfo->{typeTargetName}.ipa";
 	my $cmdPackage = "xcrun -sdk iphoneos PackageApplication -v $outAppDirectory -o $ipaFile";
 	
+
 	$SshInfo->{cmd} = "( $cmd2Workspace; $cmdUnlockKeychain; $cmdBuild; $cmdPackage )";
 	$SshInfo->{host} = getCiomHost();
 
 	logBuildingStatus(0,"=== Start remote execute build ===");
 	logBuildingStatus(0,"cmd is $SshInfo->{cmd}");
+	
 	$ciomUtil->remoteExec($SshInfo);
 	logBuildingStatus(0,"=== end remote execute build ===");
 	postAction();
