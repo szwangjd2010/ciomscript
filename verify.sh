@@ -49,5 +49,8 @@ if [ "$CiomPassphraseStarfish" == "sf2016" ]; then
 	exit 0
 fi
 
+if [ "$CiomPassphraseQidaC" == "jxf2016" ]; then
+	exit 0
+fi
 
 exit 1
