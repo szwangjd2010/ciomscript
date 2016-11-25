@@ -25,7 +25,7 @@ our $iosHost = "172.17.125.126";
 our $provisionReader = "/usr/local/bin/mobileprovision-read";
 our $appCertRoot= "/Users/ciom/ciomws/wsappcert/$appName";
 our @validIdentitiesList;
-our $certPwd = "";
+#our $certPwd = "";
 our $SshInfo = {
 	port => '22',
 	user => 'ciom',
@@ -49,19 +49,24 @@ sub getOrgs(){
 	opendir(TEMPDIR, $path) or die "can't open it:$!";
 	@orgs = grep(!/^\.\.?$/,readdir TEMPDIR); #-d表示选出目录文件，还可以换成其它表达式
 	close TEMPDIR;
+	@orgs = grep(!/^cert\.json/,@orgs);
 }
 
 sub getOldJsonInfo(){
 	my $path="$ENV{CIOM_APPCERT_HOME}/$appName/cert.json"; #设置查询的目录
-	$oldCertInfo = json_file_to_perl("$path");
+	if ( -e $path ){
+		$oldCertInfo = json_file_to_perl("$path");
+	} 
+	
 }
 
 sub generateCertInfo(){
     foreach (@orgs) {
         my $certDetail = {};
-        my $orgCode = $_;
-        if ( -e "$ENV{CIOM_APPCERT_HOME}/$appName/$orgCode/$orgCode.mobileprovision" ) {
-            $certDetail->{certname}=rmtGetTeamNameForOrg($orgCode);
+    	my $orgCode = $_;
+    	if ( -e "$ENV{CIOM_APPCERT_HOME}/$appName/$orgCode/$orgCode.mobileprovision" ) {
+        	$certDetail->{certname}=getP12SubjectO($orgCode);
+            #$certDetail->{certname}=rmtGetTeamNameForOrg($orgCode);
             $certDetail->{uuid}=rmtGetUUIDForOrg($orgCode);
             $certDetail->{p12md5sum}=getP12Md5sumForOrg($orgCode);
         }
@@ -70,7 +75,8 @@ sub generateCertInfo(){
             $certDetail->{uuid}="";
             $certDetail->{p12md5sum}="";
         }
-        $certInfo->{$_}=$certDetail ;
+    	$certInfo->{$_}=$certDetail ;
+
     }
 }
 
@@ -111,8 +117,27 @@ sub getP12Md5sumForOrg($){
 	return $p12md5;
 }
 
+sub getP12SubjectO($){
+	# will get the O field like as below:
+	#subject= /UID=.../CN=.../OU=.../O=GUANGDONG ALPHA ANIMATION & CULTURE CO., LTD./C=...
+	my $code = $_[0];
+	my $p12in = "$ENV{CIOM_APPCERT_HOME}/$appName/$code/$code-key.p12";
+	my $tempPem = "$ENV{CIOM_APPCERT_HOME}/$appName/$code/temp4getsubj.pem";
+	my $certPwd = getCertPwdFromFile($code);
+	qx(openssl pkcs12 -in $p12in -out $tempPem -passin pass:$certPwd -passout pass:123456 >/dev/null 2>&1);
+	my $output = qx(openssl x509 -in $tempPem -inform pem -noout -subject);
+	#print $output;
+	$output =~/(.*)O=(.*)\/(.*)/;
+	return $2;
+
+}
+
 sub syncAppCertFilesToAgent(){
 	$ciomUtil->execNotLogCmd("rsync -rlptoDz --exclude .svn --delete --force $ENV{CIOM_APPCERT_HOME}/$appName/ $ENV{CIOM_SLAVE_OSX_WORKSPACE}/wsappcert/$appName");
+}
+
+sub replaceCertJsonToAgent(){
+	$ciomUtil->execNotLogCmd("cp -r $ENV{CIOM_APPCERT_HOME}/$appName/cert.json $ENV{CIOM_SLAVE_OSX_WORKSPACE}/wsappcert/$appName/cert.json");
 }
 
 sub revertAppCertHome(){
@@ -169,7 +194,7 @@ sub getCertPwdFromFile($) {
 	open(FILE, $file) or die "Can't open file '$file' for read. $!" ;
     my $line = <FILE>; #读一行
 	close FILE;
-	$certPwd = "";
+	my $certPwd = "";
 	if ($line) {
 		chomp($line);
 		$line=~s/^\s+|\s+$//g;
@@ -177,10 +202,11 @@ sub getCertPwdFromFile($) {
 			#print "$line\n";
 			$certPwd = $line;
 			#print "password is: $certPwd\n";
-			return;
+			return $certPwd;
 		}
 	}
-	print "password is empty\n";
+	#print "password is empty\n";
+	return $certPwd;
 
 }
 
@@ -206,15 +232,17 @@ sub importCertificateForOrg($) {
 
 sub remoteImportCertificateForOrg($) {
 	my $code = $_[0];
-	getCertPwdFromFile($code);
+	my $certPwd = getCertPwdFromFile($code);
 	my $certFilesStatus = checkCertficateFiles($code); 
-	my $sshUser=$SshInfo->{user};
-	
+	my $sshUser = $SshInfo->{user};
+	my $uuid = $certInfo->{$code}->{uuid};
+	my $cmdImportMobileProvision = "cp -r /Users/$sshUser/ciomws/wsappcert/$appName/$code/$code.mobileprovision /Users/$sshUser/Library/Mobiledevice/Provisioning\\ Profiles/$uuid.mobileprovision";
+
 	if ( $certPwd ne '') {
 		my $cmdUnlockKeychain = "security -v unlock-keychain -p pwdasdwx /Users/$sshUser/Library/Keychains/login.keychain";
 		my $cmdImportCert = "security import $appCertRoot/$code/$code-key.p12 -k ~/Library/Keychains/login.keychain -P $certPwd";
-		$SshInfo->{cmd} = "( $cmdUnlockKeychain; $cmdImportCert )";
-		$ciomUtil->remoteExec($SshInfo);
+		$SshInfo->{cmd} = "( $cmdUnlockKeychain; $cmdImportCert; $cmdImportMobileProvision )";
+		
 	}
 	else {
 		my $cmdP12ToPem = "openssl pkcs12 -in $appCertRoot/$code/$code-key.p12 -out $appCertRoot/$code/temp.pem -passin pass: -passout pass:123456";
@@ -222,9 +250,10 @@ sub remoteImportCertificateForOrg($) {
 		my $cmdUnlockKeychain = "security -v unlock-keychain -p pwdasdwx /Users/$sshUser/Library/Keychains/login.keychain";
 		my $cmdImportCert = "security import $appCertRoot/$code/cert-final.p12 -k ~/Library/Keychains/login.keychain -P 123456";
 		$SshInfo->{cmd} = "( $cmdP12ToPem; $cmdPemBackToP12WithPWd; $cmdUnlockKeychain; $cmdImportCert )";
-		$ciomUtil->remoteExec($SshInfo);
+		#$SshInfo->{cmd} = "( $cmdPemBackToP12WithPWd; $cmdUnlockKeychain; $cmdImportCert; $cmdImportMobileProvision )";
 	}
-	
+
+	$ciomUtil->remoteExec($SshInfo);
 }
 
 sub importCertificate() {
@@ -244,10 +273,10 @@ sub main(){
 	revertAppCertHome();
 	getOldJsonInfo();
 	getOrgs();
-	syncAppCertFilesToAgent();
 	getIosAgentValidIndentitiesList();
-	importCertificate();
+	syncAppCertFilesToAgent();
 	generateCertInfo();
+	importCertificate();
 	outputCertJson();
 }
 
