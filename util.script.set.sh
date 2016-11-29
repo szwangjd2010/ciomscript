@@ -48,3 +48,5 @@ tcpdump -s 0 -A 'dst port 80 and tcp[((tcp[12:1]&0xf0)>>2):4]='$(python -c "prin
 tcpdump -s 0 -A 'dst port 80 and tcp[((tcp[12:1]&0xf0)>>2):4]='$(python -c "print '0x' + ''.join(hex(ord(i))[2:] for i in 'GET ')")
 
 tcpdump -e -s 0 -A 'dst port 80 and tcp[((tcp[12:1]&0xf0)>>2):4]='$(python -c "print '0x' + ''.join(hex(ord(i))[2:] for i in 'GET ')")' and tcp[(((tcp[12:1]&0xf0)>>2)+4):4]='$(python -c "print '0x' + ''.join(hex(ord(i))[2:] for i in '/v1/')")
+
+curl --proxy socks5h://localhost:12306 http://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png -I -w %{http_code} -s -o /dev/null

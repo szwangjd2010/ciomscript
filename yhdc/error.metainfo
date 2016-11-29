@@ -1,5 +1,5 @@
 env: ucloud
-logs: action access
+logs: error
 logroot: /data
 loglocalroot: /sdc/ciompub
 
