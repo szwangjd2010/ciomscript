@@ -7,10 +7,16 @@
 var Data_Lasting_Duration = 3600 * 24 * 3;
 
 function cleanCollection(c, timestamp) {
+        var queryJson = {
+                _id : {
+                        $lt : timestamp 
+                } 
+        };
+        
+        var cnt = c.count(queryJson);
         print(cname + " - cleaning ... ");
-        var cnt = c.count({ _id : { $lt : timestamp } });
         print(cnt + " records");
-        c.remove({ _id : { $lt : timestamp } });
+        c.remove(queryJson);
         print("done")
 }
 
