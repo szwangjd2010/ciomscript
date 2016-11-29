@@ -6,10 +6,12 @@
 
 var Data_Lasting_Duration = 3600 * 24 * 3;
 
-function cleanCollection(c, before) {
-        var cnt = c.count({ _id : { $lt : before } });
+function cleanCollection(c, timestamp) {
+        print(cname + " - cleaning ... ");
+        var cnt = c.count({ _id : { $lt : timestamp } });
         print(cnt + " records");
-        c.remove({ _id : { $lt : before } });
+        c.remove({ _id : { $lt : timestamp } });
+        print("done")
 }
 
 (function main() {
@@ -18,16 +20,13 @@ function cleanCollection(c, before) {
 
         var db = connect("localhost:27017/datav_dashboard");
         var cnames = db.getCollectionNames();
-        var timestamp = (new ObjectId()).getTimestamp().getTime() / 1000;
-        var before = timestamp - Data_Lasting_Duration;
+        var timestampClean = (new ObjectId()).getTimestamp().getTime() / 1000 - Data_Lasting_Duration;
         for (var i = 0; i < cnames.length; i++) {
                 cname = cnames[i];
                 if (cname === "system.indexes") {
                         continue;
                 }
-                print(cname + " - cleaning ... ");
-                cleanCollection(db.getCollection(cname), before);
-                print("done")
+                cleanCollection(db.getCollection(cname), timestampClean);
         }
 
         print("finished!");
