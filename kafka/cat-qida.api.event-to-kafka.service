@@ -1,0 +1,13 @@
+[Unit]
+Description=cat qida api event log to kafka
+After=syslog.target network.target
+
+[Service]
+Type=forking
+ExecStart=/data/ydata/cat.qidaapievent.to.kafka.sh
+Restart=on-failure
+TimeoutSec=60
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

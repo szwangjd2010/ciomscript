@@ -10,6 +10,7 @@ version=${1:-v1}
 deployToEnv=$2
 appName=$3
 skipGrunt=${4:-noskip}
+deployType=${5:-h5web}
 
 AppPackageFile="$appName.zip"
 
@@ -34,7 +35,7 @@ gruntCompress() {
 }
 
 generateAppPackage() {
-	if [ "$appName" == "mallh5mobile2" ]; then
+	if [ "$deployType" == "h5webnew" ]; then
 		execCmd "cd ..;rm -rf $AppPackageFile; zip -r $AppPackageFile $appName/src/*"
 	else
         execCmd "cd ..;rm -rf $AppPackageFile; zip -r $AppPackageFile $appName/app/*"
