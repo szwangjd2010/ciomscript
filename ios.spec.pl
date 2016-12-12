@@ -87,7 +87,7 @@ sub generateBuildCmd($) {
 			$BuildInfo->{target}
 		);
 	} else {
-		$cmd = sprintf("xcodebuild -workspace %s.xcworkspace -scheme %s -configuration %s -sdk %s %s CODE_SIGN_IDENTITY=\"%s\" PROVISIONING_PROFILE=\"%s\"",
+		$cmd = sprintf("xcodebuild -workspace %s.xcworkspace -scheme %s -configuration %s -sdk %s %s CODE_SIGN_IDENTITY=\"%s\" PROVISIONING_PROFILE=\"%s\" ENABLE_BITCODE=NO",
 			$BuildInfo->{typeTargetName},
 			$BuildInfo->{typeTargetName},
 			$BuildInfo->{configuration},
