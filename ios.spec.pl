@@ -22,7 +22,21 @@ my $SshInfo = {
 sub globalPreAction() {}
 sub globalPostAction() {}
 
-sub preAction() {}
+sub preAction($) {
+	my $code = $_[0]; 
+	my $devTeam = $AppCertData->{$code}->{UID};
+	my $codeSignIdentity = $AppCertData->{$code}->{CN};
+	my $provisionProfile = $AppCertData->{$code}->{uuid};
+	my $provisionProfileSpecifier = $AppCertData->{$code}->{ProfileSpecifier};
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(PROVISIONING_PROFILE = \").+(\";)|\${1}$provisionProfile\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(PROVISIONING_PROFILE_SPECIFIER = ).+(;)|\${1}$provisionProfileSpecifier\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(CODE_SIGN_IDENTITY = \").+(\";)|\${1}$codeSignIdentity\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(DEVELOPMENT_TEAM = ).+(;)|\${1}$devTeam\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(DevelopmentTeam = \").+(\";)|\${1}$devTeam\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(ProvisioningStyle = \").+(\";)|\${1}Manual\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(<key>teamID</key>\\s+<string>)[^<>]+(</string>)|\${1}$devTeam\${2}|mg\' \'$appName/Supporting Files/Entitlements.plist\'");
+
+}
 
 sub postAction() {}
 
@@ -63,17 +77,6 @@ sub resyncSourceCode() {
 	logBuildingStatus(0,"=== end sync SourceCode to osx salve ===");
 }
 
-sub generateReplaceIdentifierCmd($) {
-	my $code = $_[0];
-	my $cmd =""; 
-	my $identifier = $appCertData->{$code}->{appidentifier};
-	if ( $appName eq 'daxue' ) {
-		#$cmd = "sed -i '' 's/cn.yunxuetang.daxue/$identifier/g' $appName.xcodeproj/project.pbxproj";
-		$cmd = "perl -0 -i -pE \"s|(?<g1>PRODUCT_BUNDLE_IDENTIFIER = )(?<g2>[^<>]+)(?<g3>;)|\$\+{g1}$identifier\$\+{g3}|sg\" $appName.xcodeproj/project.pbxproj";
-	}
-	return $cmd;
-}
-
 sub generateBuildCmd($) {
 	my $code = $_[0];
 	my $cmd;
@@ -87,14 +90,15 @@ sub generateBuildCmd($) {
 			$BuildInfo->{target}
 		);
 	} else {
-		$cmd = sprintf("xcodebuild -workspace %s.xcworkspace -scheme %s -configuration %s -sdk %s %s CODE_SIGN_IDENTITY=\"%s\" PROVISIONING_PROFILE=\"%s\" ENABLE_BITCODE=NO",
+		#$cmd = sprintf("xcodebuild -workspace %s.xcworkspace -scheme %s -configuration %s -archivePath \"%s.xcarchive\" -sdk %s CODE_SIGN_IDENTITY=\"%s\" PROVISIONING_PROFILE=\"%s\" %s",
+		$cmd = sprintf("xcodebuild -workspace %s.xcworkspace -scheme %s -configuration %s -archivePath \"%s.xcarchive\" -sdk %s PROVISIONING_PROFILE=\"%s\" %s",
 			$BuildInfo->{typeTargetName},
 			$BuildInfo->{typeTargetName},
 			$BuildInfo->{configuration},
+			$BuildInfo->{typeTargetName},
 			$BuildInfo->{sdk},
-			$BuildInfo->{target},
-			$csIdentify,
-			$uuid
+			$uuid,
+			$BuildInfo->{target}
 		);		
 	}
 	return $cmd;
@@ -109,9 +113,20 @@ sub getAppBuiltOutLocation($) {
 	}	
 }
 
+sub _build($) {
+	my $code = $_[0];
+	preAction($code);
+	my $appWorkspaceOnSlave = getAppWorkspaceOnSlave();
+	my $outAppDirectory = getAppBuiltOutLocation($appWorkspaceOnSlave);
+	my $archivePath = "$appWorkspaceOnSlave/$BuildInfo->{location}/$appName.xcarchive";
+	my $optionPlistPath = "$appWorkspaceOnSlave/$BuildInfo->{location}/Supporting Files/Entitlements.plist";
+	my $cmdPackage = "xcodebuild -exportArchive -archivePath \"$archivePath\" -exportOptionsPlist \"$optionPlistPath\" -exportPath \"/Users/ciom/Desktop/\"";
+	$ciomUtil->exec("echo $cmdPackage");
+}
+
 sub build($) {
 	my $code = $_[0];
-	preAction();
+	preAction($code);
 	resyncSourceCode();
 	my $appWorkspaceOnSlave = getAppWorkspaceOnSlave();
 	my $build = $CiomData->{build};
@@ -124,10 +139,14 @@ sub build($) {
 	my $cmdBuild = generateBuildCmd($code);
 	my $outAppDirectory = getAppBuiltOutLocation($appWorkspaceOnSlave);
 	my $ipaFile = "$appWorkspaceOnSlave/$BuildInfo->{location}/$BuildInfo->{typeTargetName}.ipa";
-	my $cmdPackage = "xcrun -sdk iphoneos PackageApplication -v $outAppDirectory -o $ipaFile";
-	
+	#my $cmdPackage = "xcrun -sdk iphoneos PackageApplication -v $outAppDirectory -o $ipaFile";
+	my $archivePath = "$appWorkspaceOnSlave/$BuildInfo->{location}/$appName.xcarchive";
+	my $optionPlistPath = "$appWorkspaceOnSlave/$BuildInfo->{location}/Supporting Files/Entitlements.plist";
+	my $ipaPath = "$appWorkspaceOnSlave/$BuildInfo->{location}";
+	my $cmdPackage = "xcodebuild -exportArchive -archivePath \"$archivePath\" -exportOptionsPlist \"$optionPlistPath\" -exportPath \"$ipaPath\"";
 
 	$SshInfo->{cmd} = "( $cmd2Workspace; $cmdUnlockKeychain; $cmdBuild; $cmdPackage )";
+	#$SshInfo->{cmd} = "( $cmd2Workspace; $cmdUnlockKeychain; $cmdBuild )";
 	$SshInfo->{host} = getCiomHost();
 
 	logBuildingStatus(0,"=== Start remote execute build ===");
@@ -138,6 +157,10 @@ sub build($) {
 	postAction();
 }
 
+sub _moveApppkgFile($) {
+
+}
+
 sub moveApppkgFile($) {
 	my $code = $_[0];
 	my $slaveId = $distDetail->{slaveid} ;
@@ -146,7 +169,7 @@ sub moveApppkgFile($) {
 	#sleep for fixing following issue
 	#/bin/cp -rf WebSchool/eschool.ipa /var/lib/jenkins/jobs/mobile.ios-eschool/builds/37/app/eschool_ios_barcotest.ipa 
 	#/bin/cp: skipping file `WebSchool/eschool.ipa', as it was replaced while being copied
-	$ciomUtil->exec("sleep 5");
+	#$ciomUtil->exec("sleep 5");
 	my $appFinalPkgName = getAppFinalPkgName($code);
 	my $appWorkspaceOnSlave = getAppWorkspaceOnSlave();
 	my $slaveENV = getCiomEnv($slaveId);

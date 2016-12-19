@@ -1,8 +1,8 @@
 /*
- * remove all old data - 3 days ago
+ * remove all old data - 2 days ago
  */
 
-var Data_Lasting_Duration = 3600 * 24 * 3;
+var Data_Lasting_Duration = 3600 * 24 * 2;
 
 function cleanCollection(c, timestamp) {
     var queryJson = {

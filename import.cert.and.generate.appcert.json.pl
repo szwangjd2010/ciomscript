@@ -65,14 +65,21 @@ sub generateCertInfo(){
         my $certDetail = {};
     	my $orgCode = $_;
     	if ( -e "$ENV{CIOM_APPCERT_HOME}/$appName/$orgCode/$orgCode.mobileprovision" ) {
-        	$certDetail->{certname}=getP12SubjectO($orgCode);
+    		my $outSubject = getP12Subject($orgCode);
+        	$certDetail->{certname}=getP12SubjectO($outSubject);
             #$certDetail->{certname}=rmtGetTeamNameForOrg($orgCode);
+            $certDetail->{UID}=getP12SubjectUid($outSubject);
+            $certDetail->{CN}=getP12SubjectCN($outSubject);
             $certDetail->{uuid}=rmtGetUUIDForOrg($orgCode);
+            $certDetail->{ProfileSpecifier}=rmtGetProfileSpecifierForOrg($orgCode);
             $certDetail->{p12md5sum}=getP12Md5sumForOrg($orgCode);
         }
         else {
             $certDetail->{certname}="";
             $certDetail->{uuid}="";
+            $certDetail->{UID}="";
+            $certDetail->{CN}="";
+            $certDetail->{ProfileSpecifier}="";
             $certDetail->{p12md5sum}="";
         }
     	$certInfo->{$_}=$certDetail ;
@@ -110,6 +117,16 @@ sub rmtGetTeamNameForOrg($){
 	return $teamname;
 }
 
+sub rmtGetProfileSpecifierForOrg($){
+	my $code = $_[0];
+	my $cmd="ssh ciom\@$iosHost \"$provisionReader -f $appCertRoot/$code/$code.mobileprovision -o Name\"";
+	#print $cmd;
+	my @cmdoutput=readpipe($cmd);
+	my $name = "@cmdoutput";
+	chomp($name);
+	return $name;
+}
+
 sub getP12Md5sumForOrg($){
 	my $code = $_[0];
 	my $p12md5 = qx(md5sum $ENV{CIOM_APPCERT_HOME}/$appName/$code/$code-key.p12|cut -d ' ' -f1);
@@ -117,7 +134,7 @@ sub getP12Md5sumForOrg($){
 	return $p12md5;
 }
 
-sub getP12SubjectO($){
+sub getP12Subject($){
 	# will get the O field like as below:
 	#subject= /UID=.../CN=.../OU=.../O=GUANGDONG ALPHA ANIMATION & CULTURE CO., LTD./C=...
 	my $code = $_[0];
@@ -127,9 +144,25 @@ sub getP12SubjectO($){
 	qx(openssl pkcs12 -in $p12in -out $tempPem -passin pass:$certPwd -passout pass:123456 >/dev/null 2>&1);
 	my $output = qx(openssl x509 -in $tempPem -inform pem -noout -subject);
 	#print $output;
-	$output =~/(.*)O=(.*)\/(.*)/;
-	return $2;
+	return $output;
+}
 
+sub getP12SubjectO($){
+	my $outSub = $_[0];
+	$outSub =~/(.*)O=(.*)\/(.*)/;
+	return $2;
+}
+
+sub getP12SubjectUid($){
+	my $outSub = $_[0];
+	$outSub =~/\/UID=(.*)\/CN(.*)/;
+	return $1;
+}
+
+sub getP12SubjectCN($){
+	my $outSub = $_[0];
+	$outSub =~/(.*)CN=(.*)\/OU(.*)/;
+	return $2;
 }
 
 sub syncAppCertFilesToAgent(){
