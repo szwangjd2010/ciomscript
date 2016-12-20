@@ -28,14 +28,15 @@ sub preAction($) {
 	my $codeSignIdentity = $AppCertData->{$code}->{CN};
 	my $provisionProfile = $AppCertData->{$code}->{uuid};
 	my $provisionProfileSpecifier = $AppCertData->{$code}->{ProfileSpecifier};
-	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(PROVISIONING_PROFILE = \").+(\";)|\${1}$provisionProfile\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(PROVISIONING_PROFILE = ).+(;)|\${1}\"$provisionProfile\"\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(PROVISIONING_PROFILE_SPECIFIER = ).+(;)|\${1}$provisionProfileSpecifier\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(CODE_SIGN_IDENTITY = \").+(\";)|\${1}$codeSignIdentity\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(\"CODE_SIGN_IDENTITY\\[sdk=\\*\\]\" = \").+(\";)|\${1}$codeSignIdentity\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(\"CODE_SIGN_IDENTITY\\[sdk=iphoneos\\*\\]\" = ).+(;)|\${1}\"iPhone Distribution\"\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(DEVELOPMENT_TEAM = ).+(;)|\${1}$devTeam\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
-	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(DevelopmentTeam = \").+(\";)|\${1}$devTeam\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
-	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(ProvisioningStyle = \").+(\";)|\${1}Manual\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(DevelopmentTeam = ).+(;)|\${1}$devTeam\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(ProvisioningStyle = ).+(;)|\${1}Manual\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(<key>teamID</key>\\s+<string>)[^<>]+(</string>)|\${1}$devTeam\${2}|mg\' \'$appName/Supporting Files/Entitlements.plist\'");
-
 }
 
 sub postAction() {}
@@ -116,12 +117,13 @@ sub getAppBuiltOutLocation($) {
 sub _build($) {
 	my $code = $_[0];
 	preAction($code);
-	my $appWorkspaceOnSlave = getAppWorkspaceOnSlave();
-	my $outAppDirectory = getAppBuiltOutLocation($appWorkspaceOnSlave);
-	my $archivePath = "$appWorkspaceOnSlave/$BuildInfo->{location}/$appName.xcarchive";
-	my $optionPlistPath = "$appWorkspaceOnSlave/$BuildInfo->{location}/Supporting Files/Entitlements.plist";
-	my $cmdPackage = "xcodebuild -exportArchive -archivePath \"$archivePath\" -exportOptionsPlist \"$optionPlistPath\" -exportPath \"/Users/ciom/Desktop/\"";
-	$ciomUtil->exec("echo $cmdPackage");
+	#resyncSourceCode();
+#	my $appWorkspaceOnSlave = getAppWorkspaceOnSlave();
+#	my $outAppDirectory = getAppBuiltOutLocation($appWorkspaceOnSlave);
+#	my $archivePath = "$appWorkspaceOnSlave/$BuildInfo->{location}/$appName.xcarchive";
+#	my $optionPlistPath = "$appWorkspaceOnSlave/$BuildInfo->{location}/Supporting Files/Entitlements.plist";
+#	my $cmdPackage = "xcodebuild -exportArchive -archivePath \"$archivePath\" -exportOptionsPlist \"$optionPlistPath\" -exportPath \"/Users/ciom/Desktop/\"";
+#	$ciomUtil->exec("echo $cmdPackage");
 }
 
 sub build($) {
@@ -155,10 +157,6 @@ sub build($) {
 	$ciomUtil->remoteExec($SshInfo);
 	logBuildingStatus(0,"=== end remote execute build ===");
 	postAction();
-}
-
-sub _moveApppkgFile($) {
-
 }
 
 sub moveApppkgFile($) {
