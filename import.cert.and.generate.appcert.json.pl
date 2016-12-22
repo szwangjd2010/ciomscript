@@ -21,7 +21,7 @@ our $appName = $ARGV[0];
 our @orgs;
 our $certInfo = {};
 our $oldCertInfo = {};
-our $iosHost = "172.17.125.126";
+our $iosHost = "172.17.125.213";
 our $provisionReader = "/usr/local/bin/mobileprovision-read";
 our $appCertRoot= "/Users/ciom/ciomws/wsappcert/$appName";
 our @validIdentitiesList;
@@ -29,7 +29,7 @@ our @validIdentitiesList;
 our $SshInfo = {
 	port => '22',
 	user => 'ciom',
-	host => '172.17.125.126'
+	host => '172.17.125.213'
 };
 
 sub writeJsonToFile($$) {
