@@ -6,7 +6,7 @@ Topic=yxt.qida.api.event
 
 one() {
     tail -F /data/ws-[1-2]/tomcat7-1/logs/yxt/qidaapi_event.log \
-        | grep -P '^\w{8}-1' \
+        | grep -P '^\w{8}-' \
         | kafkacat -b $Broker -t $Topic &
 }
 

@@ -29,7 +29,7 @@ sub preAction($) {
 	my $provisionProfile = $AppCertData->{$code}->{uuid};
 	my $provisionProfileSpecifier = $AppCertData->{$code}->{ProfileSpecifier};
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(PROVISIONING_PROFILE = ).+(;)|\${1}\"$provisionProfile\"\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
-	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(PROVISIONING_PROFILE_SPECIFIER = ).+(;)|\${1}$provisionProfileSpecifier\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(PROVISIONING_PROFILE_SPECIFIER = ).+(;)|\${1}\"$provisionProfileSpecifier\"\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(CODE_SIGN_IDENTITY = \").+(\";)|\${1}$codeSignIdentity\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(\"CODE_SIGN_IDENTITY\\[sdk=\\*\\]\" = \").+(\";)|\${1}$codeSignIdentity\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(\"CODE_SIGN_IDENTITY\\[sdk=iphoneos\\*\\]\" = ).+(;)|\${1}\"iPhone Distribution\"\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");

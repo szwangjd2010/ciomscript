@@ -1,8 +1,9 @@
 #!/bin/bash
 #
 
-multiples=${1:-3}
+target=${1:-qida.api.event}
+multiples=${2:-3}
 
 for i in $(seq 1 $multiples); do
-	./cat.qidaapievent.to.kafka.sh
+	/data/ydata/kafkacat.${target}.sh
 done
