@@ -1,0 +1,14 @@
+[Unit]
+Description=kafka server service
+After=syslog.target network.target
+
+[Service]
+Type=simple
+ExecStart=/data/ydata/start.kafka.svr.sh
+#Restart=on-failure
+Restart=always
+TimeoutSec=10
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

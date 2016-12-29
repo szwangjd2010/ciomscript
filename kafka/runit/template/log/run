@@ -1,0 +1,2 @@
+#!/bin/bash
+exec chpst -u kafkacat svlogd -tt /var/log/kafkacat

@@ -2,7 +2,7 @@
  * remove all old data
  */
 
-var Data_Lasting_Duration = 3600 * 24 * 1;
+var Data_Lasting_Duration = 3600 * 24 * 3;
 
 function cleanCollection(c, timestamp) {
     var queryJson = {
@@ -20,7 +20,7 @@ function cleanCollection(c, timestamp) {
 
 (function main() {
     print("-----------------------------------------------");
-    print(new Date());s
+    print(new Date());
 
     var db = connect("localhost:27017/datav_dashboard");
     var cnames = db.getCollectionNames();

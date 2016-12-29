@@ -1,0 +1,14 @@
+[Unit]
+Description=cat qida dotnet api nginx access log to kafka
+After=syslog.target network.target
+
+[Service]
+Type=forking
+ExecStart=/data/ydata/kafkacat.qida.dotnetapi.ngx.access.sh
+#Restart=on-failure
+Restart=always
+TimeoutSec=10
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -282,7 +282,7 @@ sub remoteImportCertificateForOrg($) {
 		my $cmdPemBackToP12WithPWd = "openssl pkcs12 -export -in $appCertRoot/$code/temp.pem -out $appCertRoot/$code/cert-final.p12 -passin pass:123456 -passout pass:123456";
 		my $cmdUnlockKeychain = "security -v unlock-keychain -p pwdasdwx /Users/$sshUser/Library/Keychains/login.keychain";
 		my $cmdImportCert = "security import $appCertRoot/$code/cert-final.p12 -k ~/Library/Keychains/login.keychain -P 123456";
-		$SshInfo->{cmd} = "( $cmdP12ToPem; $cmdPemBackToP12WithPWd; $cmdUnlockKeychain; $cmdImportCert )";
+		$SshInfo->{cmd} = "( $cmdP12ToPem; $cmdPemBackToP12WithPWd; $cmdUnlockKeychain; $cmdImportCert; $cmdImportMobileProvision )";
 		#$SshInfo->{cmd} = "( $cmdPemBackToP12WithPWd; $cmdUnlockKeychain; $cmdImportCert; $cmdImportMobileProvision )";
 	}
 

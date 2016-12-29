@@ -17,6 +17,10 @@ if [ "$CiomPassphraseEschool" == "eschwjj" ]; then
 	exit 0
 fi
 
+if [ "$CiomPassphraseXkt" == "xktgx" ]; then
+	exit 0
+fi
+
 if [ "$CiomPassphraseQida" == "qidacmwyx" ]; then
 	exit 0
 fi
