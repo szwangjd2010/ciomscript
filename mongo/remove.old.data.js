@@ -38,16 +38,8 @@ function cleanCollection(c, breakpoint) {
 
     var queryJson = {
         "$or": [
-	        {
-	        	"_id" : {
-	            	"$lt" : breakpoint.microsec
-	        	}
-	    	},
-	       	{
-	       		"_id" : {
-	            	"$lt" : breakpoint.objectId
-	        	}
-	        }
+	        {"_id" : {"$lt" : breakpoint.microsec}},
+	       	{"_id" : {"$lt" : breakpoint.objectId}}
         ]
     };
     var cnt = c.count(queryJson);
