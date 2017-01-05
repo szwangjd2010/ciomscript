@@ -56,10 +56,15 @@ function cleanCollection(c, breakpoint) {
 }
 
 (function main() {
+	if (typeof Database == "undefined") {
+		print("no specified database!");
+		return;
+	}
+
     print("-----------------------------------------------");
     print(new Date() + ",  begin to clean:");
 
-    var db = connect("localhost:27017/datav_dashboard");
+    var db = connect("localhost:27017/" + Database);
     var cnames = db.getCollectionNames();
     
     for (var i = 0; i < cnames.length; i++) {
