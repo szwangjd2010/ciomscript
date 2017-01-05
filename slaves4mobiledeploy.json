@@ -10,7 +10,7 @@
 	"android": [
 		{
 			"ip":"172.17.128.240", 
-			"capacity": "6", 
+			"capacity": "3", 
 			"ciSlaveId": "0" 
 		}
 	]

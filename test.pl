@@ -6,17 +6,28 @@ use JSON::Parse 'json_file_to_perl';
 use JSON;
 use Cwd;
 use POSIX qw(strftime);
-use Digest::MD5 qw(md5 md5_hex md5_base64);
-use Digest::xxHash qw[xxhash xxhash_hex];
 
+my $h = {};
 
-sub write_to_file {
-	my $data  = shift;
-	open my $fh, ">", "data_out.json";
-	print $fh encode_json($data);
-	close $fh;
+if (!%{$h}) { 
+    print "Empty\n";
+} 
+
+my $a =[];
+
+if (!@{$a}) {
+	print "Zero length\n"
 }
-print hex("0x55b0f902776841c190374d51a9652acd"),"\n";
+my $b;
+if (!defined($b)) {
+	print "b is undef\n";
+}
+my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
 
-print xxhash_hex("55b0f902776841c190374d51a9652"),"\n";
+printf("Time Format - HH:MM:SS\n");
+printf("%02d:%02d:%02d\n", $hour, $min, $sec);
+
+my $arr=["111", "222"];
+
+print join(",", @{$arr}) . ',';
 

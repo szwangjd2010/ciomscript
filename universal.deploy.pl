@@ -5,6 +5,7 @@ use lib "$ENV{CIOM_SCRIPT_HOME}";
 use strict;
 use English;
 use Data::Dumper;
+use Hash::Merge::Simple qw( merge );
 use Cwd;
 use CiomUtil;
 use JSON::Parse 'json_file_to_perl';
@@ -17,14 +18,16 @@ STDOUT->autoflush(1);
 our $version = $ARGV[0];
 our $cloudId = $ARGV[1];
 our $appName = $ARGV[2];
-#
-# appType: tomcat, static, 
-#
-our $appType = $ARGV[3] || "tomcat";
 
-our $ciomUtil = new CiomUtil(1);
+
+our $CiomUtil = new CiomUtil(1);
 our $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
 our $CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
+our $AppType = $CiomData->{AppType};
+
+our $AppPkgName = "$appName.tar.gz";
+our $AppPkgUrl = getAppPkgUrl();
+our $Timestamp = $CiomUtil->getTimestamp();
 
 my $ShellStreamedit = "_streamedit.ciom";
 my $OldPwd = getcwd();
@@ -37,8 +40,20 @@ sub getBuildLogFile() {
 	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
 }
 
-sub doAppTypeDependencyInjection() {
-	require "$appType.special.pl";	
+sub getAppPkgUrl() {
+	return sprintf("$ENV{CIOM_DISPATCH_BASE_URL}%s/%s/%s.tar.gz",
+		$version,
+		$cloudId,
+		$appName
+	);
+}
+
+sub loadAppTypePlugin() {
+	my $Plugin = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.ciom");
+	$CiomData->{build} = merge $Plugin->{build}, $CiomData->{build};
+	$CiomData->{deploy} = merge $Plugin->{deploy}, $CiomData->{deploy};
+	$CiomData->{dispatch} = merge $Plugin->{dispatch}, $CiomData->{dispatch};
+
 }
 
 sub fillDynamicVariables() {
@@ -50,7 +65,7 @@ sub fillDynamicVariables() {
 sub enterWorkspace() {
 	my $appWorkspace = "$ENV{WORKSPACE}/$appName";
 	if (! -d $appWorkspace) {
-		$ciomUtil->exec("mkdir -p $appWorkspace");
+		$CiomUtil->exec("mkdir -p $appWorkspace");
 	}
 
 	chdir($appWorkspace);
@@ -59,10 +74,6 @@ sub enterWorkspace() {
 sub leaveWorkspace() {
 	chdir($OldPwd);
 }
-
-#
-# placeholder for platform special
-#
 
 sub updateCode() {
 	my $repos = $CiomData->{scm}->{repos};
@@ -77,13 +88,18 @@ sub updateCode() {
 		my $url = $repos->[$i]->{url};
 
 		if (! -d $name) {
-			$ciomUtil->exec("$cmdSvnPrefix co $url $name");
+			$CiomUtil->exec("$cmdSvnPrefix co $url $name");
 		} else {
-			$ciomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
-			$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
-			$ciomUtil->exec("$cmdSvnPrefix update $name");
+			$CiomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
+			$CiomUtil->exec("$cmdSvnPrefix revert -R $name");
+			$CiomUtil->exec("$cmdSvnPrefix update $name");
 		}			
 	}
+}
+
+sub replaceCustomiedFiles($) {
+	my $code = $_[0];
+	$CiomUtil->exec("/bin/cp -rf $AppVcaHome/* ./");
 }
 
 sub generateStreameditFile($) {
@@ -107,25 +123,25 @@ sub generateStreameditFile($) {
 		}
 	}
 
-	$ciomUtil->writeToFile("$ShellStreamedit", $cmds);
+	$CiomUtil->writeToFile("$ShellStreamedit", $cmds);
 }
 
 sub instanceDynamicVariablesInShellStreamedit() {
-	my $nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciomdv>' $ShellStreamedit");
+	my $nCiompmCnt = $CiomUtil->execWithReturn("grep -c '<ciomdv>' $ShellStreamedit");
 	if ($nCiompmCnt == 0) {
 		return;
 	}
 
 	for my $key (keys %{$CiomData->{dynamicVariables}}) {
-		$nCiompmCnt = $ciomUtil->execWithReturn("grep -c '<ciomdv>$key</ciomdv>' $ShellStreamedit");
+		$nCiompmCnt = $CiomUtil->execWithReturn("grep -c '<ciomdv>$key</ciomdv>' $ShellStreamedit");
 		if ($nCiompmCnt == 0) {
 			next;
 		}
 
 		my $v = $CiomData->{dynamicVariables}->{$key};
-		$ciomUtil->log("\n\ninstancing $key ...");
-		$ciomUtil->exec("cat $ShellStreamedit");
-		$ciomUtil->exec("perl -CSDL -i -pE 's|<ciomdv>$key</ciomdv>|$v|mg' $ShellStreamedit");
+		$CiomUtil->log("\n\ninstancing $key ...");
+		$CiomUtil->exec("cat $ShellStreamedit");
+		$CiomUtil->exec("perl -CSDL -i -pE 's|<ciomdv>$key</ciomdv>|$v|mg' $ShellStreamedit");
 	}	
 }
 
@@ -134,24 +150,82 @@ sub streamedit() {
 	generateStreameditFile($streameditItems);
 	instanceDynamicVariablesInShellStreamedit();
 	
-	$ciomUtil->exec("bash $ShellStreamedit");
-	$ciomUtil->exec("cat $ShellStreamedit");
+	$CiomUtil->exec("bash $ShellStreamedit");
+	$CiomUtil->exec("cat $ShellStreamedit");
 }
 
-sub preBuild() {
-	replaceCustomiedFiles();
-	streamedit();
+sub runCmds($) {
+	my $cmdsHierarchy = shift;
+	my $cmds = Dive( $CiomData, $cmdsHierarchy);
+	if (!defined($cmds)) {
+		return;
+	}
+
+	for (my $i; $i <= $#{$cmds}; $i++) {
+		$CiomUtil->exec($cmds->[$i]);
+	}
 }
 
-sub postBuildAction() {
-	;
+sub build() {
+	runCmds(qw( build pre cmds ));
+	runCmds(qw( build cmds ));
+	runCmds(qw( build post cmds ));
+}
+
+sub dispatch() {
+	my $method = Dive( $CiomData, qw( dispatch method )) || "push";
+	
+	my $joinedHosts = join(',', @{$CiomData->{deploy}->{hosts}}) . ',';
+	my $hosts = $CiomData->{deploy}->{hosts};
+	if ($method eq "push") {
+		$CiomUtil->exec("ansible all -i $joinedHosts -m file -a \"src=$AppPkgName dst=/tmp/\"");
+	} else {
+		$CiomUtil->exec("ansible all -i $joinedHosts -a \"cd /tmp; wget $AppPkgUrl\"");
+	}
+}
+
+sub deploy() {
+	runCmds(qw( deploy pre cmds ));
+
+	my $extract = Dive($CiomData, qw( deploy extract )) || 1;
+	my $hosts = $CiomData->{deploy}->{hosts};
+	for (my $i = 0; $i <= $#{$hosts}; $i++) {
+		$CiomData->upload($AppPkgName, "$hosts->[$i]:/tmp/");
+		
+		my $locations = $CiomData->{deploy}->{locations};
+		for (my $j = 0; $j <= $#{$locations}; $j++) {
+			if ($j == 0) {
+				$CiomUtil->remoteExec({
+					host => $hosts->[$i],
+					cmds => [
+						"ln -s /"
+					]
+					});
+			}
+
+			if ($extract == 1) {
+				$CiomUtil->remoteExec({
+					host => $hosts->[$i],
+					cmds => [
+						"tar -czvf $appName ${appName}.${Timestamp}.tar.gz ${appName}",
+						"tar -xzvf /tmp/$AppPkgName -C $locations->[$j]"
+					]
+				});
+			} else {
+
+			}
+		}
+	}
 }
 
 sub main() {
-	doAppTypeDependencyInjection();
+	loadAppTypePlugin();
+	
 	enterWorkspace();
 	updateCode();
+	replaceCustomiedFiles();
 	fillDynamicVariables();
+	streamedit();
 	preBuild();
 	build();
 	postBuild();

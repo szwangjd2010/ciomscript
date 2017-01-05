@@ -90,6 +90,14 @@ sub remoteExec() {
 	}
 }
 
+sub upload() {
+	my $self = shift;
+	my $local = shift;
+	my $remote = shift;
+
+	$self->exec("scp $local root\@$remote/");
+}
+
 sub writeToFile() {
 	my $self = shift;
 	my $file = shift;
@@ -161,6 +169,19 @@ sub prettyPath() {
 	$path =~ s|/{1,}|/|g;
 	return $path;
 }
+
+sub getTimestamp() {
+	my $self = shift;
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
+	return "$year$mon$mday+$hour$min$sec";
+}
+
+sub getDatestamp() {
+	my $self = shift;
+	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
+	return "$year$mon$mday";
+}
+
 
 1;
 __END__

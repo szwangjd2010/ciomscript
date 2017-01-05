@@ -34,11 +34,30 @@ cp2016() {
 	done
 }
 
+cp2017() {
+	year=2017
+	
+	for (( i=1; i<=1; i++ )); do
+		month=$(printf "%02d" $i)
+		src=$(getSrcFile)
+		dst=$(getDstLocation)
+
+		echo "check if local exist ... "
+		execCmd "$hdfsBin dfs -test -f $src"
+		if [ $? -ne 0 ]; then
+			echo "raw data $src not exists"
+			continue
+		fi
+
+		execCmd "$hdfsBin dfs -cp -f $src $dst"
+	done
+}
+
 
 main() {
 	for product in $Products; do
 		for logType in $LogTypes; do
-			cp2016
+			cp2017
 		done
 	done
 }

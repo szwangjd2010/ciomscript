@@ -1,0 +1,20 @@
+{
+    "build": {
+        "builder": "npm",
+        "cmds": [
+            "npm run build"
+        ],
+        "pre": [],
+        "post": []
+    },
+
+    "dispatch": {
+        "method": "pull"
+    },
+
+    "deploy": {
+        "extract": 1,
+        "pre": [],
+        "post": []
+    }
+}

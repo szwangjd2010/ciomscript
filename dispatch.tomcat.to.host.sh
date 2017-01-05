@@ -42,7 +42,7 @@ main() {
 	cleanTomcats
 	uploadTomcats
 	extractTomcats
-	startTomcats $host $port $tomcatParent 3
+#	startTomcats $host $port $tomcatParent 3
 	leaveWorkspace
 }
 
