@@ -4,6 +4,8 @@
 
 load(getConfFile());
 
+const DaySeconds = 24 * 3600;
+
 var Timestamp = getMidnightTimestamp();
 
 function getConfFile() {
@@ -12,12 +14,12 @@ function getConfFile() {
 
 function getMidnightTimestamp() {
 	var timestamp = (new ObjectId()).getTimestamp().getTime() / 1000;
-	return timestamp - timestamp % (24 * 3600);
+	return timestamp - timestamp % DaySeconds;
 }
 
 function getBreakpoint(cname) {
 	var lifetime = CollectionsLifetime.hasOwnProperty(cname) ? CollectionsLifetime[cname] : DefaultLifetime;
-	var breakpointMicrosec = Timestamp - lifetime * 24 * 3600;
+	var breakpointMicrosec = Timestamp - lifetime * DaySeconds;
 
 	return {
 		"microsec": breakpointMicrosec,
