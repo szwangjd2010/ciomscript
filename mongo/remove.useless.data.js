@@ -27,10 +27,8 @@ function getBreakpoint(cname) {
 }
 
 function cleanCollection(c, breakpoint) {
-	print(cname + " ... ");
 	if (breakpoint.microsec > Timestamp) {
-		print("ignored");
-		return;
+		return -1;
 	}
 
     var queryJson = {
@@ -41,7 +39,7 @@ function cleanCollection(c, breakpoint) {
     };
     var cnt = c.count(queryJson);
     c.remove(queryJson);
-	print(cnt + " records cleaned");
+    return cnt;
 }
 
 (function main() {
@@ -56,7 +54,9 @@ function cleanCollection(c, breakpoint) {
         if (cname === "system.indexes") {
             continue;
         }
-        cleanCollection(db.getCollection(cname), getBreakpoint(cname));
+        print(cname + " ... ");
+        var cnt = cleanCollection(db.getCollection(cname), getBreakpoint(cname));
+        print(cnt + " records cleaned");
     }
 
     print("finished!");
