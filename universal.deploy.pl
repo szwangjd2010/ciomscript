@@ -53,7 +53,6 @@ sub loadAppTypePlugin() {
 	$CiomData->{build} = merge $Plugin->{build}, $CiomData->{build};
 	$CiomData->{deploy} = merge $Plugin->{deploy}, $CiomData->{deploy};
 	$CiomData->{dispatch} = merge $Plugin->{dispatch}, $CiomData->{dispatch};
-
 }
 
 sub fillDynamicVariables() {
@@ -184,38 +183,61 @@ sub dispatch() {
 	}
 }
 
+sub getPlaceAppPkgCmd($) {
+	my $info = shift;
+
+	my $idx = info->{idx};
+	my $extract = info->{extract};
+	my $locations = info->{locations};
+	if (idx == 0) {
+		return $extract == 1 ? 
+			"tar -xzvf /tmp/$AppPkgName -C $locations->[0]/"
+			:
+			"/bin/cp -f /tmp/$AppPkgName $locations->[$idx]/";
+	} else {
+		return $extract == 1 ?
+			"ln -s -f $locations->[0]/$appName $locations->[$idx]/$appName"
+			:
+			"ln -s -f $locations->[0]/$AppPkgName  $locations->[$idx]/$AppPkgName";
+	}
+}
+
+sub backup($) {
+	my $info = shift;
+
+	$CiomUtil->remoteExec({
+		host => $hosts->[$i],
+		cmd => "cd $tar -czvf ${appName}.${Timestamp}.tar.gz ${appName"
+	});	
+}
+
 sub deploy() {
 	runCmds(qw( deploy pre cmds ));
 
 	my $extract = Dive($CiomData, qw( deploy extract )) || 1;
 	my $hosts = $CiomData->{deploy}->{hosts};
 	for (my $i = 0; $i <= $#{$hosts}; $i++) {
-		$CiomData->upload($AppPkgName, "$hosts->[$i]:/tmp/");
-		
 		my $locations = $CiomData->{deploy}->{locations};
+
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
-			if ($j == 0) {
-				$CiomUtil->remoteExec({
-					host => $hosts->[$i],
-					cmds => [
-						"ln -s /"
-					]
-					});
-			}
+			my $info = {
+				idx => $j,
+				extract => $extract,
+				locations => $locations
+			};
+			my $cmd = getPlaceAppPkgCmd($info);
 
-			if ($extract == 1) {
-				$CiomUtil->remoteExec({
-					host => $hosts->[$i],
-					cmds => [
-						"tar -czvf $appName ${appName}.${Timestamp}.tar.gz ${appName}",
-						"tar -xzvf /tmp/$AppPkgName -C $locations->[$j]"
-					]
-				});
-			} else {
-
-			}
+			$CiomUtil->remoteExec({
+				host => $hosts->[$i],
+				cmds => [
+					"tar -czvf $appName ${appName}.${Timestamp}.tar.gz ${appName}",
+					$cmd
+				]
+			});
 		}
 	}
+
+	runCmds(qw( deploy post cmds ));
 }
 
 sub main() {
