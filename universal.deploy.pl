@@ -15,12 +15,14 @@ use open IN => ":encoding(utf8)", OUT => ":utf8";
 use IO::Handle;
 STDOUT->autoflush(1);
 
+sub getAppPkgUrl();
+
 our $version = $ARGV[0];
 our $cloudId = $ARGV[1];
 our $appName = $ARGV[2];
 
 
-our $CiomUtil = new CiomUtil(1);
+our $CiomUtil = new CiomUtil(0);
 our $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
 our $CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
 our $AppType = $CiomData->{AppType};
@@ -48,7 +50,7 @@ sub getAppPkgUrl() {
 	);
 }
 
-sub loadAppTypePlugin() {
+sub loadPlugin() {
 	my $Plugin = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.ciom");
 	$CiomData->{build} = merge $Plugin->{build}, $CiomData->{build};
 	$CiomData->{deploy} = merge $Plugin->{deploy}, $CiomData->{deploy};
@@ -96,8 +98,7 @@ sub updateCode() {
 	}
 }
 
-sub replaceCustomiedFiles($) {
-	my $code = $_[0];
+sub replaceCustomiedFiles() {
 	$CiomUtil->exec("/bin/cp -rf $AppVcaHome/* ./");
 }
 
@@ -155,7 +156,7 @@ sub streamedit() {
 
 sub runCmds($) {
 	my $cmdsHierarchy = shift;
-	my $cmds = Dive( $CiomData, $cmdsHierarchy);
+	my $cmds = Dive( $CiomData, qw($cmdsHierarchy));
 	if (!defined($cmds)) {
 		return;
 	}
@@ -166,84 +167,68 @@ sub runCmds($) {
 }
 
 sub build() {
-	runCmds(qw( build pre cmds ));
-	runCmds(qw( build cmds ));
-	runCmds(qw( build post cmds ));
+	runCmds("build pre cmds");
+	runCmds("build cmds");
+	runCmds("build post cmds");
 }
 
 sub dispatch() {
 	my $method = Dive( $CiomData, qw( dispatch method )) || "push";
 	
 	my $joinedHosts = join(',', @{$CiomData->{deploy}->{hosts}}) . ',';
+	my $to = $CiomData->{dispatch}->{to};
 	my $hosts = $CiomData->{deploy}->{hosts};
+	$CiomUtil->exec("ansible all -i $joinedHosts -m file -a \"path=$to state=directory\"");
 	if ($method eq "push") {
-		$CiomUtil->exec("ansible all -i $joinedHosts -m file -a \"src=$AppPkgName dst=/tmp/\"");
+		$CiomUtil->exec("ansible all -i $joinedHosts -m file -a \"src=$AppPkgName dest=$to\"");
 	} else {
-		$CiomUtil->exec("ansible all -i $joinedHosts -a \"cd /tmp; wget $AppPkgUrl\"");
+		$CiomUtil->exec("ansible all -i $joinedHosts -a \"cd $to; wget $AppPkgUrl\"");
 	}
 }
 
-sub getPlaceAppPkgCmd($) {
-	my $info = shift;
-
-	my $idx = info->{idx};
-	my $extract = info->{extract};
-	my $locations = info->{locations};
-	if (idx == 0) {
-		return $extract == 1 ? 
-			"tar -xzvf /tmp/$AppPkgName -C $locations->[0]/"
-			:
-			"/bin/cp -f /tmp/$AppPkgName $locations->[$idx]/";
+sub cmdExtractAppPkgToDeploymentLocation($$) {
+	my $idx = shift;
+	my $locations = shift;
+	if ($idx == 0) {
+		return "tar -xzvf /tmp/$AppPkgName -C $locations->[0]/";
 	} else {
-		return $extract == 1 ?
-			"ln -s -f $locations->[0]/$appName $locations->[$idx]/$appName"
-			:
-			"ln -s -f $locations->[0]/$AppPkgName  $locations->[$idx]/$AppPkgName";
+		return "ln -s -f $locations->[0]/$appName $locations->[$idx]/$appName";
 	}
 }
 
-sub backup($) {
-	my $info = shift;
+sub backup($$) {
+	my $host = shift;
+	my $location = shift;
 
 	$CiomUtil->remoteExec({
-		host => $hosts->[$i],
-		cmd => "cd $tar -czvf ${appName}.${Timestamp}.tar.gz ${appName"
+		host => $host,
+		cmd => "cd $location; tar -czvf ${appName}.${Timestamp}.tar.gz ${appName}"
 	});	
 }
 
 sub deploy() {
-	runCmds(qw( deploy pre cmds ));
+	runCmds("deploy pre cmds");
 
-	my $extract = Dive($CiomData, qw( deploy extract )) || 1;
 	my $hosts = $CiomData->{deploy}->{hosts};
 	for (my $i = 0; $i <= $#{$hosts}; $i++) {
 		my $locations = $CiomData->{deploy}->{locations};
+		backup($hosts->[$i], $locations->[0]);
 
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
-			my $info = {
-				idx => $j,
-				extract => $extract,
-				locations => $locations
-			};
-			my $cmd = getPlaceAppPkgCmd($info);
-
 			$CiomUtil->remoteExec({
 				host => $hosts->[$i],
-				cmds => [
-					"tar -czvf $appName ${appName}.${Timestamp}.tar.gz ${appName}",
-					$cmd
-				]
+				cmds =>cmdExtractAppPkgToDeploymentLocation($j, $locations)
 			});
 		}
 	}
 
-	runCmds(qw( deploy post cmds ));
+	runCmds("deploy post cmds");
 }
 
 sub main() {
-	loadAppTypePlugin();
-	
+	loadPlugin();
 	enterWorkspace();
+
 	updateCode();
 	replaceCustomiedFiles();
 	fillDynamicVariables();
