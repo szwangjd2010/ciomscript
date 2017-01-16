@@ -43,7 +43,7 @@ sub getBuildLogFile() {
 }
 
 sub getAppPkgUrl() {
-	return sprintf("$ENV{CIOM_DISPATCH_BASE_URL}%s/%s/%s.tar.gz",
+	return sprintf("$ENV{CIOM_DISPATCH_URL_BASE}%s/%s/%s.tar.gz",
 		$version,
 		$cloudId,
 		$appName
@@ -99,7 +99,10 @@ sub updateCode() {
 }
 
 sub replaceCustomiedFiles() {
-	$CiomUtil->exec("/bin/cp -rf $AppVcaHome/* ./");
+	my $customizedFilesLocation = "$AppVcaHome/customized/";
+	if ( -d $customizedFilesLocation) {
+			$CiomUtil->exec("/bin/cp -rf $customizedFilesLocation ./");
+	}
 }
 
 sub generateStreameditFile($) {
