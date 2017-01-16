@@ -5,6 +5,7 @@ use lib "$ENV{CIOM_SCRIPT_HOME}";
 use strict;
 use English;
 use Data::Dumper;
+use Data::Diver qw( Dive DiveRef DiveError );
 use Hash::Merge::Simple qw( merge );
 use Cwd;
 use CiomUtil;
@@ -220,7 +221,7 @@ sub deploy() {
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
 			$CiomUtil->remoteExec({
 				host => $hosts->[$i],
-				cmds =>cmdExtractAppPkgToDeploymentLocation($j, $locations)
+				cmd =>cmdExtractAppPkgToDeploymentLocation($j, $locations)
 			});
 		}
 	}
@@ -236,13 +237,11 @@ sub main() {
 	replaceCustomiedFiles();
 	fillDynamicVariables();
 	streamedit();
-	preBuild();
 	build();
-	postBuild();
 	deploy();
 	leaveWorkspace();
 
-	return getBuildError();
+	return 0;
 }
 
 exit main();
