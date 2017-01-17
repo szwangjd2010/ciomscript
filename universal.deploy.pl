@@ -23,7 +23,7 @@ our $cloudId = $ARGV[1];
 our $appName = $ARGV[2];
 
 
-our $CiomUtil = new CiomUtil(0);
+our $CiomUtil = new CiomUtil(1);
 our $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
 our $CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
 our $AppType = $CiomData->{AppType};
@@ -44,10 +44,10 @@ sub getBuildLogFile() {
 }
 
 sub getAppPkgUrl() {
-	return sprintf("$ENV{CIOM_DISPATCH_URL_BASE}%s/%s/%s.tar.gz",
+	return sprintf("$ENV{CIOM_REPO_URL_BASE}/%s/%s/%s",
 		$version,
 		$cloudId,
-		$appName
+		$AppPkgName
 	);
 }
 
@@ -65,12 +65,7 @@ sub fillDynamicVariables() {
 }
 
 sub enterWorkspace() {
-	my $appWorkspace = "$ENV{WORKSPACE}/$appName";
-	if (! -d $appWorkspace) {
-		$CiomUtil->exec("mkdir -p $appWorkspace");
-	}
-
-	chdir($appWorkspace);
+	chdir($ENV{WORKSPACE});
 }
 
 sub leaveWorkspace() {
@@ -160,54 +155,98 @@ sub streamedit() {
 
 sub runCmds($) {
 	my $cmdsHierarchy = shift;
-	my $cmds = Dive( $CiomData, qw($cmdsHierarchy));
+	my $cmds = Dive( $CiomData, split(' ', $cmdsHierarchy));
 	if (!defined($cmds)) {
 		return;
 	}
 
-	for (my $i; $i <= $#{$cmds}; $i++) {
+	for (my $i = 0; $i <= $#{$cmds}; $i++) {
 		$CiomUtil->exec($cmds->[$i]);
 	}
 }
 
+sub getBuildLocation() {
+	return $CiomData->{scm}->{repos}->[0]->{name};
+}
+
 sub build() {
+	chdir(getBuildLocation());
+
 	runCmds("build pre cmds");
 	runCmds("build cmds");
 	runCmds("build post cmds");
+	
+	chdir($OldPwd);
+}
+
+sub getJoinedScmModuleNames() {
+	my $joinedModuleNames = '';
+	my $repos = $CiomData->{scm}->{repos};
+	my $cnt = $#{$repos} + 1;
+	for (my $i = 0; $i < $cnt; $i++) {
+		$joinedModuleNames .= $repos->[$i]->{name};
+		if ($i < $cnt - 1) {
+			$joinedModuleNames .= ' ';
+		}
+	}
+
+	return $joinedModuleNames;
+}
+
+sub pkgApp() {
+	$CiomUtil->exec("tar --exclude-vcs -czvf $AppPkgName " . getJoinedScmModuleNames());
+}
+
+sub putPkgToRepo() {
+	my $appRepoLocation = "$ENV{CIOM_REPO_LOCAL_PATH}/$version/$cloudId/";
+	$CiomUtil->exec("mkdir -p $appRepoLocation");
+	$CiomUtil->exec("/bin/cp -f $AppPkgName $appRepoLocation");
+}
+
+sub getRemoteWorkspace() {
+	return $CiomData->{dispatch}->{workspace};
 }
 
 sub dispatch() {
 	my $method = Dive( $CiomData, qw( dispatch method )) || "push";
 	
 	my $joinedHosts = join(',', @{$CiomData->{deploy}->{hosts}}) . ',';
-	my $to = $CiomData->{dispatch}->{to};
+	my $remoteWrokspace = getRemoteWorkspace();
 	my $hosts = $CiomData->{deploy}->{hosts};
-	$CiomUtil->exec("ansible all -i $joinedHosts -m file -a \"path=$to state=directory\"");
+	my $ansibleCmdPrefix = "ansible all -i $joinedHosts -u root";
+	$CiomUtil->exec("$ansibleCmdPrefix -m file -a \"path=$remoteWrokspace state=directory\"");
 	if ($method eq "push") {
-		$CiomUtil->exec("ansible all -i $joinedHosts -m file -a \"src=$AppPkgName dest=$to\"");
+		$CiomUtil->exec("$ansibleCmdPrefix -m file -a \"src=$AppPkgName dest=$remoteWrokspace\"");
 	} else {
-		$CiomUtil->exec("ansible all -i $joinedHosts -a \"cd $to; wget $AppPkgUrl\"");
+		$CiomUtil->exec("$ansibleCmdPrefix -m shell -a \"cd $remoteWrokspace; rm -rf $AppPkgName; wget $AppPkgUrl\"");
 	}
 }
 
-sub cmdExtractAppPkgToDeploymentLocation($$) {
+sub getDeployAppPkgCmd($$) {
 	my $idx = shift;
 	my $locations = shift;
-	if ($idx == 0) {
-		return "tar -xzvf /tmp/$AppPkgName -C $locations->[0]/";
-	} else {
-		return "ln -s -f $locations->[0]/$appName $locations->[$idx]/$appName";
-	}
+
+	my $remoteWrokspace = getRemoteWorkspace();
+	my $mkdirCmd = "mkdir -p $locations->[$idx]";
+	my $cmd = ($idx == 0) ?
+				"tar -xzvf $remoteWrokspace/$AppPkgName -C $locations->[0]/"
+				:
+				"ln -s -f $locations->[0]/$appName $locations->[$idx]/$appName";
+
+	return "$mkdirCmd; $cmd";
 }
 
-sub backup($$) {
-	my $host = shift;
-	my $location = shift;
+sub backup() {
+	my $remoteWrokspace = getRemoteWorkspace();
+	my $hosts = $CiomData->{deploy}->{hosts};
+	for (my $i = 0; $i <= $#{$hosts}; $i++) {
+		my $location = $CiomData->{deploy}->{locations}->[0];
 
-	$CiomUtil->remoteExec({
-		host => $host,
-		cmd => "cd $location; tar -czvf ${appName}.${Timestamp}.tar.gz ${appName}"
-	});	
+		$CiomUtil->remoteExec({
+			host => $hosts->[$i],
+			cmd => "cd $location; tar -czvf $remoteWrokspace/${appName}.${Timestamp}.tar.gz ${appName}; rm -rf ${appName}"
+		});	
+	}
 }
 
 sub deploy() {
@@ -216,12 +255,12 @@ sub deploy() {
 	my $hosts = $CiomData->{deploy}->{hosts};
 	for (my $i = 0; $i <= $#{$hosts}; $i++) {
 		my $locations = $CiomData->{deploy}->{locations};
-		backup($hosts->[$i], $locations->[0]);
 
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
+
 			$CiomUtil->remoteExec({
 				host => $hosts->[$i],
-				cmd =>cmdExtractAppPkgToDeploymentLocation($j, $locations)
+				cmd =>getDeployAppPkgCmd($j, $locations)
 			});
 		}
 	}
@@ -238,6 +277,10 @@ sub main() {
 	fillDynamicVariables();
 	streamedit();
 	build();
+	pkgApp();
+	putPkgToRepo();
+	dispatch();
+	backup();
 	deploy();
 	leaveWorkspace();
 

@@ -173,13 +173,22 @@ sub prettyPath() {
 sub getTimestamp() {
 	my $self = shift;
 	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
-	return "$year$mon$mday+$hour$min$sec";
+	return sprintf("%04d%02d%02d+%02d%02d%02d", 
+		$year + 1900,
+		$mon,
+		$mday,
+		$hour,
+		$min,
+		$sec);
 }
 
 sub getDatestamp() {
 	my $self = shift;
 	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
-	return "$year$mon$mday";
+	return sprintf("%04d%02d%02d", 
+		$year + 1900,
+		$mon,
+		$mday);
 }
 
 

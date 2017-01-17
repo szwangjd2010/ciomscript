@@ -32,6 +32,15 @@ replaceEnvSpecialFiles() {
 	execCmd "/bin/cp -rf $CnfLocation/$appName/* $WORKSPACE/$appName/"
 }
 
+replaceReplaceCustomizedVcaFiles() {
+	
+	if [ -d "$WORKSPACE/ciomcvca" ]; then
+		execCmd "/bin/cp -rf $WORKSPACE/ciomcvca/* $WORKSPACE/$appName/"
+		execCmd "rm -rf $WORKSPACE/ciomcvca"
+	fi
+
+}
+
 execPrebuildExtraAction() {
 	filePrebuildExtraAction="$CnfLocation/$appName.prebuild.extra.action"
 	if [ ! -e $filePrebuildExtraAction ]; then
@@ -47,6 +56,7 @@ execPrebuildExtraAction() {
 main() {
 	enterWorkspace
 	replaceEnvSpecialFiles
+	replaceReplaceCustomizedVcaFiles
 	execPrebuildExtraAction
 	leaveWorkspace
 }

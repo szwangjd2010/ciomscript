@@ -1,33 +1,43 @@
 #!/usr/bin/perl -W
 #
+use lib "$ENV{CIOM_SCRIPT_HOME}";
+use strict;
+use English;
 use Data::Dumper;
-use bigint;
-use JSON::Parse 'json_file_to_perl';
-use JSON;
+use Data::Diver qw( Dive DiveRef DiveError );
+use Hash::Merge::Simple qw( merge );
 use Cwd;
-use POSIX qw(strftime);
+use CiomUtil;
+use JSON::Parse 'json_file_to_perl';
+use String::Escape 'escape';
+use open ":encoding(utf8)";
+use open IN => ":encoding(utf8)", OUT => ":utf8";
 
-my $h = {};
 
-if (!%{$h}) { 
-    print "Empty\n";
-} 
+our $CiomData = json_file_to_perl("/opt/ciom/ciomscript/plugins/vue.ciom");
 
-my $a =[];
+print Dumper($CiomData);
+our $CiomUtil = new CiomUtil(0);
 
-if (!@{$a}) {
-	print "Zero length\n"
+sub runCmds($) {
+	my $cmdsHierarchy = shift;
+	#my $cmds = Dive( $CiomData, qw(" $cmdsHierarchy "));
+	my $cmds = Dive( $CiomData, split(' ', $cmdsHierarchy));
+
+	print Dumper($cmds);
+	if (!defined($cmds)) {
+		return;
+	}
+
+	for (my $i = 0; $i <= $#{$cmds}; $i++) {
+		$CiomUtil->exec($cmds->[$i]);
+	}
 }
-my $b;
-if (!defined($b)) {
-	print "b is undef\n";
+
+sub build() {
+	runCmds("build pre cmds");
+	runCmds("build cmds");
+	runCmds("build post cmds");
 }
-my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
 
-printf("Time Format - HH:MM:SS\n");
-printf("%02d:%02d:%02d\n", $hour, $min, $sec);
-
-my $arr=["111", "222"];
-
-print join(",", @{$arr}) . ',';
-
+build();
