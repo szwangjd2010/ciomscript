@@ -6,7 +6,7 @@ use strict;
 use English;
 use Data::Dumper;
 use Data::Diver qw( Dive DiveRef DiveError );
-use Hash::Merge::Simple qw( merge );
+use Hash::Merge qw( merge );
 use Cwd;
 use CiomUtil;
 use JSON::Parse 'json_file_to_perl';
@@ -51,11 +51,18 @@ sub getAppPkgUrl() {
 	);
 }
 
+sub enablePlugin($) {
+	my $plugin = shift;
+	Hash::Merge::set_behavior('RETAINMENT_PRECEDENT');
+	$CiomData->{build} = merge $plugin->{build}, $CiomData->{build};
+	$CiomData->{deploy} = merge $plugin->{deploy}, $CiomData->{deploy};
+	$CiomData->{dispatch} = merge $plugin->{dispatch}, $CiomData->{dispatch};
+}
+
+
 sub loadPlugin() {
-	my $Plugin = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.ciom");
-	$CiomData->{build} = merge $Plugin->{build}, $CiomData->{build};
-	$CiomData->{deploy} = merge $Plugin->{deploy}, $CiomData->{deploy};
-	$CiomData->{dispatch} = merge $Plugin->{dispatch}, $CiomData->{dispatch};
+	my $plugin = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.ciom");
+	enablePlugin($plugin);
 }
 
 sub fillDynamicVariables() {
@@ -97,7 +104,7 @@ sub updateCode() {
 sub replaceCustomiedFiles() {
 	my $customizedFilesLocation = "$AppVcaHome/customized/";
 	if ( -d $customizedFilesLocation) {
-			$CiomUtil->exec("/bin/cp -rf $customizedFilesLocation ./");
+		$CiomUtil->exec("/bin/cp -rf $customizedFilesLocation ./");
 	}
 }
 
@@ -195,12 +202,13 @@ sub getJoinedScmModuleNames() {
 
 sub pkgApp() {
 	$CiomUtil->exec("tar --exclude-vcs -czvf $AppPkgName " . getJoinedScmModuleNames());
+	$CiomUtil->exec("sha256sum $AppPkgName > $appName.sum");
 }
 
 sub putPkgToRepo() {
 	my $appRepoLocation = "$ENV{CIOM_REPO_LOCAL_PATH}/$version/$cloudId/";
 	$CiomUtil->exec("mkdir -p $appRepoLocation");
-	$CiomUtil->exec("/bin/cp -f $AppPkgName $appRepoLocation");
+	$CiomUtil->exec("/bin/cp -f $AppPkgName $appName.sum $appRepoLocation");
 }
 
 sub getRemoteWorkspace() {
@@ -218,7 +226,7 @@ sub dispatch() {
 	if ($method eq "push") {
 		$CiomUtil->exec("$ansibleCmdPrefix -m file -a \"src=$AppPkgName dest=$remoteWrokspace\"");
 	} else {
-		$CiomUtil->exec("$ansibleCmdPrefix -m shell -a \"cd $remoteWrokspace; rm -rf $AppPkgName; wget $AppPkgUrl\"");
+		$CiomUtil->exec("$ansibleCmdPrefix -m get_url -a \"url=$AppPkgUrl dest=$remoteWrokspace\"");
 	}
 }
 

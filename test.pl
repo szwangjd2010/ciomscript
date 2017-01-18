@@ -5,7 +5,7 @@ use strict;
 use English;
 use Data::Dumper;
 use Data::Diver qw( Dive DiveRef DiveError );
-use Hash::Merge::Simple qw( merge );
+use Hash::Merge qw( merge );
 use Cwd;
 use CiomUtil;
 use JSON::Parse 'json_file_to_perl';
@@ -13,31 +13,30 @@ use String::Escape 'escape';
 use open ":encoding(utf8)";
 use open IN => ":encoding(utf8)", OUT => ":utf8";
 
+my $a = {
+	pre => [
+		1,
+		2
+	],
 
-our $CiomData = json_file_to_perl("/opt/ciom/ciomscript/plugins/vue.ciom");
+	onlya => [
+		'onlya-1'
+	]
+};
 
-print Dumper($CiomData);
-our $CiomUtil = new CiomUtil(0);
+my $b = {
+	pre => [
+		3, 
+		4
+	],
+	onlyb => [
+		'onlyb-1'
+	]
 
-sub runCmds($) {
-	my $cmdsHierarchy = shift;
-	#my $cmds = Dive( $CiomData, qw(" $cmdsHierarchy "));
-	my $cmds = Dive( $CiomData, split(' ', $cmdsHierarchy));
+};
 
-	print Dumper($cmds);
-	if (!defined($cmds)) {
-		return;
-	}
+$b = merge $a, $b;
+print 'RETAINMENT_PRECEDENT\n' . Dumper($b);
 
-	for (my $i = 0; $i <= $#{$cmds}; $i++) {
-		$CiomUtil->exec($cmds->[$i]);
-	}
-}
-
-sub build() {
-	runCmds("build pre cmds");
-	runCmds("build cmds");
-	runCmds("build post cmds");
-}
-
-build();
+$b = merge $a, $b;
+print 'RETAINMENT_PRECEDENT\n' . Dumper($b);
