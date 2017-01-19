@@ -7,6 +7,8 @@ use English;
 use Data::Dumper;
 use Data::Diver qw( Dive DiveRef DiveError );
 use Hash::Merge qw( merge );
+use Clone 'clone';
+use Template;
 use Cwd;
 use CiomUtil;
 use JSON::Parse 'json_file_to_perl';
@@ -22,7 +24,6 @@ our $version = $ARGV[0];
 our $cloudId = $ARGV[1];
 our $appName = $ARGV[2];
 
-
 our $CiomUtil = new CiomUtil(1);
 our $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
 our $CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
@@ -32,6 +33,8 @@ our $AppPkgName = "$appName.tar.gz";
 our $AppPkgUrl = getAppPkgUrl();
 our $Timestamp = $CiomUtil->getTimestamp();
 
+my $DynamicVars = {};
+my $StreameditTpl = "$ENV{CIOM_SCRIPT_HOME}/streamedit.sh.tpl";
 my $ShellStreamedit = "_streamedit.ciom";
 my $OldPwd = getcwd();
 
@@ -54,21 +57,15 @@ sub getAppPkgUrl() {
 sub enablePlugin($) {
 	my $plugin = shift;
 	Hash::Merge::set_behavior('RETAINMENT_PRECEDENT');
-	$CiomData->{build} = merge $plugin->{build}, $CiomData->{build};
+	$CiomData->{build} = merge $plugin->{build}, $CiomData->{build} || {};
 	$CiomData->{deploy} = merge $plugin->{deploy}, $CiomData->{deploy};
-	$CiomData->{dispatch} = merge $plugin->{dispatch}, $CiomData->{dispatch};
+	$CiomData->{dispatch} = merge $plugin->{dispatch}, $CiomData->{dispatch} || {};
 }
 
 
 sub loadPlugin() {
 	my $plugin = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.ciom");
 	enablePlugin($plugin);
-}
-
-sub fillDynamicVariables() {
-	for my $key (keys %{$CiomData->{dynamicVariables}}) {
-		$CiomData->{dynamicVariables}->{$key} = $ENV{$key};
-	}		
 }
 
 sub enterWorkspace() {
@@ -108,56 +105,59 @@ sub replaceCustomiedFiles() {
 	}
 }
 
-sub generateStreameditFile($) {
-	my $items = $_[0];
+sub escapeRe($) {
+	my $re = shift;
+	#single quotation enclosed by single quotation
+	$re =~ s/'/'"'"'/g;
 
-	my $cmds = "";
-	my $CmdStreameditTpl = "perl -CSDL %s-i -pE 's|%s|%s|mg' %s";
-	for my $file (keys %{$items}) {
-		my $v = $items->{$file};
+	#vertical bar 
+	$re =~ s/\|/\\|/g;	
+	return $re;
+}
+
+sub transformStreameditsReAndFillDynamicVars() {
+	my $streameditItems = $CiomData->{streameditItems};
+	for my $file (keys %{$streameditItems}) {
+		my $v = $streameditItems->{$file};
 		my $cnt = $#{$v} + 1;
 		
 		for (my $i = 0; $i < $cnt; $i++) {
-			my $lineMode = defined($v->[$i]->{single}) ? '-0 ' : '';
-			$cmds .= sprintf($CmdStreameditTpl,
-				$lineMode,
-				$v->[$i]->{re},
-				$v->[$i]->{to},
-				$file
-			);
-			$cmds .= "\n";
+			my $vi = $v->[$i];
+			$vi->{re} = escapeRe($vi->{re});
+			$vi->{to} = escapeRe($vi->{to});
+
+			if ($vi->{to} =~ m|<ciompm>([\w_]+)</ciompm>|) {
+				$DynamicVars->{$1} = $ENV{"CIOMPM_$1"} || '';
+				$vi->{to} =~ s|<ciompm>([\w_]+)</ciompm>|[% DynamicVars.$1 %]|g;
+			}
 		}
 	}
-
-	$CiomUtil->writeToFile("$ShellStreamedit", $cmds);
 }
 
-sub instanceDynamicVariablesInShellStreamedit() {
-	my $nCiompmCnt = $CiomUtil->execWithReturn("grep -c '<ciomdv>' $ShellStreamedit");
-	if ($nCiompmCnt == 0) {
-		return;
-	}
+sub generateStreameditFile() {
+	transformStreameditsReAndFillDynamicVars();
 
-	for my $key (keys %{$CiomData->{dynamicVariables}}) {
-		$nCiompmCnt = $CiomUtil->execWithReturn("grep -c '<ciomdv>$key</ciomdv>' $ShellStreamedit");
-		if ($nCiompmCnt == 0) {
-			next;
-		}
+	my $template = Template->new({
+		ABSOLUTE => 1,
+		PRE_CHOMP  => 1,
+	    POST_CHOMP => 0,
+	});
 
-		my $v = $CiomData->{dynamicVariables}->{$key};
-		$CiomUtil->log("\n\ninstancing $key ...");
-		$CiomUtil->exec("cat $ShellStreamedit");
-		$CiomUtil->exec("perl -CSDL -i -pE 's|<ciomdv>$key</ciomdv>|$v|mg' $ShellStreamedit");
-	}	
+	my $firstOut =  "${ShellStreamedit}.0";
+	# instance stream edit items
+	$template->process($StreameditTpl, {files => $CiomData->{streameditItems}}, $firstOut)
+        || die "Template process failed - 0: ", $template->error(), "\n";
+    $CiomUtil->exec("cat $firstOut");
+
+    # instance dynamic variables
+	$template->process($firstOut, {DynamicVars => $DynamicVars}, $ShellStreamedit)
+        || die "Template process failed - 1: ", $template->error(), "\n";
+    $CiomUtil->exec("cat $ShellStreamedit");
 }
 
 sub streamedit() {
-	my $streameditItems = $CiomData->{streameditItems};
-	generateStreameditFile($streameditItems);
-	instanceDynamicVariablesInShellStreamedit();
-	
+	generateStreameditFile();
 	$CiomUtil->exec("bash $ShellStreamedit");
-	$CiomUtil->exec("cat $ShellStreamedit");
 }
 
 sub runCmds($) {
@@ -202,13 +202,13 @@ sub getJoinedScmModuleNames() {
 
 sub pkgApp() {
 	$CiomUtil->exec("tar --exclude-vcs -czvf $AppPkgName " . getJoinedScmModuleNames());
-	$CiomUtil->exec("sha256sum $AppPkgName > $appName.sum");
+	$CiomUtil->exec("sha256sum $AppPkgName > $appName.sha256sum");
 }
 
 sub putPkgToRepo() {
 	my $appRepoLocation = "$ENV{CIOM_REPO_LOCAL_PATH}/$version/$cloudId/";
 	$CiomUtil->exec("mkdir -p $appRepoLocation");
-	$CiomUtil->exec("/bin/cp -f $AppPkgName $appName.sum $appRepoLocation");
+	$CiomUtil->exec("/bin/cp -f $AppPkgName $appName.sha256sum $appRepoLocation");
 }
 
 sub getRemoteWorkspace() {
@@ -282,7 +282,6 @@ sub main() {
 
 	updateCode();
 	replaceCustomiedFiles();
-	fillDynamicVariables();
 	streamedit();
 	build();
 	pkgApp();

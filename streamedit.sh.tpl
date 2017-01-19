@@ -1,0 +1,11 @@
+[% FOREACH file IN files.keys %]
+	[% FOREACH item IN files.$file %]
+		[% IF (item.single == 1) %]
+perl -CSDL -i -0 -pE 's|[% item.re %]|[% item.to %]|mg' [% file %]
+		[% ELSE %]
+perl -CSDL -i -pE 's|[% item.re %]|[% item.to %]|mg' [% file %]
+		[% END %]
+	[% END %]
+[% END %]
+
+[% ss.aa %]

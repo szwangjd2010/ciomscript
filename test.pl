@@ -1,42 +1,43 @@
 #!/usr/bin/perl -W
 #
-use lib "$ENV{CIOM_SCRIPT_HOME}";
 use strict;
-use English;
-use Data::Dumper;
-use Data::Diver qw( Dive DiveRef DiveError );
-use Hash::Merge qw( merge );
-use Cwd;
-use CiomUtil;
-use JSON::Parse 'json_file_to_perl';
-use String::Escape 'escape';
-use open ":encoding(utf8)";
-use open IN => ":encoding(utf8)", OUT => ":utf8";
+use warnings;
+use Template;
+use Clone 'clone';
 
-my $a = {
-	pre => [
-		1,
-		2
-	],
+my $file = '/opt/ciom/ciomscript/streamedit.sh.tpl';
+my $template = Template->new({    PRE_CHOMP  => 1,
+    POST_CHOMP => 0,
+    ABSOLUTE => 1
+});
 
-	onlya => [
-		'onlya-1'
-	]
-};
 
-my $b = {
-	pre => [
-		3, 
-		4
-	],
-	onlyb => [
-		'onlyb-1'
-	]
+my $streameditItems = {
+        "datav_dashboard/src/config/api.js" => [
+            {
+                "re" => "(api_rootUrl = ').*(';)",
+                "to" => "\${1}http://datavdashboard.yunxuetang.com.cn/datavdashboardapi/v1\${2}",
+                "single" => "2"
+            }
+        ],
 
-};
+        "datav_dashboard/src/config/setting.js" => [
+            {
+                "re" => "(showProvinces: )(true|false)",
+                "to" => "\${1}: false"
+            },
+            {
+                "re" => "(maxUsers: )\\d+",
+                "to" => "\${1}: 50"
+            }
+        ]
+    };
 
-$b = merge $a, $b;
-print 'RETAINMENT_PRECEDENT\n' . Dumper($b);
+my $ca = clone($streameditItems);
+my $ss = {"aa" => "aa", "bb" => 'bb'    };
+#my $ss=[1,2];
+my $files = {files => $streameditItems };
 
-$b = merge $a, $b;
-print 'RETAINMENT_PRECEDENT\n' . Dumper($b);
+
+$template->process($file, {ss => $ss })
+        || die "Template process failed: ", $template->error(), "\n";
