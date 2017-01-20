@@ -5,10 +5,10 @@ use warnings;
 use Template;
 use Clone 'clone';
 
-my $file = '/opt/ciom/ciomscript/streamedit.sh.tpl';
-my $template = Template->new({    PRE_CHOMP  => 1,
+my $file = 'streamedit.sh.tpl';
+my $template = Template->new({    PRE_CHOMP  => 0,
     POST_CHOMP => 0,
-    ABSOLUTE => 1
+    TAG_STYLE => 'outline',
 });
 
 
@@ -17,7 +17,7 @@ my $streameditItems = {
             {
                 "re" => "(api_rootUrl = ').*(';)",
                 "to" => "\${1}http://datavdashboard.yunxuetang.com.cn/datavdashboardapi/v1\${2}",
-                "single" => "2"
+                "single" => "1"
             }
         ],
 
@@ -33,10 +33,9 @@ my $streameditItems = {
         ]
     };
 
-my $ca = clone($streameditItems);
-my $ss = {"aa" => "aa", "bb" => 'bb'    };
-#my $ss=[1,2];
+
 my $files = {files => $streameditItems };
 
 
-print '(' . join(';', @{["111", '222']}) . ')';
+$template->process("streamedit.sh.tpl", {files => $streameditItems })
+        || die "Template process failed: ", $template->error(), "\n";

@@ -139,7 +139,8 @@ sub generateStreameditFile() {
 
 	my $template = Template->new({
 		ABSOLUTE => 1,
-		PRE_CHOMP  => 1,
+		TAG_STYLE => 'outline',
+		PRE_CHOMP  => 0,
 	    POST_CHOMP => 0,
 	});
 
