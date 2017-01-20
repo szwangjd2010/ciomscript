@@ -39,5 +39,4 @@ my $ss = {"aa" => "aa", "bb" => 'bb'    };
 my $files = {files => $streameditItems };
 
 
-$template->process($file, {ss => $ss })
-        || die "Template process failed: ", $template->error(), "\n";
+print '(' . join(';', @{["111", '222']}) . ')';

@@ -160,15 +160,11 @@ sub streamedit() {
 	$CiomUtil->exec("bash $ShellStreamedit");
 }
 
-sub runCmds($) {
+sub runCmdsInHierarchy($) {
 	my $cmdsHierarchy = shift;
-	my $cmds = Dive( $CiomData, split(' ', $cmdsHierarchy));
-	if (!defined($cmds)) {
-		return;
-	}
-
-	for (my $i = 0; $i <= $#{$cmds}; $i++) {
-		$CiomUtil->exec($cmds->[$i]);
+	my $cmds = Dive($CiomData, split(' ', $cmdsHierarchy));
+	if (defined($cmds)) {
+		$CiomUtil->exec($cmds);
 	}
 }
 
@@ -179,9 +175,9 @@ sub getBuildLocation() {
 sub build() {
 	chdir(getBuildLocation());
 
-	runCmds("build pre cmds");
-	runCmds("build cmds");
-	runCmds("build post cmds");
+	runCmdsInHierarchy("build pre cmds");
+	runCmdsInHierarchy("build cmds");
+	runCmdsInHierarchy("build post cmds");
 	
 	chdir($OldPwd);
 }
@@ -258,7 +254,7 @@ sub backup() {
 }
 
 sub deploy() {
-	runCmds("deploy pre cmds");
+	runCmdsInHierarchy("deploy pre cmds");
 
 	my $hosts = $CiomData->{deploy}->{hosts};
 	for (my $i = 0; $i <= $#{$hosts}; $i++) {
@@ -273,7 +269,7 @@ sub deploy() {
 		}
 	}
 
-	runCmds("deploy post cmds");
+	runCmdsInHierarchy("deploy post cmds");
 }
 
 sub main() {

@@ -41,17 +41,30 @@ sub log() {
 	$self->appendToFile($self->{Log}, $out);
 }
 
-sub exec() {
+sub _run() {
 	my $self = shift;
 	my $cmd = shift;
-	my $log = shift || 1;
+	my $log = shift;
 	
 	if ($log == 1) {
 		$self->log($cmd);
 	}
-
 	if ($self->{RunMode} == 1) {
 		system($cmd);
+	}
+}
+
+sub exec() {
+	my $self = shift;
+	my $cmd = shift;
+	my $log = shift || 1;
+
+	if (ref($cmd) eq 'ARRAY') {
+		for (my $i = 0; $i <= $#{$cmd}; $i++) {
+			$self->_run($cmd->[$i], $log);
+		}
+	} else {
+		$self->_run($cmd, $log);
 	}
 }
 
