@@ -1,0 +1,33 @@
+{
+    "build": {
+        "builder": "none",
+        "cmds": [],
+        "pre": [],
+        "post": []
+    },
+
+    "package": {
+        "includes": ["*"],
+        "excludes": []
+    },
+
+    "dispatch": {
+        "method": "pull",
+        "workspace": "/tmp/ciomworkspace/"
+    },
+
+    "deploy": {
+        "owner": "apache",
+        
+        "pre": [],
+        "cmds":[],
+        "post": [
+            "systemctl restart httpd"
+        ],
+
+        "local": {
+            "pre": [],
+            "post": []
+        }
+    }
+}

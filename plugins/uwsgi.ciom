@@ -1,0 +1,20 @@
+{
+    "build": {
+        "builder": "none",
+        "cmds": [],
+        "pre": [],
+        "post": []
+    },
+
+    "dispatch": {
+        "workspace": "/tmp/ciomworkspace/"
+    },
+
+    "deploy": {
+        "pre": [],
+        "cmds":[],
+        "post": [
+            ""
+        ]
+    }
+}

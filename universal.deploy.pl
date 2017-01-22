@@ -6,7 +6,7 @@ use strict;
 use English;
 use Data::Dumper;
 use Data::Diver qw( Dive DiveRef DiveError );
-use Hash::Merge qw( merge );
+use Hash::Merge::Simple qw( merge );
 use Clone 'clone';
 use Template;
 use Cwd;
@@ -20,27 +20,25 @@ STDOUT->autoflush(1);
 
 sub getAppPkgUrl();
 
-our $version = $ARGV[0];
-our $cloudId = $ARGV[1];
-our $appName = $ARGV[2];
+my $version = $ARGV[0];
+my $cloudId = $ARGV[1];
+my $appName = $ARGV[2];
 
-our $CiomUtil = new CiomUtil(1);
-our $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
-our $CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
-our $AppType = $CiomData->{AppType};
+my $CiomUtil = new CiomUtil(1);
+my $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
+my $CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
+my $O_CiomData = clone($CiomData);
+my $AppType = $CiomData->{AppType};
+my $Plugin;
 
-our $AppPkgName = "$appName.tar.gz";
-our $AppPkgUrl = getAppPkgUrl();
-our $Timestamp = $CiomUtil->getTimestamp();
+my $AppPkgName = "$appName.tar.gz";
+my $AppPkgUrl = getAppPkgUrl();
+my $Timestamp = $CiomUtil->getTimestamp();
 
 my $DynamicVars = {};
 my $StreameditTpl = "$ENV{CIOM_SCRIPT_HOME}/streamedit.sh.tpl";
 my $ShellStreamedit = "_streamedit.ciom";
 my $OldPwd = getcwd();
-
-sub getAppMainModuleName() {
-	return $CiomData->{scm}->{repos}->[0]->{name};
-}
 
 sub getBuildLogFile() {
 	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
@@ -54,18 +52,22 @@ sub getAppPkgUrl() {
 	);
 }
 
-sub enablePlugin($) {
-	my $plugin = shift;
-	Hash::Merge::set_behavior('RETAINMENT_PRECEDENT');
-	$CiomData->{build} = merge $plugin->{build}, $CiomData->{build} || {};
-	$CiomData->{deploy} = merge $plugin->{deploy}, $CiomData->{deploy};
-	$CiomData->{dispatch} = merge $plugin->{dispatch}, $CiomData->{dispatch} || {};
+sub mergePluginAndAppSetting($) {
+	my $section = shift;
+	$CiomData->{$section} = merge $Plugin->{$section}, $CiomData->{$section} || {};	
+};
+
+
+sub enablePlugin() {
+	mergePluginAndAppSetting("build");
+	mergePluginAndAppSetting("package");
+	mergePluginAndAppSetting("deploy");
+	mergePluginAndAppSetting("dispatch");
 }
 
-
 sub loadPlugin() {
-	my $plugin = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.ciom");
-	enablePlugin($plugin);
+	$Plugin = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.ciom");
+	enablePlugin();
 }
 
 sub enterWorkspace() {
@@ -101,7 +103,7 @@ sub updateCode() {
 sub replaceCustomiedFiles() {
 	my $customizedFilesLocation = "$AppVcaHome/customized/";
 	if ( -d $customizedFilesLocation) {
-		$CiomUtil->exec("/bin/cp -rf $customizedFilesLocation ./");
+		$CiomUtil->exec("/bin/cp -rf $customizedFilesLocation/* ./");
 	}
 }
 
@@ -115,7 +117,7 @@ sub escapeRe($) {
 	return $re;
 }
 
-sub transformStreameditsReAndFillDynamicVars() {
+sub transformReAndGatherDynamicVars() {
 	my $streameditItems = $CiomData->{streameditItems};
 	for my $file (keys %{$streameditItems}) {
 		my $v = $streameditItems->{$file};
@@ -128,6 +130,7 @@ sub transformStreameditsReAndFillDynamicVars() {
 
 			if ($vi->{to} =~ m|<ciompm>([\w_]+)</ciompm>|) {
 				$DynamicVars->{$1} = $ENV{"CIOMPM_$1"} || '';
+				#ciom dynamic variable to template directive
 				$vi->{to} =~ s|<ciompm>([\w_]+)</ciompm>|[% DynamicVars.$1 %]|g;
 			}
 		}
@@ -135,7 +138,7 @@ sub transformStreameditsReAndFillDynamicVars() {
 }
 
 sub generateStreameditFile() {
-	transformStreameditsReAndFillDynamicVars();
+	transformReAndGatherDynamicVars();
 
 	my $template = Template->new({
 		ABSOLUTE => 1,
@@ -161,44 +164,80 @@ sub streamedit() {
 	$CiomUtil->exec("bash $ShellStreamedit");
 }
 
-sub runCmdsInHierarchy($) {
-	my $cmdsHierarchy = shift;
-	my $cmds = Dive($CiomData, split(' ', $cmdsHierarchy));
-	if (defined($cmds)) {
+sub runHierarchyCmds {
+	my ( $hierarchyCmds, $host ) = @_;
+	my $cmds = Dive($CiomData, split(' ', $hierarchyCmds));
+	if (!defined($cmds)) {
+		return;
+	}
+
+	if (defined($host)) {
+		$CiomUtil->remoteExec({
+			host => $host,
+			cmd => $cmds
+		});
+	} else {
 		$CiomUtil->exec($cmds);
 	}
 }
 
-sub getBuildLocation() {
+sub firstModuleName() {
 	return $CiomData->{scm}->{repos}->[0]->{name};
 }
 
 sub build() {
-	chdir(getBuildLocation());
+	chdir(firstModuleName());
 
-	runCmdsInHierarchy("build pre cmds");
-	runCmdsInHierarchy("build cmds");
-	runCmdsInHierarchy("build post cmds");
+	runHierarchyCmds("build pre");
+	runHierarchyCmds("build cmds");
+	runHierarchyCmds("build post");
 	
 	chdir($OldPwd);
 }
 
-sub getJoinedScmModuleNames() {
-	my $joinedModuleNames = '';
+sub getJoinedModules() {
 	my $repos = $CiomData->{scm}->{repos};
-	my $cnt = $#{$repos} + 1;
+	my $modules = '';
+	my $cnt =  $#{$repos} + 1;
 	for (my $i = 0; $i < $cnt; $i++) {
-		$joinedModuleNames .= $repos->[$i]->{name};
-		if ($i < $cnt - 1) {
-			$joinedModuleNames .= ' ';
+		$modules .= $repos->[$i]->{name};
+		if ($i != $cnt - 1) {
+			$modules .= ' ';
 		}
 	}
+	return $modules;
+}
 
-	return $joinedModuleNames;
+sub getIncludeFileRoot($) {
+	my $include = shift;
+	my $idxFileRoot = index($include, '^');
+	if ($idxFileRoot <= 0) {
+		return '.';
+	}
+	return substr($include, 0, $idxFileRoot);	
 }
 
 sub pkgApp() {
-	$CiomUtil->exec("tar --exclude-vcs -czvf $AppPkgName " . getJoinedScmModuleNames());
+	my $customizedPkgIncludes = Dive($O_CiomData, qw(package includes));
+	my $prefix = defined($customizedPkgIncludes) ? '' : firstModuleName();
+	my $includes = $CiomData->{package}->{includes};
+
+	if ($includes->[0] eq '*') {
+		my $joinedModules = getJoinedModules();
+		$CiomUtil->exec("tar --exclude-vcs -czvf $AppPkgName $joinedModules");	
+	} else {
+		my $tmpWorkspace = "$ENV{WORKSPACE}/_tmp";
+		my $dir4CollectPkgFiles = "$tmpWorkspace/$appName";
+
+		@{$includes} = map "$prefix/$_", @{$includes};
+		$CiomUtil->exec("mkdir -p $dir4CollectPkgFiles; rm -rf $dir4CollectPkgFiles/*");
+		for (my $i = 0; $i <= $#{$includes}; $i++) {
+			my $fileRoot = getIncludeFileRoot($includes->[$i]);
+			$CiomUtil->exec("(cd $fileRoot; /bin/cp -Rf * $dir4CollectPkgFiles/)");
+		}
+		$CiomUtil->exec("(cd $tmpWorkspace; tar --exclude-vcs -czvf $ENV{WORKSPACE}/$AppPkgName $appName)");		
+	}
+
 	$CiomUtil->exec("sha256sum $AppPkgName > $appName.sha256sum");
 }
 
@@ -217,7 +256,6 @@ sub dispatch() {
 	
 	my $joinedHosts = join(',', @{$CiomData->{deploy}->{hosts}}) . ',';
 	my $remoteWrokspace = getRemoteWorkspace();
-	my $hosts = $CiomData->{deploy}->{hosts};
 	my $ansibleCmdPrefix = "ansible all -i $joinedHosts -u root";
 	$CiomUtil->exec("$ansibleCmdPrefix -m file -a \"path=$remoteWrokspace state=directory\"");
 	if ($method eq "push") {
@@ -236,7 +274,7 @@ sub getDeployAppPkgCmd($$) {
 	my $cmd = ($idx == 0) ?
 				"tar -xzvf $remoteWrokspace/$AppPkgName -C $locations->[0]/"
 				:
-				"ln -s -f $locations->[0]/$appName $locations->[$idx]/$appName";
+				"rm -rf $locations->[$idx]/$appName; ln -s $locations->[0]/$appName $locations->[$idx]/$appName";
 
 	return "$mkdirCmd; $cmd";
 }
@@ -255,28 +293,38 @@ sub backup() {
 }
 
 sub deploy() {
-	runCmdsInHierarchy("deploy pre cmds");
+	runHierarchyCmds("deploy local pre");
 
+	my $owner = Dive($CiomData, qw(deploy owner)) || '';
 	my $hosts = $CiomData->{deploy}->{hosts};
 	for (my $i = 0; $i <= $#{$hosts}; $i++) {
+		my $host = $hosts->[$i];
 		my $locations = $CiomData->{deploy}->{locations};
 
-		for (my $j = 0; $j <= $#{$locations}; $j++) {
+		runHierarchyCmds("deploy pre", $host);
 
+		for (my $j = 0; $j <= $#{$locations}; $j++) {
 			$CiomUtil->remoteExec({
-				host => $hosts->[$i],
-				cmd =>getDeployAppPkgCmd($j, $locations)
+				host => $host,
+				cmd => getDeployAppPkgCmd($j, $locations)
 			});
 		}
+		if ($owner ne '') {
+			$CiomUtil->remoteExec({
+				host => $host,
+				cmd => "chown -R $owner:$owner " . join(' ', @{$locations})
+			});
+		}
+		
+		runHierarchyCmds("deploy post", $host);
 	}
 
-	runCmdsInHierarchy("deploy post cmds");
+	runHierarchyCmds("deploy local post");
 }
 
 sub main() {
-	loadPlugin();
 	enterWorkspace();
-
+	loadPlugin();
 	updateCode();
 	replaceCustomiedFiles();
 	streamedit();

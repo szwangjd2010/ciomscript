@@ -1,0 +1,21 @@
+{
+    "build": {
+        "builder": "npm",
+        "cmds": [
+            "cnpm install"
+        ],
+        "pre": [],
+        "post": []
+    },
+
+    "dispatch": {
+        "method": "pull",
+        "workspace": "/tmp/ciomworkspace/"
+    },
+
+    "deploy": {
+        "pre": [],
+        "cmds": [],
+        "post": []
+    }
+}

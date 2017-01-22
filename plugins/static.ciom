@@ -1,0 +1,29 @@
+{
+    "build": {
+        "builder": "none",
+        "cmds": [],
+        "pre": [],
+        "post": []
+    },
+
+    "package": {
+        "includes": ["*"],
+        "excludes": []
+    },
+
+    "dispatch": {
+        "method": "pull",
+        "workspace": "/tmp/ciomworkspace/"
+    },
+
+    "deploy": {
+        "pre": [],
+        "cmds":[],
+        "post": [],
+
+        "local": {
+            "pre": [],
+            "post": []
+        }
+    }
+}
