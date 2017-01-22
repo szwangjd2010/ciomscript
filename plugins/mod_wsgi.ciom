@@ -18,7 +18,8 @@
 
     "deploy": {
         "owner": "apache",
-        
+        "mode": "755",
+
         "pre": [],
         "cmds":[],
         "post": [

@@ -292,10 +292,33 @@ sub backup() {
 	}
 }
 
+sub setOwnerAndMode($) {
+	my $info = shift;
+	my $host = $info->{host};
+	my $owner = $info->{owner};
+	my $mode = $info->{mode};
+	my $locations = $info->{locations};
+	
+	my $joinedLocations = join(' ', @{$locations});
+	if ($owner ne '') {
+		$CiomUtil->remoteExec({
+			host => $host,
+			cmd => "chown -R $owner:$owner $joinedLocations"
+		});
+	}
+	if ($mode ne '') {
+		$CiomUtil->remoteExec({
+			host => $host,
+			cmd => "chmod -R $mode $joinedLocations"
+		});
+	}
+}
+
 sub deploy() {
 	runHierarchyCmds("deploy local pre");
 
 	my $owner = Dive($CiomData, qw(deploy owner)) || '';
+	my $mode = Dive($CiomData, qw(deploy mode)) || '';
 	my $hosts = $CiomData->{deploy}->{hosts};
 	for (my $i = 0; $i <= $#{$hosts}; $i++) {
 		my $host = $hosts->[$i];
@@ -309,12 +332,13 @@ sub deploy() {
 				cmd => getDeployAppPkgCmd($j, $locations)
 			});
 		}
-		if ($owner ne '') {
-			$CiomUtil->remoteExec({
-				host => $host,
-				cmd => "chown -R $owner:$owner " . join(' ', @{$locations})
-			});
-		}
+
+		setOwnerAndMode({
+			host => $host,
+			owner => $owner,
+			mode => $mode,
+			locations => $locations
+		});
 		
 		runHierarchyCmds("deploy post", $host);
 	}
