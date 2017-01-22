@@ -14,10 +14,21 @@ my $a = {
 	b => [0,1]
 };
 
-my $b = {
-	a => [2, 2],
-	c => [0,1]
-};
+my $appName = "DVD";
+my $cmds = [
+	"%AppRoot%/dist^",
+	"%AppRoot%/%AppRoot%/dist^"
+];
 
+print "%%";
 
-'0' ne '' &&  print 1;
+	foreach my $section qw(build package) {
+		print "$section\n";
+	}
+
+print Dumper($cmds);
+print Dumper(@{$cmds});
+
+@{$cmds} = map {$_ =~ s|%AppRoot%|$appName|g;  $_;}  @{$cmds};
+
+print Dumper($cmds);

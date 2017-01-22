@@ -2,8 +2,7 @@
     "build": {
         "builder": "npm",
         "cmds": [
-            "cnpm install",
-            "cnpm run build"
+            "(cd %AppRoot%; cnpm install; cnpm run build)"
         ],
         "pre": [],
         "post": []
@@ -11,7 +10,7 @@
 
     "package": {
         "includes": [
-            "dist/^"
+            "%AppRoot%/dist/^"
         ],
 
         "excludes": []
@@ -23,6 +22,9 @@
     },
 
     "deploy": {
+        "owner": "apache",
+        "mode": "755",
+        
         "pre": [],
         "cmds": [],
         "post": [],

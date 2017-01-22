@@ -1,7 +1,9 @@
 {
     "build": {
         "builder": "none",
-        "cmds": [],
+        "cmds": [
+            "(cd %AppRoot%; pip install -r config/requirement.txt)"
+        ],
         "pre": [],
         "post": []
     },

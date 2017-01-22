@@ -54,20 +54,26 @@ sub getAppPkgUrl() {
 
 sub mergePluginAndAppSetting($) {
 	my $section = shift;
-	$CiomData->{$section} = merge $Plugin->{$section}, $CiomData->{$section} || {};	
+	$CiomData->{$section} = merge $Plugin->{$section}, $CiomData->{$section} || {};
 };
 
+sub loadPlugin() {
+	$Plugin = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.ciom");
 
-sub enablePlugin() {
+	foreach my $sectionNameL1 qw(build package) {
+		foreach my $sectionNameL2 qw(pre cmds post includes excludes) {
+			my $list = $Plugin->{$sectionNameL1}->{$sectionNameL2};
+			if (!defined($list)) {
+				next;
+			}
+			@{$list} = map {$_ =~ s|%AppRoot%|$appName|g; $_;}  @{$list};
+		}
+	}
+
 	mergePluginAndAppSetting("build");
 	mergePluginAndAppSetting("package");
 	mergePluginAndAppSetting("deploy");
 	mergePluginAndAppSetting("dispatch");
-}
-
-sub loadPlugin() {
-	$Plugin = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.ciom");
-	enablePlugin();
 }
 
 sub enterWorkspace() {
@@ -186,13 +192,9 @@ sub firstModuleName() {
 }
 
 sub build() {
-	chdir(firstModuleName());
-
 	runHierarchyCmds("build pre");
 	runHierarchyCmds("build cmds");
 	runHierarchyCmds("build post");
-	
-	chdir($OldPwd);
 }
 
 sub getJoinedModules() {
@@ -218,10 +220,7 @@ sub getIncludeFileRoot($) {
 }
 
 sub pkgApp() {
-	my $customizedPkgIncludes = Dive($O_CiomData, qw(package includes));
-	my $prefix = defined($customizedPkgIncludes) ? '' : firstModuleName();
 	my $includes = $CiomData->{package}->{includes};
-
 	if ($includes->[0] eq '*') {
 		my $joinedModules = getJoinedModules();
 		$CiomUtil->exec("tar --exclude-vcs -czvf $AppPkgName $joinedModules");	
@@ -229,7 +228,6 @@ sub pkgApp() {
 		my $tmpWorkspace = "$ENV{WORKSPACE}/_tmp";
 		my $dir4CollectPkgFiles = "$tmpWorkspace/$appName";
 
-		@{$includes} = map "$prefix/$_", @{$includes};
 		$CiomUtil->exec("mkdir -p $dir4CollectPkgFiles; rm -rf $dir4CollectPkgFiles/*");
 		for (my $i = 0; $i <= $#{$includes}; $i++) {
 			my $fileRoot = getIncludeFileRoot($includes->[$i]);
@@ -298,7 +296,7 @@ sub setOwnerAndMode($) {
 	my $owner = $info->{owner};
 	my $mode = $info->{mode};
 	my $locations = $info->{locations};
-	
+
 	my $joinedLocations = join(' ', @{$locations});
 	if ($owner ne '') {
 		$CiomUtil->remoteExec({
