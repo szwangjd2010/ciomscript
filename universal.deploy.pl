@@ -55,7 +55,7 @@ sub getAppPkgUrl() {
 sub mergePluginAndAppSetting($) {
 	my $section = shift;
 	$CiomData->{$section} = merge $Plugin->{$section}, $CiomData->{$section} || {};
-};
+}
 
 sub loadPlugin() {
 	$Plugin = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.ciom");
@@ -285,7 +285,10 @@ sub backup() {
 
 		$CiomUtil->remoteExec({
 			host => $hosts->[$i],
-			cmd => "cd $location; tar -czvf $remoteWrokspace/${appName}.${Timestamp}.tar.gz ${appName}; rm -rf ${appName}"
+			cmd => [
+				"cd $location; tar -czvf $remoteWrokspace/${appName}.${Timestamp}.tar.gz ${appName}; rm -rf ${appName}",
+				"find $remoteWrokspace -name '${appName}.*.*.tar.gz' -mtime +15 -delete"
+			]
 		});	
 	}
 }
