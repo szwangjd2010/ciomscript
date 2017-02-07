@@ -31,13 +31,16 @@ my $O_CiomData = clone($CiomData);
 my $AppType = $CiomData->{AppType};
 my $Plugin;
 
+my $Output = "_output";
 my $AppPkgName = "$appName.tar.gz";
+my $AppPkgFile = "$Output/$AppPkgName";
 my $AppPkgUrl = getAppPkgUrl();
+my $AppPkgSumFile = "$Output/$appName.sha256sum";
 my $Timestamp = $CiomUtil->getTimestamp();
 
 my $DynamicVars = {};
 my $StreameditTpl = "$ENV{CIOM_SCRIPT_HOME}/streamedit.sh.tpl";
-my $ShellStreamedit = "_streamedit.ciom";
+my $ShellStreamedit = "$Output/streamedit.ciom";
 my $OldPwd = getcwd();
 
 sub getBuildLogFile() {
@@ -59,6 +62,7 @@ sub mergePluginAndAppSetting($) {
 
 sub loadPlugin() {
 	$Plugin = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.ciom");
+	my $repo0Name = $CiomData->{scm}->{repos}->[0]->{name};
 
 	foreach my $sectionNameL1 qw(build package) {
 		foreach my $sectionNameL2 qw(pre cmds post includes excludes) {
@@ -66,7 +70,7 @@ sub loadPlugin() {
 			if (!defined($list)) {
 				next;
 			}
-			@{$list} = map {$_ =~ s|%AppRoot%|$appName|g; $_;}  @{$list};
+			@{$list} = map {$_ =~ s|%AppRoot%|$repo0Name|g; $_;}  @{$list};
 		}
 	}
 
@@ -78,6 +82,10 @@ sub loadPlugin() {
 
 sub enterWorkspace() {
 	chdir($ENV{WORKSPACE});
+}
+
+sub initWorkspace() {
+	$CiomUtil->exec("mkdir -p $Output");
 }
 
 sub leaveWorkspace() {
@@ -197,19 +205,6 @@ sub build() {
 	runHierarchyCmds("build post");
 }
 
-sub getJoinedModules() {
-	my $repos = $CiomData->{scm}->{repos};
-	my $modules = '';
-	my $cnt =  $#{$repos} + 1;
-	for (my $i = 0; $i < $cnt; $i++) {
-		$modules .= $repos->[$i]->{name};
-		if ($i != $cnt - 1) {
-			$modules .= ' ';
-		}
-	}
-	return $modules;
-}
-
 sub getIncludeFileRoot($) {
 	my $include = shift;
 	my $idxFileRoot = index($include, '^');
@@ -221,28 +216,45 @@ sub getIncludeFileRoot($) {
 
 sub pkgApp() {
 	my $includes = $CiomData->{package}->{includes};
-	if ($includes->[0] eq '*') {
-		my $joinedModules = getJoinedModules();
-		$CiomUtil->exec("tar --exclude-vcs -czvf $AppPkgName $joinedModules");	
-	} else {
-		my $tmpWorkspace = "$ENV{WORKSPACE}/_tmp";
-		my $dir4CollectPkgFiles = "$tmpWorkspace/$appName";
+	my $repos = $CiomData->{scm}->{repos};
+	my $includesCnt = $#{$includes} + 1;
+	my $reposCnt = $#{$repos} + 1;
+	my $repo0Name = $repos->[0]->{name};
+	my $include0 = $includes->[0];
 
-		$CiomUtil->exec("mkdir -p $dir4CollectPkgFiles; rm -rf $dir4CollectPkgFiles/*");
-		for (my $i = 0; $i <= $#{$includes}; $i++) {
-			my $fileRoot = getIncludeFileRoot($includes->[$i]);
-			$CiomUtil->exec("(cd $fileRoot; /bin/cp -Rf * $dir4CollectPkgFiles/)");
-		}
-		$CiomUtil->exec("(cd $tmpWorkspace; tar --exclude-vcs -czvf $ENV{WORKSPACE}/$AppPkgName $appName)");		
+	if ($include0 eq '*' 
+		&& $reposCnt == 1 
+		&& $repo0Name eq $appName) {
+		$CiomUtil->exec("tar --exclude-vcs -czvf $AppPkgFile * --exclude $Output");
+		
+		return;
 	}
 
-	$CiomUtil->exec("sha256sum $AppPkgName > $appName.sha256sum");
+	my $dir4Pkg = "$Output/$appName";
+	$CiomUtil->exec("mkdir -p $dir4Pkg");
+	if ($include0 eq '*') {
+		if ($reposCnt == 1) {
+			$CiomUtil->exec("rsync -avh $repo0Name/* $dir4Pkg/ --delete");
+		} else {
+			$CiomUtil->exec("rsync -avh --exclude $Output * $dir4Pkg/ --delete");
+		}
+	} else {
+		for (my $i = 0; $i < $includesCnt; $i++) {
+			my $fileRoot = getIncludeFileRoot($includes->[$i]);
+			$CiomUtil->exec("/bin/cp -Rf $fileRoot/* $dir4Pkg/");
+		}
+	}
+	$CiomUtil->exec("(cd $Output; tar --exclude-vcs -czvf $ENV{WORKSPACE}/$AppPkgFile $appName)");		
+}
+
+sub sumPkg() {
+	$CiomUtil->exec("sha256sum $AppPkgFile > $AppPkgSumFile");
 }
 
 sub putPkgToRepo() {
 	my $appRepoLocation = "$ENV{CIOM_REPO_LOCAL_PATH}/$version/$cloudId/";
 	$CiomUtil->exec("mkdir -p $appRepoLocation");
-	$CiomUtil->exec("/bin/cp -f $AppPkgName $appName.sha256sum $appRepoLocation");
+	$CiomUtil->exec("/bin/cp -f $AppPkgFile $AppPkgSumFile $appRepoLocation");
 }
 
 sub getRemoteWorkspace() {
@@ -250,14 +262,14 @@ sub getRemoteWorkspace() {
 }
 
 sub dispatch() {
-	my $method = Dive( $CiomData, qw( dispatch method )) || "push";
+	my $method = Dive( $CiomData, qw(dispatch method)) || "push";
 	
 	my $joinedHosts = join(',', @{$CiomData->{deploy}->{hosts}}) . ',';
 	my $remoteWrokspace = getRemoteWorkspace();
 	my $ansibleCmdPrefix = "ansible all -i $joinedHosts -u root";
 	$CiomUtil->exec("$ansibleCmdPrefix -m file -a \"path=$remoteWrokspace state=directory\"");
 	if ($method eq "push") {
-		$CiomUtil->exec("$ansibleCmdPrefix -m file -a \"src=$AppPkgName dest=$remoteWrokspace\"");
+		$CiomUtil->exec("$ansibleCmdPrefix -m file -a \"src=$AppPkgFile dest=$remoteWrokspace\"");
 	} else {
 		$CiomUtil->exec("$ansibleCmdPrefix -m get_url -a \"url=$AppPkgUrl dest=$remoteWrokspace\"");
 	}
@@ -279,15 +291,16 @@ sub getDeployAppPkgCmd($$) {
 
 sub backup() {
 	my $remoteWrokspace = getRemoteWorkspace();
+	my $baseFindCmd = "find $remoteWrokspace -name '${appName}.*.tar.gz' -mtime +15";
 	my $hosts = $CiomData->{deploy}->{hosts};
+
 	for (my $i = 0; $i <= $#{$hosts}; $i++) {
 		my $location = $CiomData->{deploy}->{locations}->[0];
-
 		$CiomUtil->remoteExec({
 			host => $hosts->[$i],
 			cmd => [
 				"cd $location; tar -czvf $remoteWrokspace/${appName}.${Timestamp}.tar.gz ${appName}; rm -rf ${appName}",
-				"find $remoteWrokspace -name '${appName}.*.*.tar.gz' -mtime +15 -delete"
+				"((( \$($baseFindCmd | wc -l) > 5 ))) && $baseFindCmd -delete"
 			]
 		});	
 	}
@@ -349,12 +362,14 @@ sub deploy() {
 
 sub main() {
 	enterWorkspace();
+	initWorkspace();
 	loadPlugin();
 	updateCode();
 	replaceCustomiedFiles();
 	streamedit();
 	build();
 	pkgApp();
+	sumPkg();
 	putPkgToRepo();
 	dispatch();
 	backup();

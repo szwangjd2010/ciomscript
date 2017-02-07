@@ -2,10 +2,15 @@
     "build": {
         "builder": "npm",
         "cmds": [
-            "cnpm install"
+            "(cd %AppRoot%; cnpm install;)"
         ],
         "pre": [],
         "post": []
+    },
+
+    "package": {
+        "includes": ["*"],
+        "excludes": []
     },
 
     "dispatch": {
