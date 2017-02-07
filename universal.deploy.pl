@@ -74,10 +74,15 @@ sub loadPlugin() {
 		}
 	}
 
-	mergePluginAndAppSetting("build");
-	mergePluginAndAppSetting("package");
-	mergePluginAndAppSetting("deploy");
-	mergePluginAndAppSetting("dispatch");
+	my $NeedToMergeSections = [
+		"build",
+		"package",
+		"deploy",
+		"dispatch"
+	];
+	foreach my $section (@{$NeedToMergeSections}) {
+		mergePluginAndAppSetting($section);
+	}
 }
 
 sub enterWorkspace() {
@@ -200,9 +205,14 @@ sub firstModuleName() {
 }
 
 sub build() {
-	runHierarchyCmds("build pre");
-	runHierarchyCmds("build cmds");
-	runHierarchyCmds("build post");
+	my $CmdsInHierarchys = [
+		"build pre",
+		"build cmds",
+		"build post"
+	];
+	foreach my $hierarchy (@{$CmdsInHierarchys}) {
+		runHierarchyCmds($hierarchy);
+	}
 }
 
 sub getIncludeFileRoot($) {
