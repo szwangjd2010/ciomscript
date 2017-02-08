@@ -1,8 +1,7 @@
 {
     "build": {
         "builder": "none",
-        "cmds": [
-        ],
+        "cmds": [],
         "pre": [],
         "post": []
     },

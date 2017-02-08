@@ -1,0 +1,83 @@
+/*
+ * file prefix name is the VCA setting AppType
+ *   example: vue, nodejs, 
+ * 
+ * %AppRoot%: ciomRoot.scm.repos[0].name
+ * 
+ * inlcudes 
+ *   ^: packaged files directory start point
+ * 
+ * dispatch
+ *   method:
+ *     pull: target machine pull app deployment package from ciom http repository
+ *     push: cp app package from ci master directly 
+ *
+ *
+ *
+ */
+
+minimal plugins definitions
+{
+    "build": {
+        "builder": "none",
+        "cmds": [],
+        "pre": [],
+        "post": []
+    },
+
+    "package": {
+        "includes": ["*"],
+        "excludes": []
+    },
+
+    "dispatch": {
+        "method": "pull",
+        "workspace": "/tmp/ciomworkspace/"
+    },
+
+    "deploy": {
+        "pre": [],
+        "cmds": [],
+        "post": []
+    }
+}
+
+
+Vue plugin definition
+{
+    "build": {
+        "builder": "npm",
+        "cmds": [
+            "(cd %AppRoot%; cnpm install; cnpm run build)"
+        ],
+        "pre": [],
+        "post": []
+    },
+
+    "package": {
+        "includes": [
+            "%AppRoot%/dist/^"
+        ],
+
+        "excludes": []
+    },
+
+    "dispatch": {
+        "method": "pull",
+        "workspace": "/tmp/ciomworkspace/"
+    },
+
+    "deploy": {
+        "owner": "apache",
+        "mode": "755",
+        
+        "pre": [],
+        "cmds": [],
+        "post": [],
+
+        "local": {
+            "pre": [],
+            "post": []
+        }
+    }
+}
