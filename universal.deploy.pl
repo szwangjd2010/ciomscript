@@ -3,6 +3,7 @@
 #
 use lib "$ENV{CIOM_SCRIPT_HOME}";
 use strict;
+use warnings;
 use English;
 use Data::Dumper;
 use Data::Diver qw( Dive DiveRef DiveError );
@@ -11,6 +12,7 @@ use Clone 'clone';
 use Template;
 use Cwd;
 use CiomUtil;
+use YAML::XS 'LoadFile';
 use JSON::Parse 'json_file_to_perl';
 use String::Escape 'escape';
 use open ":encoding(utf8)";
@@ -61,8 +63,7 @@ sub mergePluginAndAppSetting($) {
 }
 
 sub loadPlugin() {
-	$Plugin = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.ciom");
-	
+	$Plugin = LoadFile("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.yaml");
 	my $repo0Name = $CiomData->{scm}->{repos}->[0]->{name};
 	foreach my $sectionNameL1 qw(build package) {
 		foreach my $sectionNameL2 qw(pre cmds post includes excludes) {

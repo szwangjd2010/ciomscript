@@ -1,26 +1,25 @@
-{
-    "build": {
-        "builder": "npm",
-        "cmds": [
-            "(cd %AppRoot%; cnpm install;)"
-        ],
-        "pre": [],
-        "post": []
-    },
+---
+build:
+  builder: npm
+  cmds:
+    - "(cd %AppRoot%; cnpm install;)"
+  pre: []
+  post: []
 
-    "package": {
-        "includes": ["*"],
-        "excludes": []
-    },
+package:
+  includes:
+    - "*"
+  excludes: []
 
-    "dispatch": {
-        "method": "pull",
-        "workspace": "/tmp/ciomworkspace/"
-    },
+dispatch:
+  method: pull
+  workspace: "/tmp/ciomworkspace/"
 
-    "deploy": {
-        "pre": [],
-        "cmds": [],
-        "post": []
-    }
-}
+deploy:
+  pre: []
+  cmds: []
+  post: []
+
+  local:
+    pre: []
+    post: []

@@ -1,31 +1,26 @@
-{
-    "build": {
-        "builder": "none",
-        "cmds": [],
-        "pre": [],
-        "post": []
-    },
+---
+build:
+  builder: none
+  cmds: []
+  pre: []
+  post: []
 
-    "package": {
-        "includes": ["*"],
-        "excludes": []
-    },
+package:
+  includes:
+    - "*"
+  excludes: []
 
-    "dispatch": {
-        "method": "pull",
-        "workspace": "/tmp/ciomworkspace/"
-    },
+dispatch:
+  method: pull
+  workspace: "/tmp/ciomworkspace/"
 
-    "deploy": {
-        "mode": "755",
+deploy:
+  mode: '755'
 
-        "pre": [],
-        "cmds":[],
-        "post": [],
+  pre: []
+  cmds: []
+  post: []
 
-        "local": {
-            "pre": [],
-            "post": []
-        }
-    }
-}
+  local:
+    pre: []
+    post: []
