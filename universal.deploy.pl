@@ -63,7 +63,7 @@ sub mergePluginAndAppSetting($) {
 }
 
 sub loadPlugin() {
-	$Plugin = LoadFile("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.yaml");
+	$Plugin = LoadFile("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.ciom");
 	my $repo0Name = $CiomData->{scm}->{repos}->[0]->{name};
 	foreach my $sectionNameL1 qw(build package) {
 		foreach my $sectionNameL2 qw(pre cmds post includes excludes) {
