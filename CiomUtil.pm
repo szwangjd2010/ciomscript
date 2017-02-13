@@ -188,7 +188,7 @@ sub getTimestamp() {
 	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
 	return sprintf("%04d%02d%02d+%02d%02d%02d", 
 		$year + 1900,
-		$mon,
+		$mon + 1,
 		$mday,
 		$hour,
 		$min,
@@ -200,7 +200,7 @@ sub getDatestamp() {
 	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
 	return sprintf("%04d%02d%02d", 
 		$year + 1900,
-		$mon,
+		$mon + 1,
 		$mday);
 }
 

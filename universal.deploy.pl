@@ -62,16 +62,26 @@ sub mergePluginAndAppSetting($) {
 	$CiomData->{$section} = merge $Plugin->{$section}, $CiomData->{$section} || {};
 }
 
+sub instanceVarsInPlugin($) {
+	my $list = shift;
+	if (!defined($list)) {
+		return;
+	}
+	my $repo0Name = $CiomData->{scm}->{repos}->[0]->{name};
+	@{$list} = map {$_ =~ s|%AppRoot%|$repo0Name|g; $_;}  @{$list};
+}
+
 sub loadPlugin() {
 	$Plugin = LoadFile("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.yaml");
-	my $repo0Name = $CiomData->{scm}->{repos}->[0]->{name};
-	foreach my $sectionNameL1 qw(build package) {
-		foreach my $sectionNameL2 qw(pre cmds post includes excludes) {
-			my $list = $Plugin->{$sectionNameL1}->{$sectionNameL2};
-			if (!defined($list)) {
+	foreach my $sectionNameL1 qw(build package deploy) {
+		foreach my $sectionNameL2 qw(pre cmds post includes excludes local) {
+			if ($sectionNameL2 eq 'local') {
+				foreach my $sectionNameL3 qw(pre post) {
+					instanceVarsInPlugin($Plugin->{$sectionNameL1}->{$sectionNameL2}->{$sectionNameL3});
+				}
 				next;
 			}
-			@{$list} = map {$_ =~ s|%AppRoot%|$repo0Name|g; $_;}  @{$list};
+			instanceVarsInPlugin($Plugin->{$sectionNameL1}->{$sectionNameL2});
 		}
 	}
 
