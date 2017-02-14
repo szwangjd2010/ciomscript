@@ -1,6 +1,7 @@
 /*
  * file prefix name is the VCA setting AppType
- *   example: vue, nodejs, 
+ *   vue     -> AppType=vue
+ *   nodejs  -> AppType=nodejs
  * 
  * %AppRoot%: ciomRoot.scm.repos[0].name
  * 
@@ -10,7 +11,7 @@
  * dispatch
  *   method:
  *     pull: target machine pull app deployment package from ciom http repository
- *     push: cp app package from ci master directly 
+ *     push: copy app package to target machine from ci master directly 
  *
  *
  *
