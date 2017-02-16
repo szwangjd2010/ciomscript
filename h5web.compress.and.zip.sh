@@ -9,7 +9,7 @@ fi
 version=${1:-v1}
 deployToEnv=$2
 appName=$3
-skipGrunt=${4:-noskip}
+gruntType=${4:-noskip}
 deployType=${5:-h5web}
 
 AppPackageFile="$appName.zip"
@@ -23,10 +23,8 @@ leaveWorkspace() {
 }
 
 gruntCompress() {
-	if [ "$skipGrunt" != "skipgrunt" ]; then
-		if [ "$appName" == "mallh5mobile" ]; then
-            execCmd "grunt release"
-    	elif [ "$appName" == "mallh5mobile2" ]; then
+	if [ "$gruntType" != "skipgrunt" ]; then
+		if [ "$gruntType" == "gruntRelease" ]; then
     		execCmd "grunt release"
         else
             execCmd "grunt"

@@ -8,11 +8,31 @@ use Hash::Merge::Simple qw( merge );
 use Data::Dumper;
 
 
-	my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
-	print sprintf("%04d%02d%02d+%02d%02d%02d", 
-		$year + 1900,
-		$mon + 1,
-		$mday,
-		$hour,
-		$min,
-		$sec);
+sub escapeRe($) {
+	my $re = shift;
+	#single quotation enclosed by single quotation
+	$re =~ s/'/'"'"'/g;
+
+	#vertical bar 
+	$re =~ s/\|/\\|/g;	
+	return $re;
+}
+
+my $arr = [
+	{
+		re => "aaaRE'",
+		to => 'aaaTO|'
+	},
+	{
+		re => 'bbbRE|',
+		to => 'bbbTO|'
+	}
+
+];
+
+foreach my $vi (@{$arr}) {
+			$vi->{re} = escapeRe($vi->{re});
+			$vi->{to} = escapeRe($vi->{to});
+}
+
+print Dumper($arr);

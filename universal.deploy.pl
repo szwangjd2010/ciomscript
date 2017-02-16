@@ -6,13 +6,13 @@ use strict;
 use warnings;
 use English;
 use Data::Dumper;
-use Data::Diver qw( Dive DiveRef DiveError );
-use Hash::Merge::Simple qw( merge );
+use Data::Diver qw(Dive DiveRef DiveError);
+use Hash::Merge::Simple qw(merge);
 use Clone 'clone';
 use Template;
 use Cwd;
 use CiomUtil;
-use YAML::XS 'LoadFile';
+use YAML::XS qw(LoadFile DumpFile);
 use JSON::Parse 'json_file_to_perl';
 use String::Escape 'escape';
 use open ":encoding(utf8)";
@@ -43,6 +43,12 @@ my $Timestamp = $CiomUtil->getTimestamp();
 my $DynamicVars = {};
 my $StreameditTpl = "$ENV{CIOM_SCRIPT_HOME}/streamedit.sh.tpl";
 my $ShellStreamedit = "$Output/streamedit.ciom";
+my $Tpl = Template->new({
+	ABSOLUTE => 1,
+	TAG_STYLE => 'outline',
+	PRE_CHOMP  => 0,
+    POST_CHOMP => 0,
+});
 my $OldPwd = getcwd();
 
 sub getBuildLogFile() {
@@ -62,28 +68,27 @@ sub mergePluginAndAppSetting($) {
 	$CiomData->{$section} = merge $Plugin->{$section}, $CiomData->{$section} || {};
 }
 
-sub instanceVarsInPlugin($) {
-	my $list = shift;
-	if (!defined($list)) {
-		return;
-	}
-	my $repo0Name = $CiomData->{scm}->{repos}->[0]->{name};
-	@{$list} = map {$_ =~ s|%AppRoot%|$repo0Name|g; $_;}  @{$list};
+sub dumpCiomDataWithPluginInfo() {
+	DumpFile("$Output/ciom.yaml", $CiomData);
 }
 
 sub loadPlugin() {
-	$Plugin = LoadFile("$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.yaml");
-	foreach my $sectionNameL1 qw(build package deploy) {
-		foreach my $sectionNameL2 qw(pre cmds post includes excludes local) {
-			if ($sectionNameL2 eq 'local') {
-				foreach my $sectionNameL3 qw(pre post) {
-					instanceVarsInPlugin($Plugin->{$sectionNameL1}->{$sectionNameL2}->{$sectionNameL3});
-				}
-				next;
+	my $filePlugin = "$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.yaml";
+	my $fileAppPlugin = "$Output/${AppType}.yaml";
+
+	$CiomUtil->exec("/bin/cp -f $filePlugin $fileAppPlugin");
+	$CiomUtil->exec("perl -i -pE 's/%([\\w_]+)%/[% PluginVars.\\1 %]/g' $fileAppPlugin");
+	
+	$Tpl->process($fileAppPlugin, {
+			PluginVars => {
+				AppRoot => $CiomData->{scm}->{repos}->[0]->{name},
+				DeployLocation => $CiomData->{deploy}->{locations}->[0],
+				AppName => $appName
 			}
-			instanceVarsInPlugin($Plugin->{$sectionNameL1}->{$sectionNameL2});
-		}
-	}
+		}, $fileAppPlugin)
+        || die "Template process failed - 1: ", $Tpl->error(), "\n";
+
+	$Plugin = LoadFile($fileAppPlugin);
 
 	my $NeedToMergeSections = [
 		"build",
@@ -94,6 +99,8 @@ sub loadPlugin() {
 	foreach my $section (@{$NeedToMergeSections}) {
 		mergePluginAndAppSetting($section);
 	}
+
+	dumpCiomDataWithPluginInfo();
 }
 
 sub enterWorkspace() {
@@ -112,21 +119,24 @@ sub updateCode() {
 	my $repos = $CiomData->{scm}->{repos};
 	my $username = $CiomData->{scm}->{username};
 	my $password = $CiomData->{scm}->{password};
-	my $cnt = $#{$repos} + 1;
 
 	my $cmdSvnPrefix = "svn --non-interactive --username $username --password '$password'";
 	my $cmdRmUnversionedTpl = "$cmdSvnPrefix status %s | grep '^?' | awk '{print \$2}' | xargs -I{} rm -rf '{}'";
-	for (my $i = 0; $i < $cnt; $i++) {
-		my $name = $repos->[$i]->{name};
-		my $url = $repos->[$i]->{url};
+	
+	foreach my $repo (@{$repos}) {
+		my $name = $repo->{name};
+		my $url = $repo->{url};
 
 		if (! -d $name) {
 			$CiomUtil->exec("$cmdSvnPrefix co $url $name");
 		} else {
-			$CiomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
-			$CiomUtil->exec("$cmdSvnPrefix revert -R $name");
-			$CiomUtil->exec("$cmdSvnPrefix update $name");
-		}			
+			my $removeUnversionedCmd = sprintf($cmdRmUnversionedTpl, $name);
+			$CiomUtil->exec([
+				$removeUnversionedCmd,
+				"$cmdSvnPrefix revert -R $name",
+				"$cmdSvnPrefix update $name"
+			]);
+		}					
 	}
 }
 
@@ -150,42 +160,32 @@ sub escapeRe($) {
 sub transformReAndGatherDynamicVars() {
 	my $streameditItems = $CiomData->{streameditItems};
 	for my $file (keys %{$streameditItems}) {
-		my $v = $streameditItems->{$file};
-		my $cnt = $#{$v} + 1;
-		
-		for (my $i = 0; $i < $cnt; $i++) {
-			my $vi = $v->[$i];
-			$vi->{re} = escapeRe($vi->{re});
-			$vi->{to} = escapeRe($vi->{to});
-
-			if ($vi->{to} =~ m|<ciompm>([\w_]+)</ciompm>|) {
+		foreach my $substitute (@{$streameditItems->{$file}}) {
+			$substitute->{re} = escapeRe($substitute->{re});
+			$substitute->{to} = escapeRe($substitute->{to});
+			
+			if ($substitute->{to} =~ m|<ciompm>([\w_]+)</ciompm>|) {
 				$DynamicVars->{$1} = $ENV{"CIOMPM_$1"} || '';
 				#ciom dynamic variable to template directive
-				$vi->{to} =~ s|<ciompm>([\w_]+)</ciompm>|[% DynamicVars.$1 %]|g;
+				$substitute->{to} =~ s|<ciompm>([\w_]+)</ciompm>|[% DynamicVars.$1 %]|g;
 			}
-		}
+		}		
 	}
 }
 
 sub generateStreameditFile() {
 	transformReAndGatherDynamicVars();
 
-	my $template = Template->new({
-		ABSOLUTE => 1,
-		TAG_STYLE => 'outline',
-		PRE_CHOMP  => 0,
-	    POST_CHOMP => 0,
-	});
-
 	my $firstOut =  "${ShellStreamedit}.0";
 	# instance stream edit items
-	$template->process($StreameditTpl, {files => $CiomData->{streameditItems}}, $firstOut)
-        || die "Template process failed - 0: ", $template->error(), "\n";
+	$Tpl->process($StreameditTpl, {files => $CiomData->{streameditItems}}, $firstOut)
+        || die "Template process failed - 0: ", $Tpl->error(), "\n";
     $CiomUtil->exec("cat $firstOut");
 
     # instance dynamic variables
-	$template->process($firstOut, {DynamicVars => $DynamicVars}, $ShellStreamedit)
-        || die "Template process failed - 1: ", $template->error(), "\n";
+	$Tpl->process($firstOut, {DynamicVars => $DynamicVars}, $ShellStreamedit)
+        || die "Template process failed - 1: ", $Tpl->error(), "\n";
+
     $CiomUtil->exec("cat $ShellStreamedit");
 }
 
@@ -313,17 +313,17 @@ sub getDeployAppPkgCmd($$) {
 sub backup() {
 	my $remoteWrokspace = getRemoteWorkspace();
 	my $baseFindCmd = "find $remoteWrokspace -name '${appName}.*.tar.gz' -mtime +15";
+	my $location = $CiomData->{deploy}->{locations}->[0];
 	my $hosts = $CiomData->{deploy}->{hosts};
 
-	for (my $i = 0; $i <= $#{$hosts}; $i++) {
-		my $location = $CiomData->{deploy}->{locations}->[0];
+	foreach my $host (@{$hosts}) {
 		$CiomUtil->remoteExec({
-			host => $hosts->[$i],
+			host => $host,
 			cmd => [
 				"cd $location; tar -czvf $remoteWrokspace/${appName}.${Timestamp}.tar.gz ${appName}; rm -rf ${appName}",
 				"((( \$($baseFindCmd | wc -l) > 5 ))) && $baseFindCmd -delete"
 			]
-		});	
+		});
 	}
 }
 
@@ -354,11 +354,9 @@ sub deploy() {
 
 	my $owner = Dive($CiomData, qw(deploy owner)) || '';
 	my $mode = Dive($CiomData, qw(deploy mode)) || '';
+	my $locations = $CiomData->{deploy}->{locations};
 	my $hosts = $CiomData->{deploy}->{hosts};
-	for (my $i = 0; $i <= $#{$hosts}; $i++) {
-		my $host = $hosts->[$i];
-		my $locations = $CiomData->{deploy}->{locations};
-
+	foreach my $host (@{$hosts}) {
 		runHierarchyCmds("deploy pre", $host);
 
 		for (my $j = 0; $j <= $#{$locations}; $j++) {

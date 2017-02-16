@@ -21,7 +21,7 @@ deploy:
   pre: []
   cmds: []
   post:
-    - systemctl restart httpd
+    - touch %DeployLocation%/%AppName%/config/wsgi.py
   
   local:
     pre: []
