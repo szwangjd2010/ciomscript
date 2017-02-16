@@ -72,6 +72,12 @@ sub dumpCiomDataWithPluginInfo() {
 	DumpFile("$Output/ciom.yaml", $CiomData);
 }
 
+sub instantiationTemplate {
+	my ($in, $data, $out) = @_;
+	$Tpl->process($in, $data, $out) 
+		|| die "Template process failed: ", $Tpl->error(), "\n";	
+}
+
 sub loadPlugin() {
 	my $filePlugin = "$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.yaml";
 	my $fileAppPlugin = "$Output/${AppType}.yaml";
@@ -79,14 +85,13 @@ sub loadPlugin() {
 	$CiomUtil->exec("/bin/cp -f $filePlugin $fileAppPlugin");
 	$CiomUtil->exec("perl -i -pE 's/%([\\w_]+)%/[% PluginVars.\\1 %]/g' $fileAppPlugin");
 	
-	$Tpl->process($fileAppPlugin, {
-			PluginVars => {
+	instantiationTemplate($fileAppPlugin, 
+			{PluginVars => {
 				AppRoot => $CiomData->{scm}->{repos}->[0]->{name},
 				DeployLocation => $CiomData->{deploy}->{locations}->[0],
 				AppName => $appName
-			}
-		}, $fileAppPlugin)
-        || die "Template process failed - 1: ", $Tpl->error(), "\n";
+			}}, 
+			$fileAppPlugin);
 
 	$Plugin = LoadFile($fileAppPlugin);
 
@@ -177,15 +182,10 @@ sub generateStreameditFile() {
 	transformReAndGatherDynamicVars();
 
 	my $firstOut =  "${ShellStreamedit}.0";
-	# instance stream edit items
-	$Tpl->process($StreameditTpl, {files => $CiomData->{streameditItems}}, $firstOut)
-        || die "Template process failed - 0: ", $Tpl->error(), "\n";
+	instantiationTemplate($StreameditTpl, {files => $CiomData->{streameditItems}}, $firstOut);
     $CiomUtil->exec("cat $firstOut");
-
-    # instance dynamic variables
-	$Tpl->process($firstOut, {DynamicVars => $DynamicVars}, $ShellStreamedit)
-        || die "Template process failed - 1: ", $Tpl->error(), "\n";
-
+    
+    instantiationTemplate($firstOut, {DynamicVars => $DynamicVars}, $ShellStreamedit);
     $CiomUtil->exec("cat $ShellStreamedit");
 }
 
@@ -195,7 +195,7 @@ sub streamedit() {
 }
 
 sub runHierarchyCmds {
-	my ( $hierarchyCmds, $host ) = @_;
+	my ($hierarchyCmds, $host) = @_;
 	my $cmds = Dive($CiomData, split(' ', $hierarchyCmds));
 	if (!defined($cmds)) {
 		return;
