@@ -43,13 +43,13 @@ my $Timestamp = $CiomUtil->getTimestamp();
 my $DynamicVars = {};
 my $StreameditTpl = "$ENV{CIOM_SCRIPT_HOME}/streamedit.sh.tpl";
 my $ShellStreamedit = "$Output/streamedit.ciom";
-my $Tpl = Template->new({
-	ABSOLUTE => 1,
-	TAG_STYLE => 'outline',
-	PRE_CHOMP  => 0,
-    POST_CHOMP => 0,
-});
 my $OldPwd = getcwd();
+my $Tpl = Template->new({
+		ABSOLUTE => 1,
+		TAG_STYLE => 'outline',
+		PRE_CHOMP  => 0,
+	    POST_CHOMP => 0
+	});
 
 sub getBuildLogFile() {
 	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
