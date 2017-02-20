@@ -51,8 +51,7 @@ setAppContextName() {
 }
 
 preDeployApp() {
-	stopTomcats $host $port $tomcatParent
-	sleep 3
+	
 }
 
 removeCatalinaLog() {
@@ -60,8 +59,7 @@ removeCatalinaLog() {
 }
 
 postDeployApp() {
-	removeCatalinaLog
-	startTomcats $host $port $tomcatParent
+	
 }
 
 main() {
