@@ -57,38 +57,13 @@ sub uploadDockerfile() {
 	$ciomUtil->upload($DockerFile,"$Cloud->{dockerHost}:$webappsParent");
 }
 
-sub startContainerFromBaseImage(){
-	$SshInfo->{cmd} = "docker run -idt --name=$baseContainerName $Cloud->{baseImage} /bin/bash"; 
-	$ciomUtil->remoteExec($SshInfo);
-}
-
-sub copyWebappsToContainer(){
-	my $getContainerIdCmd = "cid=\$\(docker inspect -f \'\{\{.Id\}\}\' $baseContainerName\)";
-	my $dockerRootfs = "/var/lib/docker/devicemapper/mnt/\$cid/rootfs/data/ws-1/webapps";
-	my $copyWebappsCmd = "";
-	if ( $asRoot eq 'ROOT'){
-		$copyWebappsCmd = "cp -r $webappsParent/webapps/ROOT $dockerRootfs/";
-	} else {
-		$copyWebappsCmd = "cp -r $webappsParent/webapps/$appName $dockerRootfs/";
-	}
-	$SshInfo->{cmd} = "( $getContainerIdCmd; $copyWebappsCmd)"; 
-	$ciomUtil->remoteExec($SshInfo);
-	#$ciomUtil->exec("echo \$\_");
-}
-
 sub createAppImageWithDockerfile(){
 	$SshInfo->{cmd} = "(cd $webappsParent; docker build -t $Cloud->{appImage} .)";
 	$ciomUtil->remoteExec($SshInfo);
 }
 
 sub commitAppImage() {
-	#$SshInfo->{cmd} = "(docker commit $baseContainerName $Cloud->{appImage}; docker push $Cloud->{appImage})";
 	$SshInfo->{cmd} = "docker push $Cloud->{appImage}";
-	$ciomUtil->remoteExec($SshInfo);
-}
-
-sub stopContainerFromBaseImage(){
-	$SshInfo->{cmd} = "(docker stop $baseContainerName ; docker rm $baseContainerName)"; 
 	$ciomUtil->remoteExec($SshInfo);
 }
 
@@ -99,16 +74,11 @@ sub cleanUselessImages(){
 }
 
 sub main() {
-	#enterWorkspace();
 	dispatchAppToTomcatHost();
 	uploadDockerfile();
-	##startContainerFromBaseImage();
-	##copyWebappsToContainer();
 	createAppImageWithDockerfile();
 	commitAppImage();
-	##stopContainerFromBaseImage();
 	cleanUselessImages();
-	##leaveWorkspace();
 }
 
 main();
