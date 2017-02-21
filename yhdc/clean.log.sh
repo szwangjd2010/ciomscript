@@ -125,7 +125,7 @@ clean() {
 		if [ "$LogTypes" == "event" ]; then
 			cleanEventLog $fileOperated
 		fi
-		if [ "$LogTypes" == "action access" ]; then
+		if [ "$LogTypes" == "action" ]; then
 			cleanActionAccessLog $fileOperated
 		fi
 		if [ "$LogTypes" == "error" ]; then

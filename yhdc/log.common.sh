@@ -1,6 +1,6 @@
 #!/bin/bash
 # 
-logMetainfoFile=$CIOM_SCRIPT_HOME/yhdc/${1:-action.access.metainfo}
+logMetainfoFile=$CIOM_SCRIPT_HOME/yhdc/${1:-action.metainfo}
 yesterday=$(date -d "1 days ago" +%04Y%02m%02d)
 begin=${2:-$yesterday}
 end=${3:-$yesterday}
