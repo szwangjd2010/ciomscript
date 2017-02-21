@@ -9,8 +9,10 @@ setMode() {
 }
 
 execCmd() {
+	cmd=$1
+	run=${2:-0}
 	echo "$1" | tee -a $LOG
-	if [ $RUN_MODE -eq 1 ]; then
+	if [ $RUN_MODE -eq 1 ] || [ $run -eq 1 ]; then
 		eval $1
 	fi
 }
