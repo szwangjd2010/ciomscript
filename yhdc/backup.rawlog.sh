@@ -24,14 +24,21 @@ backupLog() {
 	cat $logFileList | while read logFile; do
 		logFileName=$(echo $logFile | grep -oP '(?<=/)[^/]+(?=$)')
 		ym=$(echo $logFileName | grep -oP '(?<=\.)[\d]{6}(?=\.|\d)')
-		if [ -f $ym/$logFileName ]; then
-			echo "$ym/$logFileName already exist!"
+		logFile="$ym/$logFileName"
+		if [ -f $logFile ] || [ -f ${logFile}.tgz ]; then
+			echo "$logFile already exist!"
 			continue
 		fi
 
 		execCmd "$HDFS dfs -get $logFile $ym/"
-		execCmd "tar -czvf compressed/$ym/$logFileName.tgz $ym/$logFileName"
+		execCmd "tar -czvf ${logFile}.tgz $logFile"
+		execCmd "rm -rf $logFile"
 	done		
+}
+
+clearDailyLog() {
+	 ym=$1
+	 execCmd "find $ym/ -name '*.all-instances.log.tgz' -delete"
 }
 
 main() {
@@ -48,10 +55,11 @@ main() {
 		ym=$(date -d "$iday" +%Y%m)
 		ymOneMonthAgo=$(date -d "$iday -1 month" +%Y%m)
 		execCmd "mkdir -p $ym $ymOneMonthAgo"
-		execCmd "mkdir -p compressed/$ym compressed/$ymOneMonthAgo"
 
 		execCmd "$HDFS dfs -find /raw -name '*.$ymOneMonthAgo.log' > monthly.list" 1
 		backupLog "monthly.list"
+
+		clearDailyLog $ymOneMonthAgo
 		
 		execCmd "$HDFS dfs -find /raw -name '*.$ymd.all-instances.log' > daily.list" 1
 		backupLog "daily.list"

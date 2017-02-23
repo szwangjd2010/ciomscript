@@ -145,7 +145,7 @@ sub updateCode() {
 	}
 }
 
-sub replaceCustomiedFiles() {
+sub replaceCustomizedFiles() {
 	my $customizedFilesLocation = "$AppVcaHome/customized/";
 	if ( -d $customizedFilesLocation) {
 		$CiomUtil->exec("/bin/cp -rf $customizedFilesLocation/* ./");
@@ -384,7 +384,7 @@ sub main() {
 	initWorkspace();
 	loadPlugin();
 	updateCode();
-	replaceCustomiedFiles();
+	replaceCustomizedFiles();
 	streamedit();
 	build();
 	pkgApp();

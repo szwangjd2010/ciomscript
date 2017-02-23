@@ -122,13 +122,14 @@ clean() {
 		fi
 
 		itemTotalCost=0
-		if [ "$LogTypes" == "event" ]; then
+
+		if [[ "$LogTypes" =~ .*event.* ]]; then
 			cleanEventLog $fileOperated
 		fi
-		if [ "$LogTypes" == "action" ]; then
+		if [[ "$LogTypes" =~ .*action.* ]]; then
 			cleanActionAccessLog $fileOperated
 		fi
-		if [ "$LogTypes" == "error" ]; then
+		if [[ "$LogTypes" =~ .*error.* ]]; then
 			truncateLog4jPrefix $fileOperated
 		fi
 		
