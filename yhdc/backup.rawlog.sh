@@ -59,10 +59,10 @@ main() {
 		execCmd "$HDFS dfs -find /raw -name '*.$ymOneMonthAgo.log' > monthly.list" 1
 		backupLog "monthly.list"
 
-		clearDailyLog $ymOneMonthAgo
-		
 		execCmd "$HDFS dfs -find /raw -name '*.$ymd.all-instances.log' > daily.list" 1
 		backupLog "daily.list"
+		
+		clearDailyLog $ymOneMonthAgo
 	done
 
 	leaveWorkspace
