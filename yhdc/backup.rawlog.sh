@@ -24,15 +24,15 @@ backupLog() {
 	cat $logFileList | while read logFile; do
 		logFileName=$(echo $logFile | grep -oP '(?<=/)[^/]+(?=$)')
 		ym=$(echo $logFileName | grep -oP '(?<=\.)[\d]{6}(?=\.|\d)')
-		logFile="$ym/$logFileName"
-		if [ -f $logFile ] || [ -f ${logFile}.tgz ]; then
-			echo "$logFile already exist!"
+		localLogFile="$ym/$logFileName"
+		if [ -f $localLogFile ] || [ -f ${localLogFile}.tgz ]; then
+			echo "$localLogFile already exist!"
 			continue
 		fi
 
 		execCmd "$HDFS dfs -get $logFile $ym/"
-		execCmd "tar -czvf ${logFile}.tgz $logFile"
-		execCmd "rm -rf $logFile"
+		execCmd "tar -czvf ${localLogFile}.tgz $localLogFile"
+		execCmd "rm -rf $localLogFile"
 	done		
 }
 
