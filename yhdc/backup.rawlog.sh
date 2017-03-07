@@ -9,10 +9,12 @@ end=${2:-$yesterday}
 
 HDFS='/opt/hadoop-2.7.1/bin/hdfs'
 Port='/cloud.storage.port/rawlog'
+Workspace='/sdc/rawlog.backup.ws'
+
 OldPwd=$(pwd)
 
 enterWorkspace() {
-	execCmd "cd $Port"
+	execCmd "cd $Workspace"
 }
 
 leaveWorkspace() {
@@ -25,20 +27,22 @@ backupLog() {
 		logFileName=$(echo $logFile | grep -oP '(?<=/)[^/]+(?=$)')
 		ym=$(echo $logFileName | grep -oP '(?<=\.)[\d]{6}(?=\.|\d)')
 		localLogFile="$ym/$logFileName"
-		if [ -f $localLogFile ] || [ -f ${localLogFile}.tgz ]; then
-			echo "$localLogFile already exist!"
+		localLogFileInPort=" $Port/$localLogFile"
+		if [ -f $localLogFileInPort ] || [ -f ${localLogFileInPort}.tgz ]; then
+			echo "$localLogFileInPort already exist!"
 			continue
 		fi
 
 		execCmd "$HDFS dfs -get $logFile $ym/"
 		execCmd "tar -czvf ${localLogFile}.tgz $localLogFile"
-		execCmd "rm -rf $localLogFile"
+		execCmd "cp --parents ${localLogFile}.tgz $Port/"
+		execCmd "rm -rf $localLogFile  ${localLogFile}.tgz"
 	done		
 }
 
 clearDailyLog() {
 	 ym=$1
-	 execCmd "find $ym/ -name '*.all-instances.log.tgz' -delete"
+	 execCmd "find $Port/$ym/ -name '*.all-instances.log.tgz' -delete"
 }
 
 main() {

@@ -95,7 +95,9 @@ sub moveApppkgFile($) {
 	}
 
 	#$ciomUtil->exec("mv -f $builtApkFile $ApppkgPath/$appFinalPkgName");
+	$ciomUtil->exec("date");
 	$ciomUtil->exec("scp $SshInfo->{user}\@$SshInfo->{host}:$builtApkFile $ApppkgPath/$appFinalPkgName");
+	$ciomUtil->exec("date");
 }
 
 sub cleanAfterOrgBuild() {

@@ -2,14 +2,23 @@
 #
 source $CIOM_SCRIPT_HOME/yhdc/log.common.sh "$@"
 
+Only_Pull_Defined_Products=${4:-'all'}
 Flag_Force_Repull=0
 
 pullLog() {
 	hosts=$1
 	localLogYmdLocation=$2
+
 	reLogTypes=$LogTypes
 	reLogTypes=${reLogTypes// /\|}
 	joinedLogTypes=${LogTypes// /+}
+
+	reProducts='\w+'
+	if [ $Only_Pull_Defined_Products = 'OnlyPullDefinedProducts' ];then
+		reProducts=$Products
+		reProducts=${Products// /\|}
+	fi
+
 	for host in $hosts; do
 		echo -n "pull $host logs ... "
 		localHostLogLocation=$localLogYmdLocation/$host
@@ -25,7 +34,7 @@ pullLog() {
 			cd $LogRoot; \
 			mkdir -p tmp; \
 			rm -rf ./tmp/$logTgzFile; \
-			find -regextype posix-extended -regex '.*/\w+_($reLogTypes).$ymd.log' > ./tmp/_pulllog; \
+			find -regextype posix-extended -regex '.*/($reProducts)_($reLogTypes).$ymd.log' > ./tmp/_pulllog; \
 			tar -czvf ./tmp/$logTgzFile --files-from ./tmp/_pulllog;\
 		"
 		scp root@$host:$LogRoot/tmp/$logTgzFile ${localHostLogLocation}/
