@@ -1,0 +1,7 @@
+env: ucloud
+logs: action
+logroot: /data
+loglocalroot: /sdc/ciompub
+
+#qida
+10.10.125.17

@@ -1,0 +1,14 @@
+/raw/actionlog/lecai_action.20170220.all-instances.log
+/raw/actionlog/mall_action.20170220.all-instances.log
+/raw/actionlog/qida_action.20170220.all-instances.log
+/raw/actionlog/wangxiao_action.20170220.all-instances.log
+/raw/errorlog/lecai_error.20170220.all-instances.log
+/raw/errorlog/mall_error.20170220.all-instances.log
+/raw/errorlog/qida_error.20170220.all-instances.log
+/raw/errorlog/wangxiao_error.20170220.all-instances.log
+/raw/eventlog/componentapi_event.20170220.all-instances.log
+/raw/eventlog/lecaiadminapi_event.20170220.all-instances.log
+/raw/eventlog/lecaiapi_event.20170220.all-instances.log
+/raw/eventlog/malladminapi_event.20170220.all-instances.log
+/raw/eventlog/mallapi_event.20170220.all-instances.log
+/raw/eventlog/qidaapi_event.20170220.all-instances.log

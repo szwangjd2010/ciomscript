@@ -1,0 +1,21 @@
+    #log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    #                  '$status $body_bytes_sent "$http_referer" '
+    #                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+
+
+logformat yxtlf_1 [$time_local] $remote_addr $status $request $args $upstream_addr 
+$request_time $upstream_response_time 
+$request_length $request_body $bytes_sent $body_bytes_sent  
+$http_referer $http_user_agent $http_x_forwarded_for;
+
+
+    log_format yxt_lf_1 '[$time_local] $remote_addr $status $request $upstream_addr '
+                      '$request_time $upstream_response_time '
+                      '$request_length $request_body $bytes_sent $body_bytes_sent '
+                      '$http_referer $http_user_agent $http_x_forwarded_for';
+
+    log_format yxt_lf_1 '[$time_local]	$remote_addr $status	$request $upstream_addr	'
+                      '$request_time	$upstream_response_time	'
+                      '$request_length	$request_body	$body_bytes_sent	$body_bytes_sent	'
+                      '$http_referer	$http_user_agent	$http_x_forwarded_for';                   
