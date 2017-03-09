@@ -2,7 +2,6 @@
 #
 source $CIOM_SCRIPT_HOME/yhdc/log.common.sh "$@"
 
-Only_Pull_Defined_Products=${4:-'all'}
 Flag_Force_Repull=0
 
 pullLog() {
@@ -14,10 +13,8 @@ pullLog() {
 	joinedLogTypes=${LogTypes// /+}
 
 	reProducts='\w+'
-	if [ $Only_Pull_Defined_Products = 'OnlyPullDefinedProducts' ];then
-		reProducts=$Products
-		reProducts=${Products// /\|}
-	fi
+	reProducts=$Products
+	reProducts=${reProducts// /\|}
 
 	for host in $hosts; do
 		echo -n "pull $host logs ... "
