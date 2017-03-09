@@ -2,10 +2,10 @@ Products: [
 	"qida",
 	"mall",
 	"wangxiao",
-	"lecai"
+	"lecai",
+	"crm"
 ],
 
 LogTypes: [
-	"action",
-	"access"
+	"action"
 ]
