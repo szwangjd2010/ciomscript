@@ -1,12 +1,16 @@
-Products: [
-	"lecaiapi",
-	"lecaiadminapi",
-	"mallapi",
-	"malladminapi",
-	"qidaapi",
-	"componentapi"
-],
+{
+	AddDropTableDDL: 0,
 
-LogTypes: [
-	"event"
-]
+	Products: [
+		"lecaiapi",
+		"lecaiadminapi",
+		"mallapi",
+		"malladminapi",
+		"qidaapi",
+		"componentapi"
+	],
+
+	LogTypes: [
+		"event"
+	]
+}

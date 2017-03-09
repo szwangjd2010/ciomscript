@@ -1,11 +1,15 @@
-Products: [
-	"qida",
-	"mall",
-	"wangxiao",
-	"lecai",
-	"crm"
-],
+{
+	AddDropTableDDL: 0,
 
-LogTypes: [
-	"action"
-]
+	Products: [
+		"qida",
+		"mall",
+		"wangxiao",
+		"lecai",
+		"crm"
+	],
+
+	LogTypes: [
+		"action"
+	]
+}
