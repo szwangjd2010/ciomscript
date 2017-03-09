@@ -8,13 +8,9 @@ pullLog() {
 	hosts=$1
 	localLogYmdLocation=$2
 
-	reLogTypes=$LogTypes
-	reLogTypes=${reLogTypes// /\|}
+	reProducts=${Products// /\|}
+	reLogTypes=${LogTypes// /\|}
 	joinedLogTypes=${LogTypes// /+}
-
-	reProducts='\w+'
-	reProducts=$Products
-	reProducts=${reProducts// /\|}
 
 	for host in $hosts; do
 		echo -n "pull $host logs ... "
