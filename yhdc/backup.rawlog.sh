@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 source $CIOM_SCRIPT_HOME/ciom.util.sh
 setMode 1
