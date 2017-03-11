@@ -51,7 +51,7 @@ setAppContextName() {
 }
 
 preDeployApp() {
-	
+	true	
 }
 
 removeCatalinaLog() {
@@ -59,7 +59,7 @@ removeCatalinaLog() {
 }
 
 postDeployApp() {
-	
+	true
 }
 
 main() {
