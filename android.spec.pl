@@ -22,7 +22,7 @@ sub globalPreAction() {}
 sub globalPostAction() {}
 
 sub preAction() {
-	$SshInfo->{cmd} = "mkdir -p $WsRoot/$DistInfo->{distInfo}->[$executorIdx]->{workspace}";
+	$SshInfo->{cmd} = "mkdir -p $WsRoot/$cloudId/$Ws";
 	$SshInfo->{host} = getCiomHost();
 	$ciomUtil->remoteExec($SshInfo);
 }
@@ -41,14 +41,14 @@ sub getCiSlaveId($) {
 sub resyncSourceCode() {	
 	logBuildingStatus(0,"=== Start sync SourceCode to android build salve$distDetail->{slaveid}, ws$distDetail->{wsid} ===");
 	my $codeSrc = "$ENV{WORKSPACE}/$Ws/$appName";
-	my $codeDst = "$WsRoot/$Ws/";
+	my $codeDst = "$WsRoot/$cloudId/$Ws/";
 	$ciomUtil->exec("rsync -rlptoDz --exclude .svn --delete --force $codeSrc $SshInfo->{user}\@$SshInfo->{host}:$codeDst");
 	logBuildingStatus(0,"=== end sync SourceCode to android build salve ===");
 }
 
 sub gradleBuild() {
 	my $cmdGradleBuild = "gradle -b $BuildInfo->{location}/$BuildInfo->{file} $BuildInfo->{target}";
-	my $cmd2Workspace = "cd $WsRoot/$Ws/$appName";
+	my $cmd2Workspace = "cd $WsRoot/$cloudId/$Ws/$appName";
 	$SshInfo->{cmd} = "( $cmd2Workspace; $cmdGradleBuild )";
 	$SshInfo->{host} = getCiomHost();
 	logBuildingStatus(0,"=== Start remote execute build with gradle ===");
@@ -91,7 +91,7 @@ sub moveApppkgFile($) {
 	if ($BuildInfo->{builder} eq 'ant') {
 		#$builtApkFile = "/tmp/ciom.android/$appName/$BuildInfo->{location}-release.apk";
 	} else {
-		$builtApkFile = "$WsRoot/$Ws/$appName/$BuildInfo->{location}/build/outputs/apk/$BuildInfo->{packagePrefix}-release.apk";
+		$builtApkFile = "$WsRoot/$cloudId/$Ws/$appName/$BuildInfo->{location}/build/outputs/apk/$BuildInfo->{packagePrefix}-release.apk";
 	}
 
 	#$ciomUtil->exec("mv -f $builtApkFile $ApppkgPath/$appFinalPkgName");
