@@ -21,6 +21,7 @@ our $cloudId = $ARGV[1]; #$cloudId, should be "andriod[.*]", "ios[.*]"
 our $appName = $ARGV[2];
 our $orgCodes = $ARGV[3] || '*';
 our $doUpload = $ENV{UploadPackage} || 'NO';
+our $doUpload2Pgyer = $ENV{UploadToPgyer} || 'NO';
 
 our $ciomUtil = new CiomUtil(1);
 our $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
@@ -181,6 +182,7 @@ sub initialDistInfo(){
 	$DistInfo->{appName} = $appName;
 	$DistInfo->{appVcaHome} = $AppVcaHome;
 	$DistInfo->{doUpload} = $doUpload;
+	$DistInfo->{doUpload2Pgyer} = $doUpload2Pgyer;
 	$DistInfo->{version} = $version;
 	$DistInfo->{cloudId} = $cloudId;
 	$DistInfo->{dynamicParams} = $DynamicParams;

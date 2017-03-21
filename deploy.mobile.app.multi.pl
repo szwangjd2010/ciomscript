@@ -30,6 +30,7 @@ our $Platform = "";
 our $AppVcaHome = "";
 our $CiomData = {};
 our $doUpload = "";
+our $doUpload2Pgyer = "";
 our $distDetail = {};
 our $DynamicParams ={};
 our $appName = "";
@@ -46,6 +47,7 @@ sub intialGlobalVars(){
 	$AppVcaHome = $DistInfo->{appVcaHome};
 	$CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
 	$doUpload = $DistInfo->{doUpload};
+	$doUpload2Pgyer = $DistInfo->{doUpload2Pgyer};
 	$distDetail = $DistInfo->{distInfo}->[$executorIdx];
 	$DynamicParams = $DistInfo->{dynamicParams};
 	$appName = $DistInfo->{appName};
@@ -103,6 +105,30 @@ sub updateCode($) {
 				$ciomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
 				$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
 				$ciomUtil->exec("$cmdSvnPrefix update $name");
+			}			
+		}
+	}
+}
+
+sub updateCodeWithGit() {
+	my $doRevert = shift || 0;
+	my $repos = $CiomData->{scm}->{repos};
+	my $cnt = $#{$repos} + 1;
+	for (my $i = 0; $i < $cnt; $i++) {
+		my $name = $repos->[$i]->{name};
+		my $url = $repos->[$i]->{url};
+
+		if ($doRevert == 1) {
+			$ciomUtil->exec("cd $name");
+			$ciomUtil->exec("git checkout . && git clean -xdf");
+			$ciomUtil->exec("cd ..");
+		} else {
+			if (! -d $name) {
+				$ciomUtil->exec("git clone $url $name");
+			} else {
+				$ciomUtil->exec("cd $name");
+				$ciomUtil->exec("git checkout . && git clean -xdf");
+				$ciomUtil->exec("cd ..");
 			}			
 		}
 	}
@@ -262,7 +288,6 @@ sub clearBuilingLog() {
 }
 
 sub buildOrgs() {
-	my @childs;
 	my $need2BuildOrgCodes = $distDetail->{needToBuildOrgCodes};
 	my $cnt = $#{$need2BuildOrgCodes} + 1;
 	clearBuilingLog();
@@ -282,31 +307,19 @@ sub buildOrgs() {
 		}
 		cleanAfterOrgBuild();
 		moveApppkgFile($code);
-		if ($doUpload eq 'YES' ) {
-			my $pid = fork();
-			if (!defined($pid)) {
-        		print "Error in fork for uploadOrgPkgs: $!";
-        		exit 1;
-    		}
-                                  
-    		if ($pid == 0) {
-    			#print "Child $i$j : My pid = $$\n";
-				uploadOrgPkgs($code);
-        		#print "Child $i$j : end\n";
-        		exit 0;
-        	}
-        	else {
-        		push(@childs, $pid);
-        	}
-		}
+		uploadPackage($code);
 		logBuildingStatus(1,"###############Finish building org <$code> on executor${executorIdx}###############\n");
 		logBuildFinishedOrgs($code);
 	}
+}
 
+sub uploadPackage($) {
+	my $code = shift;
 	if ($doUpload eq 'YES' ) {
-		foreach (@childs) {
-			waitpid($_, 0);
-		}
+		uploadOrgPkg($code);
+	}
+	if ($doUpload2Pgyer eq 'YES') {
+		uploadPkgs2Pgyer($code);
 	}
 }
 
@@ -319,7 +332,7 @@ sub getUploadRemoteURI() {
 	return "$user\@$ip:/$path/";
 }
 
-sub uploadOrgPkgs($) {
+sub uploadOrgPkg($) {
 	my $code = shift;
 
 	if (!defined($CiomData->{publishto})) {
@@ -338,6 +351,19 @@ sub uploadAllPkgs() {
 
 	my $remoteURI = getUploadRemoteURI();
 	$ciomUtil->exec("scp -r $ApppkgPath/* $remoteURI");
+}
+
+sub uploadPkgs2Pgyer($) {
+	my $code = shift;
+	if (!defined($CiomData->{pgyer})) {
+		return;
+	}
+	my $appKey = $CiomData->{pgyer}->{appKey};
+	my $userKey = $CiomData->{pgyer}->{userKey};
+	my $uploadApiUrl = $CiomData->{pgyer}->{uploadApiUrl};
+	my $pkgName = getAppFinalPkgName($code);
+	my $uploadCmd = "curl -F \"file=\@$ApppkgPath/$pkgName\" -F \"_api_key=$appKey\" -F \"uKey=$userKey\" $uploadApiUrl";
+	$ciomUtil->exec("$uploadCmd");
 }
 
 sub main() {
