@@ -18,21 +18,27 @@ sub escapeRe($) {
 	return $re;
 }
 
-my $arr = [
-	{
-		re => "aaaRE'",
-		to => 'aaaTO|'
-	},
-	{
-		re => 'bbbRE|',
-		to => 'bbbTO|'
+sub main1() {
+	my $arr = [
+		{
+			re => "aaaRE'",
+			to => 'aaaTO|'
+		},
+		{
+			re => 'bbbRE|',
+			to => 'bbbTO|'
+		}
+
+	];
+
+	foreach my $vi (@{$arr}) {
+				$vi->{re} = escapeRe($vi->{re});
+				$vi->{to} = escapeRe($vi->{to});
 	}
 
-];
-
-foreach my $vi (@{$arr}) {
-			$vi->{re} = escapeRe($vi->{re});
-			$vi->{to} = escapeRe($vi->{to});
+	print Dumper($arr);
 }
 
-print Dumper($arr);
+sub main() {
+	return -1;
+}

@@ -2,7 +2,7 @@
 build:
   builder: npm
   cmds:
-    - "(cd %AppRoot%; cnpm install; cnpm run build)"
+    - "(cd %AppRoot%; cnpm install; gulp)"
   pre: []
   post: []
 
@@ -18,7 +18,7 @@ dispatch:
 deploy:
   owner: nginx
   mode: '755'
-  
+
   pre: []
   cmds: []
   post: []

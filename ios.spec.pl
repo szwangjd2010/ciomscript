@@ -13,6 +13,7 @@ my $AppWorkspaceOnSlave = "/Users/ciom/ciomws/$version/$cloudId/$appName";
 my $BuildInfo = $CiomData->{build};
 my $Slave4MobileDeploy = json_file_to_perl("$ENV{CIOM_SCRIPT_HOME}/slaves4mobiledeploy.json");
 my $AppCertData = json_file_to_perl("$ENV{CIOM_APPCERT_HOME}/$appName/cert.json");
+my $provisionProfileSpecifier = "";
 
 my $SshInfo = {
 	port => '22',
@@ -27,16 +28,16 @@ sub preAction($) {
 	my $devTeam = $AppCertData->{$code}->{UID};
 	my $codeSignIdentity = $AppCertData->{$code}->{CN};
 	my $provisionProfile = $AppCertData->{$code}->{uuid};
-	my $provisionProfileSpecifier = $AppCertData->{$code}->{ProfileSpecifier};
+	$provisionProfileSpecifier = $AppCertData->{$code}->{ProfileSpecifier};
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(PROVISIONING_PROFILE = ).+(;)|\${1}\"$provisionProfile\"\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(PROVISIONING_PROFILE_SPECIFIER = ).+(;)|\${1}\"$provisionProfileSpecifier\"\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
-	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(CODE_SIGN_IDENTITY = \").+(\";)|\${1}$codeSignIdentity\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(CODE_SIGN_IDENTITY = ).+(;)|\${1}\"$codeSignIdentity\"\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(\"CODE_SIGN_IDENTITY\\[sdk=\\*\\]\" = \").+(\";)|\${1}$codeSignIdentity\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(\"CODE_SIGN_IDENTITY\\[sdk=iphoneos\\*\\]\" = ).+(;)|\${1}\"iPhone Distribution\"\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(DEVELOPMENT_TEAM = ).+(;)|\${1}$devTeam\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(DevelopmentTeam = ).+(;)|\${1}$devTeam\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	#$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(ProvisioningStyle = ).+(;)|\${1}Manual\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
-	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(<key>teamID</key>\\s+<string>)[^<>]+(</string>)|\${1}$devTeam\${2}|mg\' \'$appName/Supporting Files/Entitlements.plist\'");
+	#$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(<key>teamID</key>\\s+<string>)[^<>]+(</string>)|\${1}$devTeam\${2}|mg\' \'$BuildInfo->{entitlementsPlistLocation}\'");
 }
 
 sub postAction() {}
@@ -143,9 +144,11 @@ sub build($) {
 	my $ipaFile = "$appWorkspaceOnSlave/$BuildInfo->{location}/$BuildInfo->{typeTargetName}.ipa";
 	#my $cmdPackage = "xcrun -sdk iphoneos PackageApplication -v $outAppDirectory -o $ipaFile";
 	my $archivePath = "$appWorkspaceOnSlave/$BuildInfo->{location}/$appName.xcarchive";
-	my $optionPlistPath = "$appWorkspaceOnSlave/$BuildInfo->{location}/Supporting Files/Entitlements.plist";
-	my $ipaPath = "$appWorkspaceOnSlave/$BuildInfo->{location}";
-	my $cmdPackage = "xcodebuild -exportArchive -archivePath \"$archivePath\" -exportOptionsPlist \"$optionPlistPath\" -exportPath \"$ipaPath\"";
+	#my $optionPlistPath = "$appWorkspaceOnSlave/$BuildInfo->{location}/Supporting Files/Entitlements.plist";
+	my $optionPlistPath = "$appWorkspaceOnSlave/$BuildInfo->{entitlementsPlistLocation}";
+	my $ipaPath = "$appWorkspaceOnSlave/$BuildInfo->{location}/$BuildInfo->{typeTargetName}";
+	my $cmdPackage = "xcodebuild -exportArchive -archivePath \"$archivePath\" -exportPath \"$ipaPath\" -exportFormat ipa -exportProvisioningProfile \"$provisionProfileSpecifier\"";
+	#my $cmdPackage = "xcodebuild -exportArchive -archivePath \"$archivePath\" -exportOptionsPlist \"$optionPlistPath\" -exportPath \"$ipaPath\"";
 
 	$SshInfo->{cmd} = "( $cmd2Workspace; $cmdUnlockKeychain; $cmdBuild; $cmdPackage )";
 	#$SshInfo->{cmd} = "( $cmd2Workspace; $cmdUnlockKeychain; $cmdBuild )";
