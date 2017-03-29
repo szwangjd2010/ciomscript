@@ -51,8 +51,8 @@ db.createUser(
 use admin
 db.createUser(
 {
-	user:"superuser",
-	pwd:"pwd",
+	user:"root",
+	pwd:"YDVpwdasdwx2910",
 	roles:[
 		"root"
 	]

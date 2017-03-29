@@ -44,11 +44,17 @@ function cleanCollection(c, breakpoint) {
     return cnt;
 }
 
+function getDatabase() {
+    var conn = new Mongo(DbInfo.host + ":" + DbInfo.port);
+    conn.getDB(DbInfo.authDatabase).auth(DbInfo.username, DbInfo.password);
+    
+    return conn.getDB(DbInfo.database);
+}
+
 (function main() {
     print("-----------------------------------------------");
     print(new Date() + ",  begin to clean:");
-
-    var db = connect(DatabaseURL);
+    var db = getDatabase();
     var cnames = db.getCollectionNames();
     
     for (var i = 0; i < cnames.length; i++) {
