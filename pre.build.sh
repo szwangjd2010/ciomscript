@@ -53,8 +53,16 @@ execPrebuildExtraAction() {
 	source $filePrebuildExtraAction
 }
 
+addVersionFile() {
+	timestamp=$(date +%04Y%02m%02d.%02k%02M%02S)
+	if [ -d "$WORKSPACE/$appName/src/main/resources" ]; then
+		execCmd "echo \"${SVN_REVISION}_$timestamp\" > $WORKSPACE/$appName/src/main/resources/version.txt"
+	fi
+}
+
 main() {
 	enterWorkspace
+	addVersionFile
 	replaceEnvSpecialFiles
 	replaceReplaceCustomizedVcaFiles
 	execPrebuildExtraAction

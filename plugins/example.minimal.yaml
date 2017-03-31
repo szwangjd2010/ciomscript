@@ -26,6 +26,7 @@ package:
   excludes: []
 dispatch:
   method: pull
+  repoId: private
   workspace: "/tmp/ciomworkspace/"
 deploy:
   pre: []

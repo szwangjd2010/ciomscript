@@ -11,7 +11,7 @@ var DbInfo = {
 	authDatabase: "admin"
 };
 
-var DefaultLifetime = 7; // days
+var DefaultLifetime = -1; // days
 
 var CollectionsLifetime = { // days
 	lecai_org_top30: -1,

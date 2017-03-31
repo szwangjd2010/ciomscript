@@ -96,8 +96,14 @@ applyAppPackage() {
 }
 
 backup() {
-	timestamp=$(date +%04Y%02m%02d.%02k%02M%02S)
-	execRemoteCmd $host $port "cd $WebappsLocation; tar -czvf $tomcatParent/$AppPackageFile-$timestamp.tgz $appContextName"
+	execCmd "ssh -p $port root@$host \"test -e $WebappsLocation/$appContextName/WEB-INF/classes/version.txt\""
+	if [ $? == 0 ]; then
+		backupPostfix=$(ssh -p $port root@$host "head -1 $WebappsLocation/$appContextName/WEB-INF/classes/version.txt")
+		execRemoteCmd $host $port "cd $WebappsLocation; tar -czvf $tomcatParent/$AppPackageFile-$backupPostfix.tgz $appContextName"
+	else
+		timestamp=$(date +%04Y%02m%02d.%02k%02M%02S)
+		execRemoteCmd $host $port "cd $WebappsLocation; tar -czvf $tomcatParent/$AppPackageFile-$timestamp.tgz $appContextName"
+	fi
 }
 
 clean() {

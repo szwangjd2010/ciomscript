@@ -56,7 +56,11 @@ sub getBuildLogFile() {
 }
 
 sub getAppPkgUrl() {
-	return sprintf("$ENV{CIOM_REPO_URL_BASE}/%s/%s/%s",
+	my $repoId = uc ($CiomData->{dispatch}->{repoId} || "inner");
+	my $repoBaseUrlKey = "CIOM_REPO_BASE_URL_$repoId";
+
+	return sprintf("%s/%s/%s/%s",
+		$ENV{$repoBaseUrlKey},
 		$version,
 		$cloudId,
 		$AppPkgName
@@ -89,6 +93,8 @@ sub loadPlugin() {
 			{PluginVars => {
 				AppRoot => $CiomData->{scm}->{repos}->[0]->{name},
 				DeployLocation => $CiomData->{deploy}->{locations}->[0],
+				Version => $version,
+				CloudId => $cloudId,
 				AppName => $appName
 			}}, 
 			$fileAppPlugin);
@@ -290,7 +296,7 @@ sub dispatch() {
 	my $ansibleCmdPrefix = "ansible all -i $joinedHosts -u root";
 	$CiomUtil->exec("$ansibleCmdPrefix -m file -a \"path=$remoteWrokspace state=directory\"");
 	if ($method eq "push") {
-		$CiomUtil->exec("$ansibleCmdPrefix -m file -a \"src=$AppPkgFile dest=$remoteWrokspace\"");
+		$CiomUtil->exec("$ansibleCmdPrefix -m copy -a \"src=$AppPkgFile dest=$remoteWrokspace\"");
 	} else {
 		$CiomUtil->exec("$ansibleCmdPrefix -m get_url -a \"url=$AppPkgUrl dest=$remoteWrokspace\"");
 	}

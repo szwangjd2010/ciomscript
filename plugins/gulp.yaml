@@ -13,6 +13,7 @@ package:
 
 dispatch:
   method: pull
+  repoId: private
   workspace: "/tmp/ciomworkspace/"
 
 deploy:

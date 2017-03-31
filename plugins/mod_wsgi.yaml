@@ -12,6 +12,7 @@ package:
 
 dispatch:
   method: pull
+  repoId: inner
   workspace: "/tmp/ciomworkspace/"
 
 deploy:
