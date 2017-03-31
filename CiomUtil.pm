@@ -60,9 +60,11 @@ sub exec() {
 	my $log = shift || 1;
 
 	if (ref($cmd) eq 'ARRAY') {
-		for (my $i = 0; $i <= $#{$cmd}; $i++) {
-			$self->_run($cmd->[$i], $log);
+		if ($#{$cmd} == -1) {
+			return;
 		}
+		my $jointCmds = "(" . join("; ", @{$cmd}) . ")";
+		$self->_run($jointCmds, $log);
 	} else {
 		$self->_run($cmd, $log);
 	}
@@ -94,10 +96,11 @@ sub remoteExec() {
 	my $cmd = $info->{cmd};
 	
 	if (ref($cmd) eq 'ARRAY') {
-		for (my $i = 0; $i <= $#{$cmd}; $i++) {
-			my $idxCmd = $cmd->[$i];
-			$self->exec("ssh -p $port $user\@$host '$idxCmd'");
+		if ($#{$cmd} == -1) {
+			return;
 		}
+		my $jointCmds = "(" . join("; ", @{$cmd}) . ")";
+		$self->exec("ssh -p $port $user\@$host '$jointCmds'");
 	} else {
 		$self->exec("ssh -p $port $user\@$host '$cmd'");
 	}

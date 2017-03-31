@@ -8,37 +8,9 @@ use Hash::Merge::Simple qw( merge );
 use Data::Dumper;
 
 
-sub escapeRe($) {
-	my $re = shift;
-	#single quotation enclosed by single quotation
-	$re =~ s/'/'"'"'/g;
+my $a = [
+"1",
+"2"
+];
 
-	#vertical bar 
-	$re =~ s/\|/\\|/g;	
-	return $re;
-}
-
-sub main1() {
-	my $arr = [
-		{
-			re => "aaaRE'",
-			to => 'aaaTO|'
-		},
-		{
-			re => 'bbbRE|',
-			to => 'bbbTO|'
-		}
-
-	];
-
-	foreach my $vi (@{$arr}) {
-				$vi->{re} = escapeRe($vi->{re});
-				$vi->{to} = escapeRe($vi->{to});
-	}
-
-	print Dumper($arr);
-}
-
-sub main() {
-	return -1;
-}
+print join(";", @{$a});
