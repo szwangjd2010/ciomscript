@@ -2,7 +2,9 @@
 build:
   builder: npm
   cmds:
-    - "(cd %AppRoot%; cnpm install; gulp)"
+    - cd %AppRoot%
+    - cnpm install
+    - gulp
   pre: []
   post: []
 
@@ -13,7 +15,7 @@ package:
 
 dispatch:
   method: pull
-  repoId: private
+  repoId: inner
   workspace: "/tmp/ciomworkspace/"
 
 deploy:

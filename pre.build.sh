@@ -57,6 +57,8 @@ addVersionFile() {
 	timestamp=$(date +%04Y%02m%02d.%02k%02M%02S)
 	if [ -d "$WORKSPACE/$appName/src/main/resources" ]; then
 		execCmd "echo \"${SVN_REVISION}_$timestamp\" > $WORKSPACE/$appName/src/main/resources/version.txt"
+	elif [ -d "$WORKSPACE/$appName/web/WEB-INF/classes" ]; then
+		execCmd "echo \"${SVN_REVISION}_$timestamp\" > $WORKSPACE/$appName/web/WEB-INF/classes/version.txt"
 	else
 		execCmd "echo \"${SVN_REVISION}_$timestamp\" > $WORKSPACE/$appName/version.txt"
 	fi

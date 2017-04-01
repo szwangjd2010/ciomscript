@@ -34,9 +34,9 @@ gruntCompress() {
 
 generateAppPackage() {
 	if [ "$deployType" == "h5webnew" ]; then
-		execCmd "cd ..;rm -rf $AppPackageFile; zip -r $AppPackageFile $appName/src/*"
+		execCmd "cd ..;rm -rf $AppPackageFile; mv $appName/version.txt $appName/src/; zip -r $AppPackageFile $appName/src/*"
 	else
-        execCmd "cd ..;rm -rf $AppPackageFile; zip -r $AppPackageFile $appName/app/*"
+        execCmd "cd ..;rm -rf $AppPackageFile; mv $appName/version.txt $appName/app/; zip -r $AppPackageFile $appName/app/*"
     fi
 }
 

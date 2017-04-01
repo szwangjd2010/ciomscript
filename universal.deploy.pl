@@ -82,6 +82,24 @@ sub instantiationTemplate {
 		|| die "Template process failed: ", $Tpl->error(), "\n";	
 }
 
+sub constructPluginVarsDict {
+	my $vars = {
+		AppRoot => $CiomData->{scm}->{repos}->[0]->{name},
+		DeployLocation => $CiomData->{deploy}->{locations}->[0],
+		Version => $version,
+		CloudId => $cloudId,
+		AppName => $appName
+	};
+
+	my $appTypeTopDomain = substr($AppType, 0, index($AppType, '.'));
+	my $appTypeTopDomainEnvFile =  "$ENV{CIOM_SCRIPT_HOME}/plugins/${appTypeTopDomain}.env";
+	if (-e $appTypeTopDomainEnvFile) {
+		$vars = merge $vars, LoadFile($appTypeTopDomainEnvFile);
+	}
+
+	return $vars;
+}
+
 sub loadPlugin() {
 	my $filePlugin = "$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.yaml";
 	my $fileAppPlugin = "$Output/${AppType}.yaml";
@@ -89,16 +107,7 @@ sub loadPlugin() {
 	$CiomUtil->exec("/bin/cp -f $filePlugin $fileAppPlugin");
 	$CiomUtil->exec("perl -i -pE 's/%([\\w_]+)%/[% PluginVars.\\1 %]/g' $fileAppPlugin");
 	
-	instantiationTemplate($fileAppPlugin, 
-			{PluginVars => {
-				AppRoot => $CiomData->{scm}->{repos}->[0]->{name},
-				DeployLocation => $CiomData->{deploy}->{locations}->[0],
-				Version => $version,
-				CloudId => $cloudId,
-				AppName => $appName
-			}}, 
-			$fileAppPlugin);
-
+	instantiationTemplate($fileAppPlugin, {PluginVars => constructPluginVarsDict()}, $fileAppPlugin);
 	$Plugin = LoadFile($fileAppPlugin);
 
 	my $NeedToMergeSections = [

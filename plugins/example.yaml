@@ -30,7 +30,7 @@ package:
 
 dispatch:
   method: pull
-  repoId: private
+  repoId: inner
   workspace: "/tmp/ciomworkspace/"
   
 deploy:

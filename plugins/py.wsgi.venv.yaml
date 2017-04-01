@@ -1,7 +1,12 @@
 ---
 build:
   builder: none
-  cmds: []
+  cmds:
+    - cd %AppRoot%
+    - virtualenv -p %Interpreter% .
+    - source ./bin/activate
+    - "%PIP% install -r ./requirement.txt"
+    - deactive
   pre: []
   post: []
 
@@ -22,8 +27,8 @@ deploy:
   pre: []
   cmds: []
   post:
-    - systemctl restart httpd
-  
+    - touch %DeployLocation%/%AppName%/config/wsgi.py
+
   local:
     pre: []
     post: []

@@ -1,7 +1,12 @@
 ---
 build:
   builder: none
-  cmds: []
+  cmds:
+    - cd %AppRoot%
+    - virtualenv -p %Interpreter% .
+    - source ./bin/activate
+    - "%PIP% install -r ./requirement.txt"
+    - deactive
   pre: []
   post: []
 
@@ -16,14 +21,10 @@ dispatch:
   workspace: "/tmp/ciomworkspace/"
 
 deploy:
-  owner: apache
-  mode: '755'
-  
   pre: []
   cmds: []
-  post:
-    - systemctl restart httpd
-  
+  post: []
+
   local:
     pre: []
     post: []

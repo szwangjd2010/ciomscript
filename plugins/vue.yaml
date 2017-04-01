@@ -2,7 +2,9 @@
 build:
   builder: npm
   cmds:
-    - "(cd %AppRoot%; cnpm install; cnpm run build)"
+    - cd %AppRoot%
+    - cnpm install
+    - cnpm run build
   pre: []
   post: []
 

@@ -34,7 +34,7 @@ function checkJobConfigPath() {
 }
 
 function reloadJenkinsConf() {
-	java -jar $JENKINS_HOME/jenkins-cli.jar -s  http://localhost:8080/ reload-configuration
+	java -jar $JENKINS_HOME/jenkins-cli.jar -s http://localhost:8080/ reload-configuration
 }
 
 function main () {

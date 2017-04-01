@@ -50,11 +50,12 @@ sub deployH5() {
 	$ciomUtil->exec("scp -r $appName.zip root\@$Cloud->{host}:$CiomHome/");
 
 	#Step2, remote deployment
-	my $timestamp = strftime("%04Y%02m%02d.%02k%02M%02S",localtime());
-	my $remoteBackupCmd = "mv $AppTargetRoot/$appName $CiomBackUpHome/$appName.$timestamp";
+	#my $timestamp = strftime("%04Y%02m%02d.%02k%02M%02S",localtime());
+	my $remoteBackupCmd = "mv $AppTargetRoot/$appName $CiomBackUpHome/$appName.\$version";
 	my $remoteUnzipCmd = "unzip -o $CiomHome/$appName.zip -d $CiomHome";
 	my $mvAppToTargetCmd = "mv $CiomHome/$appName/app $AppTargetRoot/$appName";
-	$SshInfo->{cmd} = "( $remoteBackupCmd; $remoteUnzipCmd; $mvAppToTargetCmd )";
+	my $getVersionTxt = "version=\$(head -1 $AppTargetRoot/$appName/version.txt)";
+	$SshInfo->{cmd} = "( $getVersionTxt; $remoteBackupCmd; $remoteUnzipCmd; $mvAppToTargetCmd )";
 	$ciomUtil->remoteExec($SshInfo);
 }
 
@@ -63,11 +64,12 @@ sub deployH5new() {
 	$ciomUtil->exec("scp -r $appName.zip root\@$Cloud->{host}:$CiomHome/");
 
 	#Step2, remote deployment
-	my $timestamp = strftime("%04Y%02m%02d.%02k%02M%02S",localtime());
-	my $remoteBackupCmd = "mv $AppTargetRoot/$appName $CiomBackUpHome/$appName.$timestamp";
+	#my $timestamp = strftime("%04Y%02m%02d.%02k%02M%02S",localtime());
+	my $remoteBackupCmd = "mv $AppTargetRoot/$appName $CiomBackUpHome/$appName.\$version";
 	my $remoteUnzipCmd = "unzip -o $CiomHome/$appName.zip -d $CiomHome";
 	my $mvAppToTargetCmd = "mv $CiomHome/$appName/src $AppTargetRoot/$appName";
-	$SshInfo->{cmd} = "( $remoteBackupCmd; $remoteUnzipCmd; $mvAppToTargetCmd )";
+	my $getVersionTxt = "version=\$(head -1 $AppTargetRoot/$appName/version.txt)";
+	$SshInfo->{cmd} = "( $getVersionTxt; $remoteBackupCmd; $remoteUnzipCmd; $mvAppToTargetCmd )";
 	$ciomUtil->remoteExec($SshInfo);
 }
 
@@ -76,11 +78,12 @@ sub deployDirectly() {
 	$ciomUtil->exec("zip -r $appName.zip $appName/*; scp -r $appName.zip root\@$Cloud->{host}:$CiomHome/");
 	
 	#Step2, remote deployment
-	my $timestamp = strftime("%04Y%02m%02d.%02k%02M%02S",localtime());
-	my $remoteBackupCmd = "mv $AppTargetRoot/$appName $CiomBackUpHome/$appName.$timestamp";
+	#my $timestamp = strftime("%04Y%02m%02d.%02k%02M%02S",localtime());
+	my $getVersionTxt = "version=\$(head -1 $AppTargetRoot/$appName/version.txt)";
+	my $remoteBackupCmd = "mv $AppTargetRoot/$appName $CiomBackUpHome/$appName.\$version";
 	my $remoteUnzipCmd = "unzip -o $CiomHome/$appName.zip -d $CiomHome";
 	my $mvAppToTargetCmd = "mv $CiomHome/$appName $AppTargetRoot/$appName";
-	$SshInfo->{cmd} = "( $remoteBackupCmd; $remoteUnzipCmd; $mvAppToTargetCmd )";
+	$SshInfo->{cmd} = "( $getVersionTxt; $remoteBackupCmd; $remoteUnzipCmd; $mvAppToTargetCmd )";
 	$ciomUtil->remoteExec($SshInfo);
 }
 

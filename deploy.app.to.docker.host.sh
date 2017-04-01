@@ -17,7 +17,6 @@ WebappsLocation="$webappsParent/webapps"
 
 appContextName=$appName
 
-
 enterWorkspace() {
 	execCmd "cd $MyWorkspace"
 	execRemoteCmd $host $port "mkdir -p $WebappsLocation"

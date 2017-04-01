@@ -1,8 +1,10 @@
 ---
 build:
-  builder: none
-  cmds: []
-  pre: []
+  builder: maven
+  cmds: 
+    - "(cd %AppRoot%; mvn clean package;)"
+  pre: 
+    - "$CIOM_SCRIPT_HOME/pre.build.sh %Version% %CloudId% %AppName%"
   post: []
 
 package:
@@ -12,18 +14,16 @@ package:
 
 dispatch:
   method: pull
-  repoId: inner
+  repoId: private
   workspace: "/tmp/ciomworkspace/"
 
 deploy:
-  owner: apache
   mode: '755'
-  
+
   pre: []
   cmds: []
-  post:
-    - systemctl restart httpd
-  
+  post: []
+
   local:
     pre: []
     post: []
