@@ -1,0 +1,7 @@
+{
+  "dev.env-yxt.crm.api.deploy": {
+    "version": "v0",
+    "cloudId": "dev",
+    "appName": "crmapi"
+  }
+}
