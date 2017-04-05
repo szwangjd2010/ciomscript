@@ -92,9 +92,9 @@ sub constructPluginVarsDict {
 	};
 
 	my $appTypeTopDomain = substr($AppType, 0, index($AppType, '.'));
-	my $appTypeTopDomainEnvFile =  "$ENV{CIOM_SCRIPT_HOME}/plugins/${appTypeTopDomain}.env";
-	if (-e $appTypeTopDomainEnvFile) {
-		$vars = merge $vars, LoadFile($appTypeTopDomainEnvFile);
+	my $appTypeTopDomainVarsFile =  "$ENV{CIOM_SCRIPT_HOME}/plugins/vars/${appTypeTopDomain}";
+	if (-e $appTypeTopDomainVarsFile) {
+		$vars = merge $vars, LoadFile($appTypeTopDomainVarsFile);
 	}
 
 	return $vars;
