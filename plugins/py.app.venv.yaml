@@ -6,7 +6,8 @@ build:
     - virtualenv -p %Interpreter% .
     - source ./bin/activate
     - "%PIP% install -r ./requirement.txt"
-    - deactive
+    - deactivate
+    - perl -i -pE 's|(VIRTUAL_ENV=\").*(\")|${1}%DeployLocation%/%AppName%${2}|' ./bin/activate
   pre: []
   post: []
 

@@ -77,7 +77,7 @@ sub getBackupListOptions() {
 
 sub updateJobOptionsInTargetJob() {
 	#echo $options
-	$ciomUtil->exec("perl -i -0 -pE 's|(?<g1><name>BackUpTarget</name>.*<a class=\\\"string-array\\\">\\s+)(?<g2>.*)(?<g3>\\s+</a>)|\$+{g1}$options\$+{g3}|sg' $jobConfigFile");
+	$ciomUtil->execNotLogCmd("perl -i -0 -pE 's|(?<g1><name>BackUpTarget</name>.*<a class=\\\"string-array\\\">\\s+)(?<g2>.*)(?<g3>\\s+</a>)|\$+{g1}$options\$+{g3}|sg' $jobConfigFile");
 }
 
 sub main() {

@@ -15,7 +15,7 @@ my $OldPwd = getcwd();
 my $JobJsonFile="$ENV{CIOM_SCRIPT_HOME}/mrollback/jobs.json";
 our $CiomData = json_file_to_perl("$JobJsonFile");
 
-sub main() {
+sub batchUpdate() {
 	for my $job (keys %{$CiomData}) {
 		my $version = $CiomData->{$job}->{version};
 		my $cloudId = $CiomData->{$job}->{cloudId};
@@ -33,6 +33,16 @@ sub main() {
 		
 		$ciomUtil->exec($cmd);
 	}
+}
+
+sub reloadJenkinsConfiguration() {
+	$ciomUtil->exec("java -jar $ENV{JENKINS_HOME}/jenkins-cli.jar -s http://localhost:8080/ reload-configuration");
+
+}
+
+sub main() {
+	batchUpdate;
+	reloadJenkinsConfiguration();
 }
 
 main();
