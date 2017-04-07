@@ -60,7 +60,8 @@ addVersionFile() {
 	elif [ -d "$WORKSPACE/$appName/web/WEB-INF/classes" ]; then
 		execCmd "echo \"${SVN_REVISION}_$timestamp\" > $WORKSPACE/$appName/web/WEB-INF/classes/version.txt"
 	else
-		execCmd "echo \"${SVN_REVISION}_$timestamp\" > $WORKSPACE/$appName/version.txt"
+		#execCmd "svn info"
+		execCmd "echo \"${SVN_REVISION_1}_$timestamp\" > $WORKSPACE/$appName/version.txt"
 	fi
 }
 

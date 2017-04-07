@@ -35,6 +35,9 @@ gruntCompress() {
 generateAppPackage() {
 	if [ "$deployType" == "h5webnew" ]; then
 		execCmd "cd ..;rm -rf $AppPackageFile; mv $appName/version.txt $appName/src/; zip -r $AppPackageFile $appName/src/*"
+	elif [ "$deployType" == "h5webWithTarget" ]; then
+		folderTarget=$(grep "folderTarget" $CIOM_VCA_HOME/$version/pre/$deployToEnv/$appName.ciom| cut -d "'" -f 2)
+		execCmd "cd ..;rm -rf $AppPackageFile; mv $appName/version.txt $appName/$folderTarget/; zip -r $AppPackageFile $appName/$folderTarget/*"
 	else
         execCmd "cd ..;rm -rf $AppPackageFile; mv $appName/version.txt $appName/app/; zip -r $AppPackageFile $appName/app/*"
     fi
