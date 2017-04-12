@@ -19,10 +19,15 @@ deploy:
   owner: apache
   mode: '755'
   
-  pre: []
-  cmds: []
-  post:
-    - touch %DeployLocation%/%AppName%/config/wsgi.py
+  host:
+    pre: []
+    post: []
+
+  instance:
+    pre: []
+    cmds: []
+    post:
+      - touch %DeployLocation%/%AppName%/config/wsgi.py
   
   local:
     pre: []

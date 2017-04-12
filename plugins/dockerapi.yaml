@@ -20,10 +20,16 @@ dispatch:
 deploy:
   mode: '755'
 
-  pre: []
-  cmds: []
-  post: []
+  host:
+    pre: []
+    post: []
+
+  instance:
+    pre: []
+    cmds: []
+    post: []
 
   local:
     pre: []
     post: []
+

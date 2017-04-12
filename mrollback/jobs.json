@@ -3,5 +3,10 @@
     "version": "v0",
     "cloudId": "dev",
     "appName": "crmapi"
+  },
+  "test-yxt.lecai.web.starfish.rollback": {
+    "version": "v0",
+    "cloudId": "dev",
+    "appName": "lecaiweb-starfish"
   }
 }

@@ -29,6 +29,15 @@ dispatch:
   repoId: inner
   workspace: "/tmp/ciomworkspace/"
 deploy:
-  pre: []
-  cmds: []
-  post: []
+  host:
+    pre: []
+    post: []
+
+  instance:
+    pre: []
+    cmds: []
+    post: []
+
+  local:
+    pre: []
+    post: []
