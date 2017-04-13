@@ -1,4 +1,6 @@
 ---
+__extend: skeleton
+
 build:
   builder: maven
   cmds: 
@@ -10,26 +12,6 @@ build:
 package:
   includes:
     - "*"
-  excludes: []
-
-dispatch:
-  method: pull
-  repoId: private
-  workspace: "/tmp/ciomworkspace/"
 
 deploy:
   mode: '755'
-
-  host:
-    pre: []
-    post: []
-
-  instance:
-    pre: []
-    cmds: []
-    post: []
-
-  local:
-    pre: []
-    post: []
-

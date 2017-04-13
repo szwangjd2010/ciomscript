@@ -100,11 +100,44 @@ sub constructPluginVarsDict {
 	return $vars;
 }
 
-sub loadPlugin() {
-	my $filePlugin = "$ENV{CIOM_SCRIPT_HOME}/plugins/${AppType}.yaml";
-	my $fileAppPlugin = "$Output/${AppType}.yaml";
+sub getPluginFile($) {
+	my $pluginName = shift;
+	return  "$ENV{CIOM_SCRIPT_HOME}/plugins/${pluginName}.yaml"
+}
 
-	$CiomUtil->exec("/bin/cp -f $filePlugin $fileAppPlugin");
+sub getPlugin {
+	my $plugins = {};
+	my $chain = [];
+	local *appendChainNode = sub {
+		my ($name, $data) = @_;
+		push(@{$chain}, $name);
+		$plugins->{$name} = clone($data);
+	};
+
+	my $plugin = LoadFile(getPluginFile($AppType));
+	appendChainNode($AppType, $plugin);
+
+	my $extend = $plugin->{__extend};
+	while (defined($extend)) {
+		$plugin = LoadFile(getPluginFile($extend));
+		appendChainNode($extend, $plugin);
+
+		$extend = $plugin->{__extend};
+	}
+
+	my $final = {};
+	for (my $i = $#{$chain}; $i >= 0; $i--) {
+		$final = merge $final, $plugins->{$chain->[$i]};
+	}
+	$final = merge $final, {__extend => $chain};
+
+	return $final;
+}
+
+sub loadPlugin() {
+	my $fileAppPlugin = "$Output/${AppType}.yaml";
+	DumpFile($fileAppPlugin, getPlugin());
+
 	$CiomUtil->exec("perl -i -pE 's/%([\\w_]+)%/[% PluginVars.\\1 %]/g' $fileAppPlugin");
 	
 	instantiationTemplate($fileAppPlugin, {PluginVars => constructPluginVarsDict()}, $fileAppPlugin);
@@ -372,13 +405,17 @@ sub deploy() {
 	my $locations = $CiomData->{deploy}->{locations};
 	my $hosts = $CiomData->{deploy}->{hosts};
 	foreach my $host (@{$hosts}) {
-		runHierarchyCmds("deploy pre", $host);
+		runHierarchyCmds("deploy host pre", $host);
 
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
+			runHierarchyCmds("deploy instance pre", $host);
 			$CiomUtil->remoteExec({
 				host => $host,
 				cmd => getDeployAppPkgCmd($j, $locations)
 			});
+
+			runHierarchyCmds("deploy instance cmds", $host);
+			runHierarchyCmds("deploy instance post", $host);
 		}
 
 		setOwnerAndMode({
@@ -388,7 +425,7 @@ sub deploy() {
 			locations => $locations
 		});
 		
-		runHierarchyCmds("deploy post", $host);
+		runHierarchyCmds("deploy host post", $host);
 	}
 
 	runHierarchyCmds("deploy local post");
@@ -398,6 +435,7 @@ sub main() {
 	enterWorkspace();
 	initWorkspace();
 	loadPlugin();
+	return 0;
 	updateCode();
 	replaceCustomizedFiles();
 	streamedit();

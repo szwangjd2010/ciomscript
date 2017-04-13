@@ -1,37 +1,18 @@
 ---
+__extend: skeleton
+
 build:
   builder: npm
   cmds:
     - cd %AppRoot%
     - cnpm install
     - gulp
-  pre: []
-  post: []
 
 package:
   includes:
     - "%AppRoot%/dist/^"
-  excludes: []
-
-dispatch:
-  method: pull
-  repoId: inner
-  workspace: "/tmp/ciomworkspace/"
 
 deploy:
   owner: nginx
   mode: '755'
-
-  host:
-    pre: []
-    post: []
-
-  instance:
-    pre: []
-    cmds: []
-    post: []
-
-  local:
-    pre: []
-    post: []
-    
+        

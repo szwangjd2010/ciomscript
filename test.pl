@@ -8,9 +8,21 @@ use Hash::Merge::Simple qw( merge );
 use Data::Dumper;
 
 
-my $a = [
-"1",
-"2"
-];
+sub a {
+    local *b = sub {
+        my ($v1, $v2) = @_;
 
-print join(";", @{$a});
+        print $v1 . "\n";
+        print $v2 . "\n";
+        return 123;
+    };
+    return b(11, 22);  # Works as expected
+}
+
+
+a();
+
+my $repos = [1,2,3];
+foreach my $repo (@{$repos}) {
+    print $repo . "\n";
+}

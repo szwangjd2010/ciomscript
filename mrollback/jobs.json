@@ -4,9 +4,9 @@
     "cloudId": "dev",
     "appName": "crmapi"
   },
-  "test-yxt.lecai.web.starfish.rollback": {
+  "test-yxt.qida.web.rollback": {
     "version": "v0",
     "cloudId": "dev",
-    "appName": "lecaiweb-starfish"
+    "appName": "qidaweb"
   }
 }

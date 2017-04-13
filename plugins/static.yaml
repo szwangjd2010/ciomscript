@@ -1,27 +1,10 @@
 ---
-build:
-  builder: none
-  cmds: []
-  pre: []
-  post: []
+__extend: skeleton
 
 package:
   includes:
     - "*"
-  excludes: []
-
-dispatch:
-  method: pull
-  repoId: inner
-  workspace: "/tmp/ciomworkspace/"
 
 deploy:
   mode: '755'
-
-  pre: []
-  cmds: []
-  post: []
-
-  local:
-    pre: []
-    post: []
+  

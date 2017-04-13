@@ -1,6 +1,7 @@
 ---
+__extend: skeleton
+
 build:
-  builder: none
   cmds:
     - cd %AppRoot%
     - virtualenv -p %Interpreter% .
@@ -8,33 +9,17 @@ build:
     - "%PIP% install -r ./requirement.txt"
     - deactivate
     - perl -i -pE 's|(VIRTUAL_ENV=\").*(\")|${1}%DeployLocation%/%AppName%${2}|' ./bin/activate
-  pre: []
-  post: []
 
 package:
   includes:
     - "*"
-  excludes: []
-
-dispatch:
-  method: pull
-  repoId: inner
-  workspace: "/tmp/ciomworkspace/"
 
 deploy:
   owner: apache
   mode: '755'
-  
-  host:
-    pre: []
-    post: []
 
   instance:
     pre: []
     cmds: []
     post:
       - touch %DeployLocation%/%AppName%/config/wsgi.py
-
-  local:
-    pre: []
-    post: []

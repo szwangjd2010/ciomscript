@@ -1,34 +1,10 @@
 ---
-build:
-  builder: none
-  cmds: []
-  pre: []
-  post: []
+__extend: skeleton
 
 package:
   includes:
     - "*"
-  excludes: []
-
-dispatch:
-  method: pull
-  repoId: inner
-  workspace: "/tmp/ciomworkspace/"
 
 deploy:
   owner: apache
   mode: '755'
-  
-  host:
-    pre: []
-    post: []
-
-  instance:
-    pre: []
-    cmds: []
-    post:
-      - touch %DeployLocation%/%AppName%/config/wsgi.py
-  
-  local:
-    pre: []
-    post: []

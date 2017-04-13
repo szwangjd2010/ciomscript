@@ -1,32 +1,12 @@
 ---
+__extend: skeleton
+
 build:
   builder: npm
   cmds:
     - cd %AppRoot%
     - cnpm install
-  pre: []
-  post: []
 
 package:
   includes:
     - "*"
-  excludes: []
-
-dispatch:
-  method: pull
-  repoId: inner
-  workspace: "/tmp/ciomworkspace/"
-
-deploy:
-  host:
-    pre: []
-    post: []
-
-  instance:
-    pre: []
-    cmds: []
-    post: []
-
-  local:
-    pre: []
-    post: []
