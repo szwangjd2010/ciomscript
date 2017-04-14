@@ -14,4 +14,4 @@ package:
     - "*"
 
 deploy:
-  mode: '755'
+  mode: 755

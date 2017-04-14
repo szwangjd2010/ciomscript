@@ -16,7 +16,8 @@ package:
 
 deploy:
   owner: apache
-  mode: '755'
+  group: apache
+  mode: 755
 
   instance:
     pre: []

@@ -42,10 +42,9 @@ dispatch:
   workspace: "/tmp/ciomworkspace/"
 
 deploy:
-  properties:
-    owner: ""
-    group: ""
-    mode: "755"
+  owner: ""
+  group: ""
+  mode: "755"
 
   host:
     pre: []

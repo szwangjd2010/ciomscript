@@ -14,4 +14,5 @@ package:
 
 deploy:
   owner: nginx
-  mode: '755'
+  group: nginx
+  mode: 755

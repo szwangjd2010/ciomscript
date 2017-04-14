@@ -368,6 +368,7 @@ sub setOwnerAndMode($) {
 	my $info = shift;
 	my $host = $info->{host};
 	my $owner = $info->{owner};
+	my $group = $info->{group};
 	my $mode = $info->{mode};
 	my $locations = $info->{locations};
 
@@ -375,7 +376,7 @@ sub setOwnerAndMode($) {
 	if ($owner ne '') {
 		$CiomUtil->remoteExec({
 			host => $host,
-			cmd => "chown -R $owner:$owner $joinedLocations"
+			cmd => "chown -R $owner:$group $joinedLocations"
 		});
 	}
 	if ($mode ne '') {
@@ -390,6 +391,7 @@ sub deploy() {
 	runHierarchyCmds("deploy local pre");
 
 	my $owner = Dive($CiomData, qw(deploy owner)) || '';
+	my $group = Dive($CiomData, qw(deploy group)) || '';
 	my $mode = Dive($CiomData, qw(deploy mode)) || '';
 	my $locations = $CiomData->{deploy}->{locations};
 	my $hosts = $CiomData->{deploy}->{hosts};
@@ -410,6 +412,7 @@ sub deploy() {
 		setOwnerAndMode({
 			host => $host,
 			owner => $owner,
+			group => $group,
 			mode => $mode,
 			locations => $locations
 		});

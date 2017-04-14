@@ -6,5 +6,7 @@ package:
     - "*"
 
 deploy:
-  mode: '755'
+  owner: nginx
+  group: nginx  
+  mode: 755
   
