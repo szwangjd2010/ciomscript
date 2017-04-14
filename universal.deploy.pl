@@ -88,7 +88,7 @@ sub insertTplVarsIntoCiomData {
 	my $appTypeTopDomain = substr($AppType, 0, index($AppType, '.'));
 	my $appTypeTopDomainVarsFile =  "$ENV{CIOM_SCRIPT_HOME}/plugins/vars/${appTypeTopDomain}";
 	if (-e $appTypeTopDomainVarsFile) {
-		$CiomData = merge $CiomData, LoadFile($appTypeTopDomainVarsFile);
+		$CiomData->{vars} = LoadFile($appTypeTopDomainVarsFile);
 	}
 }
 
