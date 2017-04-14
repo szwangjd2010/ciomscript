@@ -3,12 +3,12 @@ __extend: skeleton
 
 build:
   cmds:
-    - cd %AppRoot%
-    - virtualenv -p %Interpreter% .
+    - cd [% root.scm.repos.0.name %]
+    - virtualenv -p [% root.vars.interpreter %] .
     - source ./bin/activate
-    - "%PIP% install -r ./requirement.txt"
+    - "[% root.vars.pip %] install -r ./requirement.txt"
     - deactivate
-    - perl -i -pE 's|(VIRTUAL_ENV=\").*(\")|${1}%DeployLocation%/%AppName%${2}|' ./bin/activate
+    - perl -i -pE 's|(VIRTUAL_ENV=\").*(\")|${1}[% root.deploy.locations.0 %]/[% root.vca.appName %]${2}|' ./bin/activate
 
 package:
   includes:
@@ -22,4 +22,4 @@ deploy:
     pre: []
     cmds: []
     post:
-      - touch %DeployLocation%/%AppName%/config/wsgi.py
+      - touch [% root.deploy.locations.0 %]/[% root.vca.appName %]/config/wsgi.py

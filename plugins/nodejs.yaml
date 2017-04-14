@@ -4,7 +4,7 @@ __extend: skeleton
 build:
   builder: npm
   cmds:
-    - cd %AppRoot%
+    - cd [% root.scm.repos.0.name %]
     - cnpm install
 
 package:

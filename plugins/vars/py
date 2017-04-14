@@ -1,3 +1,4 @@
 ---
-Interpreter: /usr/bin/python
-PIP: pip
+vars:
+  interpreter: /usr/bin/python
+  pip: pip

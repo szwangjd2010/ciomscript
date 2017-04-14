@@ -11,4 +11,4 @@ deploy:
 
   instance:
     post:
-      - touch %DeployLocation%/%AppName%/config/wsgi.py
+      - touch [% root.deploy.locations.0 %]/[% root.vca.appName %]/config/wsgi.py

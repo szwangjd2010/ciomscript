@@ -4,9 +4,9 @@ __extend: skeleton
 build:
   builder: maven
   cmds: 
-    - "(cd %AppRoot%; mvn clean package;)"
+    - "(cd [% root.scm.repos.0.name %]; mvn clean package;)"
   pre: 
-    - "$CIOM_SCRIPT_HOME/pre.build.sh %Version% %CloudId% %AppName%"
+    - "$CIOM_SCRIPT_HOME/pre.build.sh [% root.vca.version %] [% root.vca.cloudId %] [% root.vca.appName %]"
   post: []
 
 package:

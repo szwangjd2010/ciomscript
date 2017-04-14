@@ -72,46 +72,38 @@ sub mergePluginAndAppSetting($) {
 	$CiomData->{$section} = merge $Plugin->{$section}, $CiomData->{$section} || {};
 }
 
-sub dumpCiomDataWithPluginInfo() {
-	DumpFile("$Output/ciom.yaml", $CiomData);
-}
-
 sub instantiationTemplate {
 	my ($in, $data, $out) = @_;
 	$Tpl->process($in, $data, $out) 
 		|| die "Template process failed: ", $Tpl->error(), "\n";	
 }
 
-sub constructPluginVarsDict {
-	my $vars = {
-		AppRoot => $CiomData->{scm}->{repos}->[0]->{name},
-		DeployLocation => $CiomData->{deploy}->{locations}->[0],
-		Version => $version,
-		CloudId => $cloudId,
-		AppName => $appName
+sub insertTplVarsIntoCiomData {
+	$CiomData->{vca} = {
+		version => $version,
+		cloudId => $cloudId,
+		appName => $appName		
 	};
 
 	my $appTypeTopDomain = substr($AppType, 0, index($AppType, '.'));
 	my $appTypeTopDomainVarsFile =  "$ENV{CIOM_SCRIPT_HOME}/plugins/vars/${appTypeTopDomain}";
 	if (-e $appTypeTopDomainVarsFile) {
-		$vars = merge $vars, LoadFile($appTypeTopDomainVarsFile);
+		$CiomData = merge $CiomData, LoadFile($appTypeTopDomainVarsFile);
 	}
-
-	return $vars;
 }
 
-sub getPluginFile($) {
-	my $pluginName = shift;
-	return  "$ENV{CIOM_SCRIPT_HOME}/plugins/${pluginName}.yaml"
-}
-
-sub getPlugin {
+sub getPluginDefinition {
 	my $plugins = {};
 	my $chain = [];
 	local *appendChainNode = sub {
 		my ($name, $data) = @_;
 		push(@{$chain}, $name);
 		$plugins->{$name} = clone($data);
+	};
+
+	local *getPluginFile = sub {
+		my ($pluginName) = @_;
+		return  "$ENV{CIOM_SCRIPT_HOME}/plugins/${pluginName}.yaml";
 	};
 
 	my $plugin = LoadFile(getPluginFile($AppType));
@@ -125,22 +117,25 @@ sub getPlugin {
 		$extend = $plugin->{__extend};
 	}
 
-	my $final = {};
+	my $definition = {};
 	for (my $i = $#{$chain}; $i >= 0; $i--) {
-		$final = merge $final, $plugins->{$chain->[$i]};
+		$definition = merge $definition, $plugins->{$chain->[$i]};
 	}
-	$final = merge $final, {__extend => $chain};
+	$definition = merge $definition, {__extend => $chain};
+	return $definition;
+}
 
-	return $final;
+sub persistCiomAndPluginInfo() {
+	DumpFile("$Output/ciom.yaml", $CiomData);
 }
 
 sub loadPlugin() {
 	my $fileAppPlugin = "$Output/${AppType}.yaml";
-	DumpFile($fileAppPlugin, getPlugin());
-
-	$CiomUtil->exec("perl -i -pE 's/%([\\w_]+)%/[% PluginVars.\\1 %]/g' $fileAppPlugin");
+	my $plugin = getPluginDefinition();
+	DumpFile($fileAppPlugin, $plugin);
 	
-	instantiationTemplate($fileAppPlugin, {PluginVars => constructPluginVarsDict()}, $fileAppPlugin);
+	insertTplVarsIntoCiomData();
+	instantiationTemplate($fileAppPlugin, {root => $CiomData}, $fileAppPlugin);
 	$Plugin = LoadFile($fileAppPlugin);
 
 	my $NeedToMergeSections = [
@@ -152,8 +147,6 @@ sub loadPlugin() {
 	foreach my $section (@{$NeedToMergeSections}) {
 		mergePluginAndAppSetting($section);
 	}
-
-	dumpCiomDataWithPluginInfo();
 }
 
 sub enterWorkspace() {
@@ -257,10 +250,6 @@ sub runHierarchyCmds {
 	} else {
 		$CiomUtil->exec($cmds);
 	}
-}
-
-sub firstModuleName() {
-	return $CiomData->{scm}->{repos}->[0]->{name};
 }
 
 sub build() {
@@ -435,7 +424,7 @@ sub main() {
 	enterWorkspace();
 	initWorkspace();
 	loadPlugin();
-	return 0;
+	persistCiomAndPluginInfo();
 	updateCode();
 	replaceCustomizedFiles();
 	streamedit();

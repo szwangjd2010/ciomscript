@@ -3,9 +3,9 @@
 #   nodejs  -> AppType=nodejs
 #
 # available supported builtin variables 
-#   %AppRoot%: ciomRoot.scm.repos[0].name
-#   %DeployLocation%: ciomRoot.deploy.locations[0]
-#   %AppName%: appName
+#   [% root.scm.repos.0.name %]: ciomRoot.scm.repos[0].name
+#   [% root.deploy.locations.0 %]: ciomRoot.deploy.locations[0]
+#   [% root.vca.appName %]: appName
 # 
 # inlcudes 
 #   ^: packaged files directory start point
