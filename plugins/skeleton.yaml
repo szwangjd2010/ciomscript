@@ -1,4 +1,7 @@
 ---
+# This is the skeleton/empty plugin definition in ciom universal deploy,
+# and specific plugins should extend this plugin.
+#
 # file prefix name is the "AppType" which defined in VCA app *.ciom file
 #   if AppType=vue, will load vue.yaml plugin file
 #   if AppType=nodejs, will load nodejs.yaml plugin file
