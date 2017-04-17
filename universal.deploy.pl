@@ -67,18 +67,13 @@ sub getAppPkgUrl() {
 	);
 }
 
-sub mergePluginAndAppSetting($) {
-	my $section = shift;
-	$CiomData->{$section} = merge $Plugin->{$section}, $CiomData->{$section} || {};
-}
-
-sub instantiationTemplate {
+sub processTemplate {
 	my ($in, $data, $out) = @_;
 	$Tpl->process($in, $data, $out) 
 		|| die "Template process failed: ", $Tpl->error(), "\n";	
 }
 
-sub insertTplVarsIntoCiomData {
+sub addTplVarsIntoCiomData {
 	$CiomData->{vca} = {
 		version => $version,
 		cloudId => $cloudId,
@@ -95,25 +90,24 @@ sub insertTplVarsIntoCiomData {
 sub getPluginDefinition {
 	my $plugins = {};
 	my $chain = [];
-	local *appendChainNode = sub {
+	local *appendPluginInheritedChainNode = sub {
 		my ($name, $data) = @_;
 		push(@{$chain}, $name);
 		$plugins->{$name} = clone($data);
 	};
 
-	local *getPluginFile = sub {
+	local *getPluginFileByName = sub {
 		my ($pluginName) = @_;
 		return  "$ENV{CIOM_SCRIPT_HOME}/plugins/${pluginName}.yaml";
 	};
 
-	my $plugin = LoadFile(getPluginFile($AppType));
-	appendChainNode($AppType, $plugin);
+	my $plugin = LoadFile(getPluginFileByName($AppType));
+	appendPluginInheritedChainNode($AppType, $plugin);
 
 	my $extend = $plugin->{__extend};
 	while (defined($extend)) {
-		$plugin = LoadFile(getPluginFile($extend));
-		appendChainNode($extend, $plugin);
-
+		$plugin = LoadFile(getPluginFileByName($extend));
+		appendPluginInheritedChainNode($extend, $plugin);
 		$extend = $plugin->{__extend};
 	}
 
@@ -134,18 +128,18 @@ sub loadPlugin() {
 	my $plugin = getPluginDefinition();
 	DumpFile($fileAppPlugin, $plugin);
 	
-	insertTplVarsIntoCiomData();
-	instantiationTemplate($fileAppPlugin, {root => $CiomData}, $fileAppPlugin);
+	addTplVarsIntoCiomData();
+	processTemplate($fileAppPlugin, {root => $CiomData}, $fileAppPlugin);
 	$Plugin = LoadFile($fileAppPlugin);
 
-	my $NeedToMergeSections = [
+	my $SectionsToMerge = [
 		"build",
 		"package",
 		"deploy",
 		"dispatch"
 	];
-	foreach my $section (@{$NeedToMergeSections}) {
-		mergePluginAndAppSetting($section);
+	foreach my $section (@{$SectionsToMerge}) {
+		$CiomData->{$section} = merge $Plugin->{$section}, $CiomData->{$section} || {};
 	}
 }
 
@@ -223,10 +217,10 @@ sub generateStreameditFile() {
 	transformReAndGatherDynamicVars();
 
 	my $firstOut =  "${ShellStreamedit}.0";
-	instantiationTemplate($StreameditTpl, {files => $CiomData->{streameditItems}}, $firstOut);
+	processTemplate($StreameditTpl, {files => $CiomData->{streameditItems}}, $firstOut);
     $CiomUtil->exec("cat $firstOut");
     
-    instantiationTemplate($firstOut, {DynamicVars => $DynamicVars}, $ShellStreamedit);
+    processTemplate($firstOut, {DynamicVars => $DynamicVars}, $ShellStreamedit);
     $CiomUtil->exec("cat $ShellStreamedit");
 }
 
@@ -366,23 +360,17 @@ sub backup() {
 
 sub setOwnerAndMode($) {
 	my $info = shift;
-	my $host = $info->{host};
-	my $owner = $info->{owner};
-	my $group = $info->{group};
-	my $mode = $info->{mode};
-	my $locations = $info->{locations};
-
-	my $joinedLocations = join(' ', @{$locations});
-	if ($owner ne '') {
+	my $joinedLocations = join(' ', @{$info->{locations}});
+	if ($info->{owner} ne '') {
 		$CiomUtil->remoteExec({
-			host => $host,
-			cmd => "chown -R $owner:$group $joinedLocations"
+			host => $info->{host},
+			cmd => "chown -R  $info->{owner}:$info->{group} $joinedLocations"
 		});
 	}
-	if ($mode ne '') {
+	if ($info->{mode} ne '') {
 		$CiomUtil->remoteExec({
-			host => $host,
-			cmd => "chmod -R $mode $joinedLocations"
+			host => $info->{host},
+			cmd => "chmod -R $info->{mode} $joinedLocations"
 		});
 	}
 }
