@@ -19,6 +19,6 @@ deploy:
   group: apache
   mode: 755
 
-  instance:
+  host:
     post:
       - touch [% root.deploy.locations.0 %]/[% root.vca.appName %]/config/wsgi.py

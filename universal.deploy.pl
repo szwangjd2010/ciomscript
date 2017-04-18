@@ -385,7 +385,9 @@ sub deploy() {
 	my $mode = Dive($CiomData, qw(deploy mode)) || '';
 	my $locations = $CiomData->{deploy}->{locations};
 	my $hosts = $CiomData->{deploy}->{hosts};
-	foreach my $host (@{$hosts}) {
+	my $hostsCnt = $#{$hosts} + 1;
+	for (my $i = 0; $i < $hostsCnt; $i++) {
+		my $host = $hosts->[$i];
 		runHierarchyCmds("deploy host pre", $host);
 
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
@@ -408,6 +410,8 @@ sub deploy() {
 		});
 		
 		runHierarchyCmds("deploy host post", $host);
+
+		($i < $hostsCnt) && $CiomUtil->exec("sleep 5");
 	}
 
 	runHierarchyCmds("deploy local post");
