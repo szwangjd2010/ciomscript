@@ -25,6 +25,8 @@ sub getAppPkgUrl();
 my $version = $ARGV[0];
 my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
+my $DoRollback = $ARGV[3] || 0;
+my $RollbackTo = $ARGV[4] || 0;
 
 my $CiomUtil = new CiomUtil(1);
 my $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
@@ -177,7 +179,7 @@ sub updateCode() {
 			]);
 		}
 		$CiomUtil->exec("$cmdSvnPrefix info $name > $name/.repoinfo");
-		$CiomUtil->exec("grep -P '(Revision|Last Changed Rev)' $name/.repoinfo | awk -F': ' '{print \$2}' | tr '\n', '.' | rev | cut -c 2- | rev > $name/.rev");
+		$CiomUtil->exec("grep -P '(Revision|Last Changed Rev)' $name/.repoinfo | awk -F': ' '{print \$2}' | tr '\n', '' | rev | cut -c 2- | rev > $name/.rev");
 	}
 }
 
@@ -348,12 +350,17 @@ sub backup() {
 	my $baseFindCmd = "find $remoteWrokspace -name '${appName}.*.tar.gz' -mtime +15";
 	my $location = $CiomData->{deploy}->{locations}->[0];
 	my $hosts = $CiomData->{deploy}->{hosts};
+	my $revFile = "${appName}/.rev";
+	my $getRevCmd = "\$(cat $revFile)";
 
 	foreach my $host (@{$hosts}) {
 		$CiomUtil->remoteExec({
 			host => $host,
 			cmd => [
-				"cd $location; tar -czvf $remoteWrokspace/${appName}.${Timestamp}.tar.gz ${appName}; rm -rf ${appName}",
+				"cd $location",
+				"if [ ! -e $revFile ]; then touch $revFile; fi",
+				"tar -czvf $remoteWrokspace/${appName}.${getRevCmd}.${Timestamp}.tar.gz ${appName}",
+				"rm -rf ${appName}",
 				"((( \$($baseFindCmd | wc -l) > 5 ))) && $baseFindCmd -delete"
 			]
 		});
@@ -411,13 +418,42 @@ sub deploy() {
 		
 		runHierarchyCmds("deploy host post", $host);
 
-		($i < $hostsCnt) && $CiomUtil->exec("sleep 5");
+		if ($hostsCnt > 1 && $i < $hostsCnt - 1) {
+			$CiomUtil->exec("sleep 5");
+		}
 	}
 
 	runHierarchyCmds("deploy local post");
 }
 
+sub deliver() {
+	enterWorkspace();
+	initWorkspace();
+	loadPlugin();
+	persistCiomAndPluginInfo();
+	updateCode();
+	replaceCustomizedFiles();
+	streamedit();
+	build();
+	packageApp();
+	sumPackage();
+	putPackageToRepo();
+	dispatch();
+	backup();
+	deploy();
+	leaveWorkspace();
+}
+
+sub rollback() {
+
+}
+
 sub main() {
+	if ($DoRollback eq "DoRollback") {
+		rollback();
+	} else {
+		deliver();
+	}
 	enterWorkspace();
 	initWorkspace();
 	loadPlugin();

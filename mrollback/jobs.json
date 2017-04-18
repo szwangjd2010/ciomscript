@@ -8,5 +8,10 @@
     "version": "v0",
     "cloudId": "dev",
     "appName": "qidaweb"
+  },
+  "dev.env-yxt.crm.api.deploy.and.rollback": {
+    "version": "v0",
+    "cloudId": "dev",
+    "appName": "crmapi"
   }
 }
