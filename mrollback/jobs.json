@@ -1,9 +1,4 @@
 {
-  "dev.env-yxt.crm.api.rollback": {
-    "version": "v0",
-    "cloudId": "dev",
-    "appName": "crmapi"
-  },
   "test-yxt.qida.web.rollback": {
     "version": "v0",
     "cloudId": "dev",
@@ -13,5 +8,10 @@
     "version": "v0",
     "cloudId": "dev",
     "appName": "crmapi"
+  },
+  "dev.env-yxt.crm.h5.mobile.deploy.and.rollback": {
+    "version": "v0",
+    "cloudId": "dev",
+    "appName": "crmh5web"
   }
 }

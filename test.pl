@@ -7,22 +7,15 @@ use Clone 'clone';
 use Hash::Merge::Simple qw( merge );
 use Data::Dumper;
 
+my $p1 = $ARGV[0];
 
-sub a {
-    local *b = sub {
-        my ($v1, $v2) = @_;
-
-        print $v1 . "\n";
-        print $v2 . "\n";
-        return 123;
-    };
-    return b(11, 22);  # Works as expected
+sub p {
+    my ($l) = @_;
+    print "${l}\n";
 }
 
-
-a();
-
-my $repos = [1,2,3];
-foreach my $repo (@{$repos}) {
-    print $repo . "\n";
+if ($p1 eq "DoRollback") {
+    p("eq");
+} else {
+    p("ne");
 }

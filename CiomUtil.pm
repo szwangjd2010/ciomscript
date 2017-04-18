@@ -106,6 +106,21 @@ sub remoteExec() {
 	}
 }
 
+sub isEqual() {
+	my $self = shift;
+	my $left = shift;
+	my $right = shift;
+
+	return defined($left) && $left eq $right;
+}
+
+sub isNotEmpty() {
+	my $self = shift;
+	my $v = shift;
+
+	return defined($v) && $v ne ''; 
+}
+
 sub upload() {
 	my $self = shift;
 	my $local = shift;

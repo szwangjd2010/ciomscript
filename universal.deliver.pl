@@ -25,8 +25,8 @@ sub getAppPkgUrl();
 my $version = $ARGV[0];
 my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
-my $DoRollback = $ARGV[3] || 0;
-my $RollbackTo = $ARGV[4] || 0;
+my $DoRollback = $ARGV[3];
+my $RollbackTo = $ARGV[4];
 
 my $CiomUtil = new CiomUtil(1);
 my $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
@@ -183,7 +183,7 @@ sub updateCode() {
 	}
 }
 
-sub replaceCustomizedFiles() {
+sub customizeFiles() {
 	my $customizedFilesLocation = "$AppVcaHome/customized/";
 	if ( -d $customizedFilesLocation) {
 		$CiomUtil->exec("/bin/cp -rf $customizedFilesLocation/* ./");
@@ -359,7 +359,7 @@ sub backup() {
 			cmd => [
 				"cd $location",
 				"if [ ! -e $revFile ]; then touch $revFile; fi",
-				"tar -czvf $remoteWrokspace/${appName}.${getRevCmd}.${Timestamp}.tar.gz ${appName}",
+				"tar -czvpf $remoteWrokspace/${appName}.${getRevCmd}.${Timestamp}.tar.gz ${appName}",
 				"rm -rf ${appName}",
 				"((( \$($baseFindCmd | wc -l) > 5 ))) && $baseFindCmd -delete"
 			]
@@ -367,29 +367,35 @@ sub backup() {
 	}
 }
 
-sub setOwnerAndMode($) {
-	my $info = shift;
-	my $joinedLocations = join(' ', @{$info->{locations}});
-	if ($info->{owner} ne '') {
+sub setPermissions {
+	my ($host, $locations, $permissions) = @_;
+	my $joinedLocations = join(' ', @{$locations});
+	if ($permissions->{owner} ne '') {
 		$CiomUtil->remoteExec({
-			host => $info->{host},
-			cmd => "chown -R $info->{owner}:$info->{group} $joinedLocations"
+			host => $host,
+			cmd => "chown -R $permissions->{owner}:$permissions->{group} $joinedLocations"
 		});
 	}
-	if ($info->{mode} ne '') {
+	if ($permissions->{mode} ne '') {
 		$CiomUtil->remoteExec({
-			host => $info->{host},
-			cmd => "chmod -R $info->{mode} $joinedLocations"
+			host => $host,
+			cmd => "chmod -R $permissions->{mode} $joinedLocations"
 		});
 	}
+}
+
+sub getPermissions() {
+	return {
+		owner => Dive($CiomData, qw(deploy owner)) || '',
+		group => Dive($CiomData, qw(deploy group)) || '',
+		mode => Dive($CiomData, qw(deploy mode)) || ''
+	};
 }
 
 sub deploy() {
 	runHierarchyCmds("deploy local pre");
 
-	my $owner = Dive($CiomData, qw(deploy owner)) || '';
-	my $group = Dive($CiomData, qw(deploy group)) || '';
-	my $mode = Dive($CiomData, qw(deploy mode)) || '';
+	my $permissions = getPermissions();
 	my $locations = $CiomData->{deploy}->{locations};
 	my $hosts = $CiomData->{deploy}->{hosts};
 	my $hostsCnt = $#{$hosts} + 1;
@@ -408,13 +414,7 @@ sub deploy() {
 			runHierarchyCmds("deploy instance post", $host);
 		}
 
-		setOwnerAndMode({
-			host => $host,
-			owner => $owner,
-			group => $group,
-			mode => $mode,
-			locations => $locations
-		});
+		setPermissions($host, $locations, $permissions);
 		
 		runHierarchyCmds("deploy host post", $host);
 
@@ -426,13 +426,9 @@ sub deploy() {
 	runHierarchyCmds("deploy local post");
 }
 
-sub deliver() {
-	enterWorkspace();
-	initWorkspace();
-	loadPlugin();
-	persistCiomAndPluginInfo();
+sub wayDeliver() {
 	updateCode();
-	replaceCustomizedFiles();
+	customizeFiles();
 	streamedit();
 	build();
 	packageApp();
@@ -441,33 +437,60 @@ sub deliver() {
 	dispatch();
 	backup();
 	deploy();
-	leaveWorkspace();
 }
 
+# begin - wayRollback subs
 sub rollback() {
+	runHierarchyCmds("rollback local pre");
 
+	my $permissions = getPermissions();
+	my $locations = $CiomData->{deploy}->{locations};
+	my $hosts = $CiomData->{deploy}->{hosts};
+	my $hostsCnt = $#{$hosts} + 1;
+	for (my $i = 0; $i < $hostsCnt; $i++) {
+		my $host = $hosts->[$i];
+		runHierarchyCmds("rollback host pre", $host);
+
+		for (my $j = 0; $j <= $#{$locations}; $j++) {
+			runHierarchyCmds("rollback instance pre", $host);
+			$CiomUtil->remoteExec({
+				host => $host,
+				cmd => getDeployAppPkgCmd($j, $locations)
+			});
+
+			runHierarchyCmds("rollback instance cmds", $host);
+			runHierarchyCmds("rollback instance post", $host);
+		}
+
+		setPermissions($host, $locations, $permissions);
+		
+		runHierarchyCmds("rollback host post", $host);
+
+		if ($hostsCnt > 1 && $i < $hostsCnt - 1) {
+			$CiomUtil->exec("sleep 5");
+		}
+	}
+
+	runHierarchyCmds("deploy local post");
+}
+# end - wayRollback subs 
+
+sub wayRollback() {
+	rollback();
 }
 
 sub main() {
-	if ($DoRollback eq "DoRollback") {
-		rollback();
-	} else {
-		deliver();
-	}
 	enterWorkspace();
 	initWorkspace();
 	loadPlugin();
 	persistCiomAndPluginInfo();
-	updateCode();
-	replaceCustomizedFiles();
-	streamedit();
-	build();
-	packageApp();
-	sumPackage();
-	putPackageToRepo();
-	dispatch();
-	backup();
-	deploy();
+
+	if ($CiomUtil->isEqual($DoRollback, "DoRollback")) {
+		wayRollback();
+	} else {
+		wayDeliver();
+	}
+
 	leaveWorkspace();
 
 	return 0;
