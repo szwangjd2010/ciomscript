@@ -20,7 +20,5 @@ deploy:
   mode: 755
 
   instance:
-    pre: []
-    cmds: []
     post:
       - touch [% root.deploy.locations.0 %]/[% root.vca.appName %]/config/wsgi.py
