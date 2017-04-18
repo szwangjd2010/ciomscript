@@ -29,7 +29,6 @@ my $appName = $ARGV[2];
 my $CiomUtil = new CiomUtil(1);
 my $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
 my $CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
-my $O_CiomData = clone($CiomData);
 my $AppType = $CiomData->{AppType};
 my $Plugin;
 
@@ -176,7 +175,9 @@ sub updateCode() {
 				"$cmdSvnPrefix revert -R $name",
 				"$cmdSvnPrefix update $name"
 			]);
-		}					
+		}
+		$CiomUtil->exec("$cmdSvnPrefix info $name > $name/.repoinfo");
+		$CiomUtil->exec("grep -P '(Revision|Last Changed Rev)' $name/.repoinfo | awk -F': ' '{print \$2}' | tr '\n', '.' | rev | cut -c 2- | rev > $name/.rev");
 	}
 }
 
@@ -266,7 +267,7 @@ sub getIncludeFileRoot($) {
 	return substr($include, 0, $idxFileRoot);	
 }
 
-sub pkgApp() {
+sub packageApp() {
 	my $includes = $CiomData->{package}->{includes};
 	my $repos = $CiomData->{scm}->{repos};
 	my $includesCnt = $#{$includes} + 1;
@@ -296,14 +297,15 @@ sub pkgApp() {
 			$CiomUtil->exec("/bin/cp -Rf $fileRoot/* $dir4Pkg/");
 		}
 	}
+	$CiomUtil->exec("/bin/cp -f *.revinfo *.rev $Output/");	
 	$CiomUtil->exec("(cd $Output; tar --exclude-vcs -czvf $ENV{WORKSPACE}/$AppPkgFile $appName)");		
 }
 
-sub sumPkg() {
+sub sumPackage() {
 	$CiomUtil->exec("sha256sum $AppPkgFile > $AppPkgSumFile");
 }
 
-sub putPkgToRepo() {
+sub putPackageToRepo() {
 	my $appRepoLocation = "$ENV{CIOM_REPO_LOCAL_PATH}/$version/$cloudId/";
 	$CiomUtil->exec("mkdir -p $appRepoLocation");
 	$CiomUtil->exec("/bin/cp -f $AppPkgFile $AppPkgSumFile $appRepoLocation");
@@ -364,7 +366,7 @@ sub setOwnerAndMode($) {
 	if ($info->{owner} ne '') {
 		$CiomUtil->remoteExec({
 			host => $info->{host},
-			cmd => "chown -R  $info->{owner}:$info->{group} $joinedLocations"
+			cmd => "chown -R $info->{owner}:$info->{group} $joinedLocations"
 		});
 	}
 	if ($info->{mode} ne '') {
@@ -420,9 +422,9 @@ sub main() {
 	replaceCustomizedFiles();
 	streamedit();
 	build();
-	pkgApp();
-	sumPkg();
-	putPkgToRepo();
+	packageApp();
+	sumPackage();
+	putPackageToRepo();
 	dispatch();
 	backup();
 	deploy();
