@@ -1,5 +1,5 @@
 {
-  "test-yxt.qida.web.rollback": {
+  "dev.env-yxt.qida.web.deploy.and.rollback": {
     "version": "v0",
     "cloudId": "dev",
     "appName": "qidaweb"

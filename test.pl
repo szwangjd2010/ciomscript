@@ -9,6 +9,8 @@ use Data::Dumper;
 
 my $p1 = $ARGV[0];
 
+
+my $v = 
 sub p {
     my ($l) = @_;
     print "${l}\n";

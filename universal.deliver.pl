@@ -20,8 +20,6 @@ use open IN => ":encoding(utf8)", OUT => ":utf8";
 use IO::Handle;
 STDOUT->autoflush(1);
 
-sub getAppPkgUrl();
-
 my $version = $ARGV[0];
 my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
@@ -29,28 +27,18 @@ my $DoRollback = $ARGV[3];
 my $RollbackTo = $ARGV[4];
 
 my $CiomUtil = new CiomUtil(1);
+my $Timestamp = $CiomUtil->getTimestamp();
 my $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
 my $CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
 my $AppType = $CiomData->{AppType};
-my $Plugin;
-
 my $Output = "_output";
-my $AppPkgName = "$appName.tar.gz";
-my $AppPkgFile = "$Output/$AppPkgName";
-my $AppPkgUrl = getAppPkgUrl();
-my $AppPkgSumFile = "$Output/$appName.sha256sum";
-my $Timestamp = $CiomUtil->getTimestamp();
+my $OldPwd = getcwd();
 
 my $DynamicVars = {};
-my $StreameditTpl = "$ENV{CIOM_SCRIPT_HOME}/streamedit.sh.tpl";
-my $ShellStreamedit = "$Output/streamedit.ciom";
-my $OldPwd = getcwd();
-my $Tpl = Template->new({
-		ABSOLUTE => 1,
-		TAG_STYLE => 'outline',
-		PRE_CHOMP  => 0,
-	    POST_CHOMP => 0
-	});
+my $AppPkg = {};
+my $Plugin;
+my $Tpl;
+
 
 sub getBuildLogFile() {
 	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
@@ -64,8 +52,24 @@ sub getAppPkgUrl() {
 		$ENV{$repoBaseUrlKey},
 		$version,
 		$cloudId,
-		$AppPkgName
+		$AppPkg->{name}
 	);
+}
+
+sub initTpl() {
+	$Tpl = Template->new({
+		ABSOLUTE => 1,
+		TAG_STYLE => 'outline',
+		PRE_CHOMP  => 0,
+	    POST_CHOMP => 0
+	});	
+}
+
+sub initAppPkgInfo() {
+	$AppPkg->{name} = "$appName.tar.gz";
+	$AppPkg->{file} = "$Output/$appName.tar.gz";
+	$AppPkg->{url} = getAppPkgUrl();
+	$AppPkg->{sumfile} = "$Output/$appName.sha256sum";
 }
 
 sub processTemplate {
@@ -152,6 +156,12 @@ sub initWorkspace() {
 	$CiomUtil->exec("mkdir -p $Output");
 }
 
+sub init() {
+	initWorkspace();
+	initAppPkgInfo();
+	initTpl();
+}
+
 sub leaveWorkspace() {
 	chdir($OldPwd);
 }
@@ -179,7 +189,7 @@ sub updateCode() {
 			]);
 		}
 		$CiomUtil->exec("$cmdSvnPrefix info $name > $name/.repoinfo");
-		$CiomUtil->exec("grep -P '(Revision|Last Changed Rev)' $name/.repoinfo | awk -F': ' '{print \$2}' | tr '\n', '' | rev | cut -c 2- | rev > $name/.rev");
+		$CiomUtil->exec("grep -P '(Revision|Last Changed Rev)' $name/.repoinfo | awk -F': ' '{print \$2}' | tr '\n', '+' | rev | cut -c 2- | rev > $name/.rev");
 	}
 }
 
@@ -216,20 +226,17 @@ sub transformReAndGatherDynamicVars() {
 	}
 }
 
-sub generateStreameditFile() {
-	transformReAndGatherDynamicVars();
+sub streamedit() {
+	my $StreameditTpl = "$ENV{CIOM_SCRIPT_HOME}/streamedit.sh.tpl";
+	my $StreameditFile = "$Output/streamedit.ciom";
+	my $firstOut =  "${StreameditFile}.0";
 
-	my $firstOut =  "${ShellStreamedit}.0";
 	processTemplate($StreameditTpl, {files => $CiomData->{streameditItems}}, $firstOut);
     $CiomUtil->exec("cat $firstOut");
     
-    processTemplate($firstOut, {DynamicVars => $DynamicVars}, $ShellStreamedit);
-    $CiomUtil->exec("cat $ShellStreamedit");
-}
-
-sub streamedit() {
-	generateStreameditFile();
-	$CiomUtil->exec("bash $ShellStreamedit");
+    processTemplate($firstOut, {DynamicVars => $DynamicVars}, $StreameditFile);
+    $CiomUtil->exec("cat $StreameditFile");
+	$CiomUtil->exec("bash $StreameditFile");
 }
 
 sub runHierarchyCmds {
@@ -280,7 +287,7 @@ sub packageApp() {
 	if ($include0 eq '*' 
 		&& $reposCnt == 1 
 		&& $repo0Name eq $appName) {
-		$CiomUtil->exec("tar --exclude-vcs -czvf $AppPkgFile * --exclude $Output");
+		$CiomUtil->exec("tar --exclude-vcs -czvf $AppPkg->{file} * --exclude $Output");
 		
 		return;
 	}
@@ -300,17 +307,17 @@ sub packageApp() {
 		}
 	}
 	$CiomUtil->exec("/bin/cp -f *.revinfo *.rev $Output/");	
-	$CiomUtil->exec("(cd $Output; tar --exclude-vcs -czvf $ENV{WORKSPACE}/$AppPkgFile $appName)");		
+	$CiomUtil->exec("(cd $Output; tar --exclude-vcs -czvf $ENV{WORKSPACE}/$AppPkg->{file} $appName)");		
 }
 
 sub sumPackage() {
-	$CiomUtil->exec("sha256sum $AppPkgFile > $AppPkgSumFile");
+	$CiomUtil->exec("sha256sum $AppPkg->{file} > $AppPkg->{sumfile}");
 }
 
 sub putPackageToRepo() {
 	my $appRepoLocation = "$ENV{CIOM_REPO_LOCAL_PATH}/$version/$cloudId/";
 	$CiomUtil->exec("mkdir -p $appRepoLocation");
-	$CiomUtil->exec("/bin/cp -f $AppPkgFile $AppPkgSumFile $appRepoLocation");
+	$CiomUtil->exec("/bin/cp -f $AppPkg->{file} $AppPkg->{sumfile} $appRepoLocation");
 }
 
 sub getRemoteWorkspace() {
@@ -325,9 +332,9 @@ sub dispatch() {
 	my $ansibleCmdPrefix = "ansible all -i $joinedHosts -u root";
 	$CiomUtil->exec("$ansibleCmdPrefix -m file -a \"path=$remoteWrokspace state=directory\"");
 	if ($method eq "push") {
-		$CiomUtil->exec("$ansibleCmdPrefix -m copy -a \"src=$AppPkgFile dest=$remoteWrokspace\"");
+		$CiomUtil->exec("$ansibleCmdPrefix -m copy -a \"src=$AppPkg->{file} dest=$remoteWrokspace\"");
 	} else {
-		$CiomUtil->exec("$ansibleCmdPrefix -m get_url -a \"url=$AppPkgUrl dest=$remoteWrokspace\"");
+		$CiomUtil->exec("$ansibleCmdPrefix -m get_url -a \"url=$AppPkg->{url} dest=$remoteWrokspace\"");
 	}
 }
 
@@ -338,7 +345,7 @@ sub getDeployAppPkgCmd($$) {
 	my $remoteWrokspace = getRemoteWorkspace();
 	my $mkdirCmd = "mkdir -p $locations->[$idx]";
 	my $cmd = ($idx == 0) ?
-				"tar -xzvf $remoteWrokspace/$AppPkgName -C $locations->[0]/"
+				"tar -xzvf $remoteWrokspace/$AppPkg->{name} -C $locations->[0]/"
 				:
 				"rm -rf $locations->[$idx]/$appName; ln -s $locations->[0]/$appName $locations->[$idx]/$appName";
 
@@ -429,6 +436,7 @@ sub deploy() {
 sub wayDeliver() {
 	updateCode();
 	customizeFiles();
+	transformReAndGatherDynamicVars();
 	streamedit();
 	build();
 	packageApp();
@@ -440,6 +448,10 @@ sub wayDeliver() {
 }
 
 # begin - wayRollback subs
+sub getRollbackableList() {
+
+}
+
 sub rollback() {
 	runHierarchyCmds("rollback local pre");
 
@@ -476,12 +488,13 @@ sub rollback() {
 # end - wayRollback subs 
 
 sub wayRollback() {
+	backup();
 	rollback();
 }
 
 sub main() {
 	enterWorkspace();
-	initWorkspace();
+	init();
 	loadPlugin();
 	persistCiomAndPluginInfo();
 
