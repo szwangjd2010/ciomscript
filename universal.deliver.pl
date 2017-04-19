@@ -422,7 +422,7 @@ sub deploy($) {
 			runHierarchyCmds("$activeNode instance cmds", $host);
 			runHierarchyCmds("$activeNode instance post", $host);
 		}
-		
+
 		setPermissions($host, $locations, $permissions);
 		runHierarchyCmds("$activeNode host post", $host);
 
@@ -465,13 +465,21 @@ sub makeRollbackToAsElect {
 	});
 }
 
-# end - wayRollback subs 
+sub initRollbackDefinition() {
+	if (defined($CiomData->{rollback})) {
+		return;
+	}
+
+	$CiomData->{rollback} = clone($CiomData->{deploy});
+}
 
 sub wayRollback() {
+	initRollbackDefinition();
 	backup();
 	makeRollbackToAsElect();
 	deploy("rollback");
 }
+# end - wayRollback subs 
 
 sub main() {
 	enterWorkspace();
