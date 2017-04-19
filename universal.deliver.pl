@@ -453,7 +453,7 @@ sub getRollbackableList() {
 
 }
 
-sub makeRollbackToAsElect {
+sub electRollbackTo {
 	my ($host) = @_;
 	my $remoteWrokspace = getRemoteWorkspace();
 	$CiomUtil->remoteExec({
@@ -476,7 +476,7 @@ sub initRollbackDefinition() {
 sub wayRollback() {
 	initRollbackDefinition();
 	backup();
-	makeRollbackToAsElect();
+	electRollbackTo();
 	deploy("rollback");
 }
 # end - wayRollback subs 
