@@ -466,11 +466,7 @@ sub electRollbackTo {
 }
 
 sub initRollbackDefinition() {
-	if (defined($CiomData->{rollback})) {
-		return;
-	}
-
-	$CiomData->{rollback} = clone($CiomData->{deploy});
+	$CiomData->{rollback} = merge $CiomData->{deploy}, $CiomData->{rollback};
 }
 
 sub wayRollback() {

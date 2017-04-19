@@ -58,5 +58,10 @@ deploy:
   local:
     pre: []
     post: []
-  
+
+# rollback should include [host, instance, local] nodes just like in deploy node
+# final rollback is the merged result of deploy and rollback(prefer) nodes
+rollback: {}
+
+
     
