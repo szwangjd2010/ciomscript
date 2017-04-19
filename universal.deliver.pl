@@ -23,8 +23,8 @@ STDOUT->autoflush(1);
 my $version = $ARGV[0];
 my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
-my $DoRollback = $ARGV[3];
-my $RollbackTo = $ARGV[4];
+my $DoRollback = $ARGV[3] || '';
+my $RollbackTo = $ARGV[4] || '';
 
 my $CiomUtil = new CiomUtil(1);
 my $Timestamp = $CiomUtil->getTimestamp();
@@ -338,7 +338,7 @@ sub dispatch() {
 	}
 }
 
-sub getDeployAppPkgCmd($$) {
+sub getUnpackCmdByLocationIdx($$) {
 	my $idx = shift;
 	my $locations = shift;
 
@@ -399,38 +399,39 @@ sub getPermissions() {
 	};
 }
 
-sub deploy() {
-	runHierarchyCmds("deploy local pre");
+sub deploy($) {
+	my $activeNode = shift;
+
+	runHierarchyCmds("$activeNode local pre");
 
 	my $permissions = getPermissions();
-	my $locations = $CiomData->{deploy}->{locations};
-	my $hosts = $CiomData->{deploy}->{hosts};
+	my $locations = $CiomData->{$activeNode}->{locations};
+	my $hosts = $CiomData->{$activeNode}->{hosts};
 	my $hostsCnt = $#{$hosts} + 1;
 	for (my $i = 0; $i < $hostsCnt; $i++) {
 		my $host = $hosts->[$i];
-		runHierarchyCmds("deploy host pre", $host);
+		
+		runHierarchyCmds("$activeNode host pre", $host);
 
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
-			runHierarchyCmds("deploy instance pre", $host);
+			runHierarchyCmds("$activeNode instance pre", $host);
 			$CiomUtil->remoteExec({
 				host => $host,
-				cmd => getDeployAppPkgCmd($j, $locations)
+				cmd => getUnpackCmdByLocationIdx($j, $locations)
 			});
-
-			runHierarchyCmds("deploy instance cmds", $host);
-			runHierarchyCmds("deploy instance post", $host);
+			runHierarchyCmds("$activeNode instance cmds", $host);
+			runHierarchyCmds("$activeNode instance post", $host);
 		}
-
-		setPermissions($host, $locations, $permissions);
 		
-		runHierarchyCmds("deploy host post", $host);
+		setPermissions($host, $locations, $permissions);
+		runHierarchyCmds("$activeNode host post", $host);
 
 		if ($hostsCnt > 1 && $i < $hostsCnt - 1) {
 			$CiomUtil->exec("sleep 5");
 		}
 	}
 
-	runHierarchyCmds("deploy local post");
+	runHierarchyCmds("$activeNode local post");
 }
 
 sub wayDeliver() {
@@ -444,7 +445,7 @@ sub wayDeliver() {
 	putPackageToRepo();
 	dispatch();
 	backup();
-	deploy();
+	deploy("deploy");
 }
 
 # begin - wayRollback subs
@@ -452,44 +453,24 @@ sub getRollbackableList() {
 
 }
 
-sub rollback() {
-	runHierarchyCmds("rollback local pre");
-
-	my $permissions = getPermissions();
-	my $locations = $CiomData->{deploy}->{locations};
-	my $hosts = $CiomData->{deploy}->{hosts};
-	my $hostsCnt = $#{$hosts} + 1;
-	for (my $i = 0; $i < $hostsCnt; $i++) {
-		my $host = $hosts->[$i];
-		runHierarchyCmds("rollback host pre", $host);
-
-		for (my $j = 0; $j <= $#{$locations}; $j++) {
-			runHierarchyCmds("rollback instance pre", $host);
-			$CiomUtil->remoteExec({
-				host => $host,
-				cmd => getDeployAppPkgCmd($j, $locations)
-			});
-
-			runHierarchyCmds("rollback instance cmds", $host);
-			runHierarchyCmds("rollback instance post", $host);
-		}
-
-		setPermissions($host, $locations, $permissions);
-		
-		runHierarchyCmds("rollback host post", $host);
-
-		if ($hostsCnt > 1 && $i < $hostsCnt - 1) {
-			$CiomUtil->exec("sleep 5");
-		}
-	}
-
-	runHierarchyCmds("deploy local post");
+sub makeRollbackToAsElect {
+	my ($host) = @_;
+	my $remoteWrokspace = getRemoteWorkspace();
+	$CiomUtil->remoteExec({
+		host => $host,
+		cmd => [
+			"rm -rf $remoteWrokspace/$AppPkg->{name}",
+			"ln -s $remoteWrokspace/$RollbackTo $remoteWrokspace/$AppPkg->{name}"
+		]
+	});
 }
+
 # end - wayRollback subs 
 
 sub wayRollback() {
 	backup();
-	rollback();
+	makeRollbackToAsElect();
+	deploy("rollback");
 }
 
 sub main() {
@@ -498,7 +479,7 @@ sub main() {
 	loadPlugin();
 	persistCiomAndPluginInfo();
 
-	if ($CiomUtil->isEqual($DoRollback, "DoRollback")) {
+	if ($DoRollback eq 'DoRollback') {
 		wayRollback();
 	} else {
 		wayDeliver();
