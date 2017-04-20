@@ -1,5 +1,6 @@
 #!/usr/bin/perl -W
 #
+package T123;
 use strict;
 use warnings;
 use Template;
@@ -7,17 +8,23 @@ use Clone 'clone';
 use Hash::Merge::Simple qw( merge );
 use Data::Dumper;
 
-my $p1 = $ARGV[0];
+my $p1 = $ARGV[0] || 'm2';
 
+sub way_m1() {
+    p("m1");
+}
 
-my $v = 
+sub way_m2() {
+    p("m2");
+}
+
 sub p {
     my ($l) = @_;
-    print "${l}\n";
+    print "$l\n";
 }
+no strict "refs"; 
 
-if ($p1 eq "DoRollback") {
-    p("eq");
-} else {
-    p("ne");
-}
+my $fn = "way_$p1";
+$fn->();
+
+T123->{$fn}();

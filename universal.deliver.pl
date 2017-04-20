@@ -1,6 +1,8 @@
 #!/usr/bin/perl -W
 # 
 #
+package UniveralDeliver;
+
 use lib "$ENV{CIOM_SCRIPT_HOME}";
 use strict;
 use warnings;
@@ -11,19 +13,24 @@ use Hash::Merge::Simple qw(merge);
 use Clone 'clone';
 use Template;
 use Cwd;
-use CiomUtil;
+use File::Slurp;
 use YAML::XS qw(LoadFile DumpFile);
 use JSON::Parse 'json_file_to_perl';
 use String::Escape 'escape';
 use open ":encoding(utf8)";
 use open IN => ":encoding(utf8)", OUT => ":utf8";
 use IO::Handle;
+use CiomUtil;
 STDOUT->autoflush(1);
 
 my $version = $ARGV[0];
 my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
-my $DoRollback = $ARGV[3] || '';
+
+# $DeliverMode: deploy or rollback
+# it's corresponding to same name node which defined in %app%.ciom & %plugin%.yaml
+# in deploy process, will execute pre, cmds, post actions defined in the $DeliverMode node
+my $DeliverMode = $ARGV[3] || 'deploy'; 
 my $RollbackTo = $ARGV[4] || '';
 
 my $CiomUtil = new CiomUtil(1);
@@ -36,8 +43,10 @@ my $OldPwd = getcwd();
 
 my $DynamicVars = {};
 my $AppPkg = {};
+my $Rollback = {};
 my $Plugin;
 my $Tpl;
+my $RevisionId;
 
 
 sub getBuildLogFile() {
@@ -66,10 +75,11 @@ sub initTpl() {
 }
 
 sub initAppPkgInfo() {
-	$AppPkg->{name} = "$appName.tar.gz";
-	$AppPkg->{file} = "$Output/$appName.tar.gz";
+	$AppPkg->{name} = "$appName.$RevisionId.tar.gz";
+	$AppPkg->{file} = "$Output/$AppPkg->{name}";
 	$AppPkg->{url} = getAppPkgUrl();
 	$AppPkg->{sumfile} = "$Output/$appName.sha256sum";
+	$AppPkg->{repoLocation} = "$ENV{CIOM_REPO_LOCAL_PATH}/$version/$cloudId/$appName/";
 }
 
 sub processTemplate {
@@ -156,14 +166,17 @@ sub initWorkspace() {
 	$CiomUtil->exec("mkdir -p $Output");
 }
 
-sub init() {
-	initWorkspace();
-	initAppPkgInfo();
-	initTpl();
-}
-
 sub leaveWorkspace() {
 	chdir($OldPwd);
+}
+
+sub setRevisionId($) {
+	my $id = shift;
+	if (defined($id)) {
+		$RevisionId = $id;	
+	} else {
+		$RevisionId = $id$CiomUtil->exec("cat $CiomData->{repos}->[0]->{name}/.revid");
+	}
 }
 
 sub updateCode() {
@@ -189,7 +202,7 @@ sub updateCode() {
 			]);
 		}
 		$CiomUtil->exec("$cmdSvnPrefix info $name > $name/.repoinfo");
-		$CiomUtil->exec("grep -P '(Revision|Last Changed Rev)' $name/.repoinfo | awk -F': ' '{print \$2}' | tr '\n', '+' | rev | cut -c 2- | rev > $name/.rev");
+		$CiomUtil->exec("grep -P '(Revision|Last Changed Rev)' $name/.repoinfo | awk -F': ' '{print \$2.$Timestamp}' | tr '\n', '+' | rev | cut -c 2- | rev > $name/.revid");
 	}
 }
 
@@ -315,9 +328,8 @@ sub sumPackage() {
 }
 
 sub putPackageToRepo() {
-	my $appRepoLocation = "$ENV{CIOM_REPO_LOCAL_PATH}/$version/$cloudId/";
-	$CiomUtil->exec("mkdir -p $appRepoLocation");
-	$CiomUtil->exec("/bin/cp -f $AppPkg->{file} $AppPkg->{sumfile} $appRepoLocation");
+	$CiomUtil->exec("mkdir -p $AppPkg->{repoLocation}");
+	$CiomUtil->exec("/bin/cp -f $AppPkg->{file} $AppPkg->{sumfile} $AppPkg->{repoLocation}");
 }
 
 sub getRemoteWorkspace() {
@@ -332,7 +344,7 @@ sub dispatch() {
 	my $ansibleCmdPrefix = "ansible all -i $joinedHosts -u root";
 	$CiomUtil->exec("$ansibleCmdPrefix -m file -a \"path=$remoteWrokspace state=directory\"");
 	if ($method eq "push") {
-		$CiomUtil->exec("$ansibleCmdPrefix -m copy -a \"src=$AppPkg->{file} dest=$remoteWrokspace\"");
+		$CiomUtil->exec("$ansibleCmdPrefix -m copy -a \"src=$AppPkg->{repoLocation}/$AppPkg->{file} dest=$remoteWrokspace\"");
 	} else {
 		$CiomUtil->exec("$ansibleCmdPrefix -m get_url -a \"url=$AppPkg->{url} dest=$remoteWrokspace\"");
 	}
@@ -350,28 +362,6 @@ sub getUnpackCmdByLocationIdx($$) {
 				"rm -rf $locations->[$idx]/$appName; ln -s $locations->[0]/$appName $locations->[$idx]/$appName";
 
 	return "$mkdirCmd; $cmd";
-}
-
-sub backup() {
-	my $remoteWrokspace = getRemoteWorkspace();
-	my $baseFindCmd = "find $remoteWrokspace -name '${appName}.*.tar.gz' -mtime +15";
-	my $location = $CiomData->{deploy}->{locations}->[0];
-	my $hosts = $CiomData->{deploy}->{hosts};
-	my $revFile = "${appName}/.rev";
-	my $getRevCmd = "\$(cat $revFile)";
-
-	foreach my $host (@{$hosts}) {
-		$CiomUtil->remoteExec({
-			host => $host,
-			cmd => [
-				"cd $location",
-				"if [ ! -e $revFile ]; then touch $revFile; fi",
-				"tar -czvpf $remoteWrokspace/${appName}.${getRevCmd}.${Timestamp}.tar.gz ${appName}",
-				"rm -rf ${appName}",
-				"((( \$($baseFindCmd | wc -l) > 5 ))) && $baseFindCmd -delete"
-			]
-		});
-	}
 }
 
 sub setPermissions {
@@ -399,98 +389,102 @@ sub getPermissions() {
 	};
 }
 
-sub deploy($) {
-	my $activeNode = shift;
-
-	runHierarchyCmds("$activeNode local pre");
+sub deploy() {
+	runHierarchyCmds("$DeliverMode local pre");
 
 	my $permissions = getPermissions();
-	my $locations = $CiomData->{$activeNode}->{locations};
-	my $hosts = $CiomData->{$activeNode}->{hosts};
+	my $locations = $CiomData->{$DeliverMode}->{locations};
+	my $hosts = $CiomData->{$DeliverMode}->{hosts};
 	my $hostsCnt = $#{$hosts} + 1;
 	for (my $i = 0; $i < $hostsCnt; $i++) {
 		my $host = $hosts->[$i];
 		
-		runHierarchyCmds("$activeNode host pre", $host);
+		runHierarchyCmds("$DeliverMode host pre", $host);
 
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
-			runHierarchyCmds("$activeNode instance pre", $host);
+			runHierarchyCmds("$DeliverMode instance pre", $host);
 			$CiomUtil->remoteExec({
 				host => $host,
 				cmd => getUnpackCmdByLocationIdx($j, $locations)
 			});
-			runHierarchyCmds("$activeNode instance cmds", $host);
-			runHierarchyCmds("$activeNode instance post", $host);
+			runHierarchyCmds("$DeliverMode instance cmds", $host);
+			runHierarchyCmds("$DeliverMode instance post", $host);
 		}
 
 		setPermissions($host, $locations, $permissions);
-		runHierarchyCmds("$activeNode host post", $host);
+		runHierarchyCmds("$DeliverMode host post", $host);
 
 		if ($hostsCnt > 1 && $i < $hostsCnt - 1) {
 			$CiomUtil->exec("sleep 5");
 		}
 	}
 
-	runHierarchyCmds("$activeNode local post");
+	runHierarchyCmds("$DeliverMode local post");
 }
 
-sub wayDeliver() {
+sub delivermode_deploy() {
 	updateCode();
+	setRevisionId();
+	initAppPkgInfo();
+
 	customizeFiles();
 	transformReAndGatherDynamicVars();
 	streamedit();
+	
 	build();
+
 	packageApp();
 	sumPackage();
 	putPackageToRepo();
+	
 	dispatch();
-	backup();
-	deploy("deploy");
+	deploy();
+
+	addRevisionIdIntoRollbackList();
 }
 
-# begin - wayRollback subs
-sub getRollbackableList() {
-
-}
-
-sub electRollbackTo {
-	my ($host) = @_;
-	my $remoteWrokspace = getRemoteWorkspace();
-	$CiomUtil->remoteExec({
-		host => $host,
-		cmd => [
-			"rm -rf $remoteWrokspace/$AppPkg->{name}",
-			"ln -s $remoteWrokspace/$RollbackTo $remoteWrokspace/$AppPkg->{name}"
-		]
-	});
-}
-
-sub initRollbackDefinition() {
+# begin - delivermode_rollback subs
+sub initRollbackNode() {
 	$CiomData->{rollback} = merge $CiomData->{deploy}, $CiomData->{rollback};
 }
 
-sub wayRollback() {
-	initRollbackDefinition();
-	backup();
-	electRollbackTo();
-	deploy("rollback");
+sub getRollbackList() {
+	my @list = read_file($Rollback->{listFile}, chomp => 1);
+	return \@list;
 }
-# end - wayRollback subs 
+
+sub initRollbackInfo() {
+	$Rollback->{to} = $RollbackTo;
+	$Rollback->{listFile} = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/rollback.list.ciom";
+	$Rollback->{list} = getRollbackList();
+}
+
+sub addRevisionIdIntoRollbackList() {
+	$CiomUtil->exec("echo $RevisionId >> $Rollback->{listFile}");
+}
+
+sub delivermode_rollback() {
+	initRollbackNode();
+	initRollbackInfo();
+
+	setRevisionId($RollbackTo);
+	initAppPkgInfo();
+	
+	dispatch();
+	deploy();
+}
+# end - delivermode_rollback subs 
 
 sub main() {
 	enterWorkspace();
-	init();
+	initWorkspace();
+	initTpl();
 	loadPlugin();
 	persistCiomAndPluginInfo();
-
-	if ($DoRollback eq 'DoRollback') {
-		wayRollback();
-	} else {
-		wayDeliver();
-	}
+	
+	eval("delivermode_${DeliverMode}()");
 
 	leaveWorkspace();
-
 	return 0;
 }
 
