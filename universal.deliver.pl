@@ -57,10 +57,11 @@ sub getAppPkgUrl() {
 	my $repoId = uc ($CiomData->{dispatch}->{repoId} || "inner");
 	my $repoBaseUrlKey = "CIOM_REPO_BASE_URL_$repoId";
 
-	return sprintf("%s/%s/%s/%s",
+	return sprintf("%s/%s/%s/%s/%s",
 		$ENV{$repoBaseUrlKey},
 		$version,
 		$cloudId,
+		$appName,
 		$AppPkg->{name}
 	);
 }
@@ -135,6 +136,9 @@ sub getPluginDefinition {
 }
 
 sub persistCiomAndPluginInfo() {
+	$CiomData->{Timestamp} = $Timestamp;
+	$CiomData->{AppPkg} = $AppPkg;
+	$CiomData->{Rollback} = $Rollback;
 	DumpFile("$Output/ciom.yaml", $CiomData);
 }
 
@@ -170,13 +174,15 @@ sub leaveWorkspace() {
 	chdir($OldPwd);
 }
 
-sub setRevisionId($) {
-	my $id = shift;
+sub setRevisionId {
+	my ($id) = @_;
 	if (defined($id)) {
 		$RevisionId = $id;	
 	} else {
-		$RevisionId = $id$CiomUtil->exec("cat $CiomData->{repos}->[0]->{name}/.revid");
+		$RevisionId = $CiomUtil->execWithReturn("cat $CiomData->{scm}->{repos}->[0]->{name}/.revid | tr -d '\n'");
 	}
+
+	print $RevisionId;
 }
 
 sub updateCode() {
@@ -202,7 +208,7 @@ sub updateCode() {
 			]);
 		}
 		$CiomUtil->exec("$cmdSvnPrefix info $name > $name/.repoinfo");
-		$CiomUtil->exec("grep -P '(Revision|Last Changed Rev)' $name/.repoinfo | awk -F': ' '{print \$2.$Timestamp}' | tr '\n', '+' | rev | cut -c 2- | rev > $name/.revid");
+		$CiomUtil->exec("grep -P '(Revision|Last Changed Rev)' $name/.repoinfo | awk -F': ' '{print \$2}' | tr '\n', '.' | awk '{print \$1 \"$Timestamp\"}' > $name/.revid");
 	}
 }
 
@@ -439,8 +445,6 @@ sub delivermode_deploy() {
 	
 	dispatch();
 	deploy();
-
-	addRevisionIdIntoRollbackList();
 }
 
 # begin - delivermode_rollback subs
@@ -448,24 +452,8 @@ sub initRollbackNode() {
 	$CiomData->{rollback} = merge $CiomData->{deploy}, $CiomData->{rollback};
 }
 
-sub getRollbackList() {
-	my @list = read_file($Rollback->{listFile}, chomp => 1);
-	return \@list;
-}
-
-sub initRollbackInfo() {
-	$Rollback->{to} = $RollbackTo;
-	$Rollback->{listFile} = "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/rollback.list.ciom";
-	$Rollback->{list} = getRollbackList();
-}
-
-sub addRevisionIdIntoRollbackList() {
-	$CiomUtil->exec("echo $RevisionId >> $Rollback->{listFile}");
-}
-
 sub delivermode_rollback() {
 	initRollbackNode();
-	initRollbackInfo();
 
 	setRevisionId($RollbackTo);
 	initAppPkgInfo();
@@ -480,10 +468,10 @@ sub main() {
 	initWorkspace();
 	initTpl();
 	loadPlugin();
-	persistCiomAndPluginInfo();
 	
 	eval("delivermode_${DeliverMode}()");
 
+	persistCiomAndPluginInfo();
 	leaveWorkspace();
 	return 0;
 }
