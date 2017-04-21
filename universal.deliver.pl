@@ -163,7 +163,7 @@ sub loadPlugin() {
 }
 
 sub enterWorkspace() {
-	chdir($ENV{WORKSPACE});
+	chdir($ENV{WORKSPACE}) || die "can not change working directory!";
 }
 
 sub initWorkspace() {
@@ -215,7 +215,8 @@ sub updateCode() {
 sub customizeFiles() {
 	my $customizedFilesLocation = "$AppVcaHome/customized/";
 	if ( -d $customizedFilesLocation) {
-		$CiomUtil->exec("/bin/cp -rf $customizedFilesLocation/* ./");
+		my $dirNotEmpty = sprintf('[ "$(ls -A %s)" ]', $customizedFilesLocation);
+		$CiomUtil->exec("$dirNotEmpty && /bin/cp -rf $customizedFilesLocation ./");
 	}
 }
 
@@ -350,7 +351,7 @@ sub dispatch() {
 	my $ansibleCmdPrefix = "ansible all -i $joinedHosts -u root";
 	$CiomUtil->exec("$ansibleCmdPrefix -m file -a \"path=$remoteWrokspace state=directory\"");
 	if ($method eq "push") {
-		$CiomUtil->exec("$ansibleCmdPrefix -m copy -a \"src=$AppPkg->{repoLocation}/$AppPkg->{file} dest=$remoteWrokspace\"");
+		$CiomUtil->exec("$ansibleCmdPrefix -m copy -a \"src=$AppPkg->{repoLocation}/$AppPkg->{name} dest=$remoteWrokspace\"");
 	} else {
 		$CiomUtil->exec("$ansibleCmdPrefix -m get_url -a \"url=$AppPkg->{url} dest=$remoteWrokspace\"");
 	}
