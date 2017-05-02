@@ -60,7 +60,7 @@ sub getBackupListOptions() {
 		$cmd="ssh $user\@$remoteHost 'powershell -command \"Get-ChildItem $wsRoot|?{\$_.name-like\\\"${appName}_*_*\\\"}|Select-Object Name\"'";
 	}
 	else {	
-		$cmd="ssh $user\@$remoteHost \"find $wsRoot -maxdepth 1 -name '*$appName*_*' -printf '%f\\n'\"";
+		$cmd="ssh $user\@$remoteHost \"find $wsRoot -maxdepth 1 -name '*$appName*_*' -printf '%f\\n' | sort \"";
 	}
 	
 	my @result = $ciomUtil->execWithReturn($cmd);

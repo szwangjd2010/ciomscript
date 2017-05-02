@@ -4,14 +4,64 @@
     "cloudId": "dev",
     "appName": "qidaweb"
   },
-  "dev.env-yxt.crm.api.deploy.and.rollback": {
+  "dev.env-yxt.crmboss.api.deploy.and.rollback": {
     "version": "v0",
     "cloudId": "dev",
-    "appName": "crmapi"
+    "appName": "crmbossapi"
   },
   "dev.env-yxt.crm.h5.mobile.deploy.and.rollback": {
     "version": "v0",
     "cloudId": "dev",
     "appName": "crmh5web"
+  },
+  "ucloud.env-yxt.qida.api.publish": {
+    "version": "v0",
+    "cloudId": "ucloud",
+    "appName": "qidaapi"
+  },
+  "ucloud.env-yxt.qida.soa.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "elsoa"
+  },
+  "ucloud.env-yxt.qida.csapi.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "elapi"
+  },
+  "ucloud.env-yxt.qida.servicecenter.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "elservicecenter"
+  },
+  "ucloud.env-yxt.qida.web.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "elearning"
+  },
+  "ucloud.xjk.env-yxt.qida.api.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "qidaapi"
+  },
+  "ucloud.xjk.env-yxt.qida.soa.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "elsoa"
+  },
+  "ucloud.xjk.env-yxt.qida.csapi.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "elapi"
+  },
+  "ucloud.xjk.env-yxt.qida.servicecenter.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "elservicecenter"
+  },
+  "ucloud.xjk.env-yxt.qida.web.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "elearning"
   }
 }
