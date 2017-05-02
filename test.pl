@@ -38,6 +38,10 @@ sub f2 {
     p($b);
 }
 
-f1("aaa", "bbb");
+
+my $a=True;
+$a &&= 1;
+
+p($a);
 
 

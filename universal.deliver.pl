@@ -282,14 +282,22 @@ sub addLazyOut2CiomData {
 
 sub lazyProcessCmds {
 	my ($hierarchyArr, $cmds, $hostIdx, $instanceIdx) = @_;
-	if (!defined($hostIdx) && !defined($instanceIdx)) {
-		return;
-	}
-
 	my $vars = {
 		hostIdx => $hostIdx,
 		instanceIdx => $instanceIdx
 	};
+
+	my $exist = 0;
+	foreach my $val (values %{$vars}) {
+		if (defined($val)) {
+			$exist = 1;
+			last;
+		}
+	}
+	if (!$exist) {
+		return;
+	}
+
 	foreach my $cmd (@{$cmds}) {
 		$cmd =~ s/%([\w\d]+)%/$vars->{$1}/g;
 		$cmd =~ s/%% ([\w\d\.]+) %%/[% $1 %]/g;
