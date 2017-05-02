@@ -22,9 +22,22 @@ sub p {
     my ($l) = @_;
     print "$l\n";
 }
-no strict "refs"; 
 
-my $fn = "way_$p1";
-$fn->();
 
-T123->{$fn}();
+sub f1 {
+    my ($a, $b) = @_;
+    p($a);
+    p($b);
+
+    f2(@_);
+}
+
+sub f2 {
+    my ($a, $b) = @_;
+    p($a);
+    p($b);
+}
+
+f1("aaa", "bbb");
+
+

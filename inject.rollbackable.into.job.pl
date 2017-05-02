@@ -20,26 +20,45 @@ use Text::CSV::Simple;
 use CiomUtil;
 STDOUT->autoflush(1);
 
+my $JobsHome = "/var/lib/jenkins/jobs";
+my $Workspace = "${JobsHome}/.rollback";
 my $JobsInfoFile = ".jobs.info";
 my $JobsInfo;
 my $CiomUtil = new CiomUtil(1);
 my $OldPwd = getcwd();
+my $Tpl;
 
 sub enterWorkspace() {
-	chdir("/var/lib/jenkins/jobs") || die "can not change working directory!";
+	mkdir($Workspace);
+	chdir($Workspace) || die "can not change working directory!";
 }
 
 sub leaveWorkspace() {
 	chdir($OldPwd);
 }
 
+sub initTpl() {
+	$Tpl = Template->new({
+		ABSOLUTE => 1,
+		TAG_STYLE => 'outline',
+		PRE_CHOMP  => 0,
+	    POST_CHOMP => 0
+	});	
+}
+
+sub processTemplate {
+	my ($in, $data, $out) = @_;
+	$Tpl->process($in, $data, $out) 
+		|| die "Template process failed: ", $Tpl->error(), "\n";	
+}
+
 sub getJobPackageLocation($) {
-	my $jobInfo = shift;
+	my $job = shift;
 	return sprintf("%s/%s/%s/%s",
 		$ENV{CIOM_REPO_LOCAL_PATH},
-		$jobInfo->{version},
-		$jobInfo->{cloudId},
-		$jobInfo->{appName}
+		$job->{version},
+		$job->{cloudId},
+		$job->{appName}
 	);
 }
 
@@ -52,37 +71,55 @@ sub getJobsInfo() {
 
 sub generateJobsInfoCSV() {
 	$CiomUtil->exec("rm -f $JobsInfoFile");
-	$CiomUtil->exec("find -maxdepth 2 -name config.xml | xargs -i  grep -HoP  '(?<=universal.deliver.pl).*(?=<)' {} >> $JobsInfoFile");
-	my $reToCSV = 's|^\./([^ ]+)/config\.xml:|$1|g';
+	$CiomUtil->exec("find -L $JobsHome -maxdepth 2 -name config.xml | xargs -i  grep -HoP  '(?<=universal.deliver.pl).*(?=<)' {} >> $JobsInfoFile");
+	my $reToCSV = sprintf('|^%s/([^ ]+)/config\.xml:|$1|g', $JobsHome);
 	$CiomUtil->exec("perl -pE '$reToCSV' $JobsInfoFile | tr ' ', ',' > ${JobsInfoFile}.csv");
 }
 
 sub generateJobsRollbackList() {
-	mkdir(".jobs.rollback.list");
-	
-	foreach my $jobInfo (@{$JobsInfo}) {
-		my $job = $jobInfo->{job};
-		my $jobPkgLocation = getJobPackageLocation($jobInfo);
+	foreach my $job (@{$JobsInfo}) {
+		my $jobName = $job->{job};
+		my $jobPkgLocation = getJobPackageLocation($jobName);
 		my $reRevisionId = '(\d+\.){2}\d{8}\+\d{6}';
-		my $rollbackListFile = ".jobs.rollback.list/${job}";
-		$CiomUtil->exec("find $jobPkgLocation -name $jobInfo->{appName}.*.tar.gz | grep -oP '$reRevisionId' > $rollbackListFile");
+		my $rollbackListFile = "${jobName}.rbl";
+		$CiomUtil->exec("find $jobPkgLocation -name $job->{appName}.*.tar.gz | grep -oP '$reRevisionId' > $rollbackListFile");
 
 		my @rollbackList = read_file($rollbackListFile, chomp => 1);
-		$jobInfo->{rollbackList} = \@rollbackList;
+		$job->{rollbackList} = \@rollbackList;
 	}
 }
 
-sub getJobXmlPropertiesInfo($) {
+sub editJobXml($) {
 	my $job = shift;
-	my $jobXml = "~jenkins/jobs/$job/config.xml";
+	my $jobName = $job->{name};
+	my $jobXml = "$JobsHome/$jobName/config.xml";
+	my $tplFile = "$ENV{CIOM_SCRIPT_HOME}/rollback.segment.tpl";
+	my $macthed = $CiomUtil->execWithReturn("grep -on '<properties/>' $jobXml");
+
+	my $data = {
+		parameterDefinitions => 0,
+		rollbackList => $job->{rollbackList}
+	};
+
+	if ($macthed eq '<properties/>' ) {
+		 $data->{parameterDefinitions} = 1;
+	} else {
+		# $CiomUtil->exec([
+		# 	"sed '/<!-- auto injected begin - ciom rollback -->/,/<!-- auto injected end - ciom rollback -->/d' $jobXml",
+		# 	"sed '/<parameterDefinitions>/r ' $jobXml",
+		# ]);
+	}
+	processTemplate($tplFile, { root => $data}, "${jobName}.xml");
 }
 
 sub main() {
 	enterWorkspace();
+	initTpl();
 	generateJobsInfoCSV();
 	getJobsInfo();
 	generateJobsRollbackList();
 	DumpFile("jobs.info.yaml", $JobsInfo);
+
 	leaveWorkspace();
 	return 0;
 }

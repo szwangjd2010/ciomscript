@@ -9,4 +9,8 @@ deploy:
   owner: nginx
   group: nginx  
   mode: 755
+  instance:
+    pre: 
+      - echo %% root.deploy.hosts.%hostIdx% %%
+      - echo %% root.deploy.locations.%instanceIdx% %%
   

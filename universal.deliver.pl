@@ -259,20 +259,67 @@ sub streamedit() {
 	$CiomUtil->exec("bash $StreameditFile");
 }
 
-sub runHierarchyCmds {
-	my ($hierarchyCmds, $host) = @_;
-	my $cmds = Dive($CiomData, split(' ', $hierarchyCmds));
-	if (!defined($cmds)) {
+sub addLazyOut2CiomData {
+	my ($hierarchyArr, $cmds, $hostIdx, $instanceIdx) = @_;
+	my $lazyOutKey = "lazyout";
+	if (!defined($CiomData->{$lazyOutKey})) {
+		$CiomData->{$lazyOutKey} = {};
+	}
+
+	my $pointer = $CiomData->{$lazyOutKey};
+	foreach my $node (@{$hierarchyArr}) {
+		if (!defined($pointer->{$node})) {
+			$pointer->{$node} = {};
+			$pointer = $pointer->{$node};
+		}
+	}
+
+	my $key = "host[$hostIdx]-instance[$instanceIdx]";
+	if (!defined($pointer->{$key})) {
+		$pointer->{$key} = $cmds;
+	}
+}
+
+sub lazyProcessCmds {
+	my ($hierarchyArr, $cmds, $hostIdx, $instanceIdx) = @_;
+	if (!defined($hostIdx) && !defined($instanceIdx)) {
 		return;
 	}
 
-	if (defined($host)) {
+	my $vars = {
+		hostIdx => $hostIdx,
+		instanceIdx => $instanceIdx
+	};
+	foreach my $cmd (@{$cmds}) {
+		$cmd =~ s/%([\w\d]+)%/$vars->{$1}/g;
+		$cmd =~ s/%% ([\w\d\.]+) %%/[% $1 %]/g;
+
+		my $out = '';
+		processTemplate(\$cmd, {root => $CiomData}, \$out);
+		$cmd = $out;
+	}
+
+	addLazyOut2CiomData(@_);
+}
+
+sub runHierarchyCmds {
+	my ($hierarchyCmds, $hostIdx, $instanceIdx) = @_;
+	my @hierarchyArr = split(' ', $hierarchyCmds);
+	my $cmds = Dive($CiomData, @hierarchyArr);
+	if (!defined($cmds) || $#{$cmds} == -1) {
+		return;
+	}
+
+	my $clonedCmds = clone($cmds); 
+	lazyProcessCmds(\@hierarchyArr, $clonedCmds, $hostIdx, $instanceIdx);
+
+	if (defined($hostIdx)) {
 		$CiomUtil->remoteExec({
-			host => $host,
-			cmd => $cmds
+			host => $CiomData->{deploy}->{hosts}->[$hostIdx],
+			cmd => $clonedCmds
 		});
 	} else {
-		$CiomUtil->exec($cmds);
+		$CiomUtil->exec($clonedCmds);
 	}
 }
 
@@ -406,20 +453,20 @@ sub deploy() {
 	for (my $i = 0; $i < $hostsCnt; $i++) {
 		my $host = $hosts->[$i];
 		
-		runHierarchyCmds("$DeliverMode host pre", $host);
+		runHierarchyCmds("$DeliverMode host pre", $i);
 
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
-			runHierarchyCmds("$DeliverMode instance pre", $host);
+			runHierarchyCmds("$DeliverMode instance pre", $i, $j);
 			$CiomUtil->remoteExec({
 				host => $host,
 				cmd => getUnpackCmdByLocationIdx($j, $locations)
 			});
-			runHierarchyCmds("$DeliverMode instance cmds", $host);
-			runHierarchyCmds("$DeliverMode instance post", $host);
+			runHierarchyCmds("$DeliverMode instance cmds", $i, $j);
+			runHierarchyCmds("$DeliverMode instance post", $i, $j);
 		}
 
 		setPermissions($host, $locations, $permissions);
-		runHierarchyCmds("$DeliverMode host post", $host);
+		runHierarchyCmds("$DeliverMode host post", $i);
 
 		if ($hostsCnt > 1 && $i < $hostsCnt - 1) {
 			$CiomUtil->exec("sleep 5");
