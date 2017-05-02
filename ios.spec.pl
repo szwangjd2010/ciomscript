@@ -36,7 +36,7 @@ sub preAction($) {
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(\"CODE_SIGN_IDENTITY\\[sdk=iphoneos\\*\\]\" = ).+(;)|\${1}\"iPhone Distribution\"\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(DEVELOPMENT_TEAM = ).+(;)|\${1}$devTeam\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
 	$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(DevelopmentTeam = ).+(;)|\${1}$devTeam\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
-	#$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(ProvisioningStyle = ).+(;)|\${1}Manual\${2}|mg\' $appName/$appName.xcodeproj/project.pbxproj");
+	#$ciom$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(<key>teamID</key>\\s+<string>)[^<>]+(</string>)|\${1}$devTeam\${2}|mg\' \'$BuildInfo->{entitlementsPlistLocation}\'");
 	#$ciomUtil->exec("perl -CSDL -0 -i -pE \'s|(<key>teamID</key>\\s+<string>)[^<>]+(</string>)|\${1}$devTeam\${2}|mg\' \'$BuildInfo->{entitlementsPlistLocation}\'");
 }
 
