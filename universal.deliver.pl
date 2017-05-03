@@ -287,14 +287,14 @@ sub lazyProcessCmds {
 		instanceIdx => $instanceIdx
 	};
 
-	my $exist = 0;
+	my $needProcess = 0;
 	foreach my $val (values %{$vars}) {
 		if (defined($val)) {
-			$exist = 1;
+			$needProcess = 1;
 			last;
 		}
 	}
-	if (!$exist) {
+	if (!$needProcess) {
 		return;
 	}
 
