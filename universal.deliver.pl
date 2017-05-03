@@ -41,7 +41,7 @@ my $AppType = $CiomData->{AppType};
 my $Output = "_output";
 my $OldPwd = getcwd();
 
-my $DynamicVars = {};
+my $UDV = {}; # user-defined variable
 my $AppPkg = {};
 my $Rollback = {};
 my $Plugin;
@@ -230,7 +230,7 @@ sub escapeRe($) {
 	return $re;
 }
 
-sub transformReAndGatherDynamicVars() {
+sub transformReAndGatherUDV() {
 	my $streameditItems = $CiomData->{streameditItems};
 	for my $file (keys %{$streameditItems}) {
 		foreach my $substitute (@{$streameditItems->{$file}}) {
@@ -238,9 +238,9 @@ sub transformReAndGatherDynamicVars() {
 			$substitute->{to} = escapeRe($substitute->{to});
 			
 			if ($substitute->{to} =~ m|<ciompm>([\w_]+)</ciompm>|) {
-				$DynamicVars->{$1} = $ENV{"CIOMPM_$1"} || '';
+				$UDV->{$1} = $ENV{"CIOMPM_$1"} || '';
 				#ciom dynamic variable to template directive
-				$substitute->{to} =~ s|<ciompm>([\w_]+)</ciompm>|[% DynamicVars.$1 %]|g;
+				$substitute->{to} =~ s|<ciompm>([\w_]+)</ciompm>|[% UDV.$1 %]|g;
 			}
 		}		
 	}
@@ -254,7 +254,7 @@ sub streamedit() {
 	processTemplate($StreameditTpl, {files => $CiomData->{streameditItems}}, $firstOut);
     $CiomUtil->exec("cat $firstOut");
     
-    processTemplate($firstOut, {DynamicVars => $DynamicVars}, $StreameditFile);
+    processTemplate($firstOut, {UDV => $UDV}, $StreameditFile);
     $CiomUtil->exec("cat $StreameditFile");
 	$CiomUtil->exec("bash $StreameditFile");
 }
@@ -490,7 +490,7 @@ sub delivermode_deploy() {
 	initAppPkgInfo();
 
 	customizeFiles();
-	transformReAndGatherDynamicVars();
+	transformReAndGatherUDV();
 	streamedit();
 	
 	build();
