@@ -22,6 +22,8 @@ reOther=".*/(rpt_org_study_data)\.log"
 reName=re${type}
 re=${!reName}
 
+OldPwd=$(pwd)
+
 instanceLoadDataTpl() {
 	tableName=$1
 	/bin/cp -rf $tpl $tplInstance
@@ -29,6 +31,7 @@ instanceLoadDataTpl() {
 }
 
 main() {
+	cd $logLocation
 	echo $ymd >> $logFile
 	for tableName in $(find $logLocation -regextype posix-extended -regex "$re" | grep -o -P 'rpt_\w+'); do
 		echo $tableName >> $logFile
@@ -38,6 +41,7 @@ main() {
 		#mysql -h 10.10.66.88 -uyxt -phzyxtDUANG2015 -e "show databases;" lecaireport 2>>$logFile
 	done
 	echo >> $logFile
+	cd $OldPwd
 }
 
 main

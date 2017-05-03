@@ -77,6 +77,9 @@ sub getBackupListOptions() {
 
 sub updateJobOptionsInTargetJob() {
 	#echo $options
+	if ( $options eq "") {
+		$options="<string></string>";
+	}
 	$ciomUtil->execNotLogCmd("perl -i -0 -pE 's|(?<g1><name>RollbackTo</name>.*<a class=\\\"string-array\\\">\\s+)(?<g2>.*)(?<g3>\\s+</a>)|\$+{g1}$options\$+{g3}|sg' $jobConfigFile");
 }
 

@@ -34,6 +34,6 @@ LOAD DATA LOCAL
 --  /* rpt_monthly */ pid,startTime,endTime,orgId,orgName,channelId,industryId,orgCreateTime,totalUser,newUser,activeUser,totalOrderAmount,newOrderAmount,totalOrder,newOrder,totalStudyplan,newStudyplan,totalStudyHour,newStudyHour,newOnlineStudyHour,totalKnowledge,newKnowledge,createTime
 --  /* rpt_retention */ pid,reportDate,createDate,period,channelId,newUser,activeUser
 --  /* rpt_weekly */ pid,startTime,endTime,orgId,orgName,channelId,industryId,orgCreateTime,totalUser,newUser,activeUser,totalOrderAmount,newOrderAmount,totalOrder,newOrder,totalStudyplan,newStudyplan,totalStudyHour,newStudyHour,newOnlineStudyHour,totalKnowledge,newKnowledge,createTime
---  /* rpt_org_study_data */  pid,orgId,orgName,industryId,contactPhone,contactEmail,lastLoginTime,sourceId,packageId,creator,orgCreateTime,createTime,userCount,departmentCount,examCount,planCount,packageCount,studyHours,knowledgeCount,siteName,shortName,code,domain
+--  /* rpt_org_study_data */  pid,orgId,orgName,industryId,contactPhone,contactEmail,lastLoginTime,sourceId,packageId,creator,orgCreateTime,createTime,userCount,departmentCount,examCount,planCount,packageCount,studyHours,knowledgeCount,siteName,shortName,code,domain,xuankeCount
     
     );

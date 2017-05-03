@@ -54,8 +54,8 @@ sub getBuildLogFile() {
 }
 
 sub getAppPkgUrl() {
-	my $repoId = uc ($CiomData->{dispatch}->{repoId} || "inner");
-	my $repoBaseUrlKey = "CIOM_REPO_BASE_URL_$repoId";
+	my $repo = uc ($CiomData->{dispatch}->{repo} || "inner");
+	my $repoBaseUrlKey = "CIOM_REPO_BASE_URL_$repo";
 
 	return sprintf("%s/%s/%s/%s/%s",
 		$ENV{$repoBaseUrlKey},
@@ -417,13 +417,19 @@ sub getUnpackCmdByLocationIdx($$) {
 	my $locations = shift;
 
 	my $remoteWrokspace = getRemoteWorkspace();
-	my $mkdirCmd = "mkdir -p $locations->[$idx]";
-	my $cmd = ($idx == 0) ?
-				"tar -xzvf $remoteWrokspace/$AppPkg->{name} -C $locations->[0]/"
-				:
-				"rm -rf $locations->[$idx]/$appName; ln -s $locations->[0]/$appName $locations->[$idx]/$appName";
+	my $idxLocation = $locations->[$idx];
+	my $idxAppLocation = "$idxLocation/$appName";
+	
+	my $cmd = "tar -xzvf $remoteWrokspace/$AppPkg->{name} -C $idxLocation/";
+	if (!$CiomData->{deploy}->{multiphysical} == 0 && $idx != 0) {
+		$cmd = "ln -s $locations->[0]/$appName $idxLocation/$appName";
+	}
 
-	return "$mkdirCmd; $cmd";
+	return sprintf("%s; %s; %s",
+		"mkdir -p $idxLocation",
+		"[ -d $idxAppLocation ] && rm -rf $idxAppLocation",
+		$cmd
+	);
 }
 
 sub setPermissions {
