@@ -1,5 +1,5 @@
 [% IF !root.parameterDefinitions %]
-  <properties>
+   <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
 
