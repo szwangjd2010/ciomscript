@@ -19,6 +19,8 @@ use open IN => ":encoding(utf8)", OUT => ":utf8";
 use IO::Handle;
 use Text::CSV::Simple;
 use CiomUtil;
+use String::Buffer;
+
 STDOUT->autoflush(1);
 
 my $JobName = $ARGV[0];
@@ -114,7 +116,6 @@ sub updateJobXml($) {
 	if ($macthed =~ m|^<properties/>|) {
 		$data->{parameterDefinitions} = 0;
 	}
-print Dumper($data);
 	processTemplate($tplFile, { root => $data}, "${jobName}.pds");
 
 	if ($data->{parameterDefinitions} == 1) {
@@ -131,11 +132,17 @@ print Dumper($data);
 	
 }
 
-sub updateAllJobs() {
+sub updateJobs() {
+	my $jobsNameBuf = String::Buffer->new();
 	foreach my $job (@{$JobsInfo}) {
 		updateJobXml($job);
+		$jobsNameBuf->write($job->{name} . " ");
 	}
+
+	my $jobsName = $jobsNameBuf->flush();
+	$CiomUtil->reloadJenkinsJob($jobsName);
 }
+
 
 sub main() {
 	enterWorkspace();
@@ -145,7 +152,7 @@ sub main() {
 	getJobsInfo();
 	generateJobsRollbackList();
 	print Dumper($JobsInfo);
-	updateAllJobs();
+	updateJobs();
 
 	DumpFile("${JobsInfoFile}.yaml", $JobsInfo);
 	leaveWorkspace();

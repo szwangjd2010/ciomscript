@@ -1,3 +1,4 @@
+[% IF root.rollbackList.size > 0 %]
 [% IF !root.parameterDefinitions %]
    <properties>
     <hudson.model.ParametersDefinitionProperty>
@@ -7,7 +8,7 @@
         <!-- auto injected begin - ciom rollback -->
         <hudson.model.ChoiceParameterDefinition>
           <name>DeployMode</name>
-          <description>ciom DeployMode</description>
+          <description></description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               <string>Deploy</string>
@@ -18,7 +19,7 @@
 
         <hudson.model.ChoiceParameterDefinition>
           <name>RollbackTo</name>
-          <description>ciom RollbackTo</description>
+          <description></description>
           <choices class="java.util.Arrays$ArrayList">
             <a class="string-array">
               [% FOR item = root.rollbackList %]
@@ -34,4 +35,5 @@
     </hudson.model.ParametersDefinitionProperty>
   </properties>
 
+[% END %]
 [% END %]
