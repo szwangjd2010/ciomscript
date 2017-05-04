@@ -68,5 +68,35 @@
     "version": "v0",
     "cloudId": "ucloud-qida",
     "appName": "qidah5webc"
+  },
+  "ucloud.env-yxt.qida.h5web.embedded.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "qidah5webs"
+  },
+  "ucloud.env-yxt.qida.h5web.core.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "qidah5web"
+  },
+  "ucloud.env-yxt.qida.h5web.core.new.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "qidah5new"
+  },
+  "ucloud.xjk.env-yxt.qida.h5web.community.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "qidah5webc"
+  },
+  "ucloud.xjk.env-yxt.qida.h5web.core.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "qidah5web"
+  },
+  "ucloud.xjk.env-yxt.qida.h5web.embedded.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "qidah5webs"
   }
 }
