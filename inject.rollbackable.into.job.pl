@@ -48,7 +48,7 @@ sub initTpl() {
 	$Tpl = Template->new({
 		ABSOLUTE => 1,
 		TAG_STYLE => 'outline',
-		PRE_CHOMP  => 0,
+		PRE_CHOMP  => 1,
 	    POST_CHOMP => 0
 	});	
 }
@@ -92,7 +92,7 @@ sub generateJobsRollbackList() {
 		}
 		my $reRevisionId = '(\d+\.){2}\d{8}\+\d{6}';
 		my $rollbackListFile = "${jobName}.rbl";
-		$CiomUtil->exec("find $jobPkgLocation -name $job->{appName}.*.tar.gz | grep -oP '$reRevisionId' > $rollbackListFile");
+		$CiomUtil->exec("find $jobPkgLocation -name $job->{appName}.*.tar.gz | grep -oP '$reRevisionId' | sort -rn > $rollbackListFile");
 
 		my @rollbackList = read_file($rollbackListFile, chomp => 1);
 		$job->{rollbackList} = \@rollbackList;
@@ -139,16 +139,15 @@ sub updateAllJobs() {
 
 sub main() {
 	enterWorkspace();
+	
 	initTpl();
 	generateJobsInfoCSV();
 	getJobsInfo();
 	generateJobsRollbackList();
-	DumpFile("${JobsInfoFile}.yaml", $JobsInfo);
-	
-	$JobsInfo = LoadFile("${JobsInfoFile}.yaml");
 	print Dumper($JobsInfo);
 	updateAllJobs();
 
+	DumpFile("${JobsInfoFile}.yaml", $JobsInfo);
 	leaveWorkspace();
 	return 0;
 }
