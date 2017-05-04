@@ -39,9 +39,6 @@ sub f2 {
 }
 
 
-my $a=True;
-$a &&= 1;
 
-p($a);
-
+p(lc("AAAAAAAAAAAAAAAccc"));
 

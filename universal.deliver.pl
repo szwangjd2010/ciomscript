@@ -27,11 +27,11 @@ my $version = $ARGV[0];
 my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
 
-# $DeliverMode: deploy or rollback
+# $DeployMode: deploy or rollback
 # it's corresponding to same name node which defined in %app%.ciom & %plugin%.yaml
-# in deploy process, will execute pre, cmds, post actions defined in the $DeliverMode node
-my $DeliverMode = $ARGV[3] || 'deploy'; 
-my $RollbackTo = $ARGV[4] || '';
+# in deploy process, will execute pre, cmds, post actions defined in the $DeployMode node
+my $DeployMode = lc($ENV{DeployMode}) || 'deploy'; 
+my $RollbackTo = lc($ENV{RollbackTo}) || '';
 
 my $CiomUtil = new CiomUtil(1);
 my $Timestamp = $CiomUtil->getTimestamp();
@@ -331,15 +331,20 @@ sub runHierarchyCmds {
 	}
 }
 
+sub runCmdsInHierarchys {
+	my ($hierarchys) = @_;
+	foreach my $hierarchy (@{$hierarchys}) {
+		runHierarchyCmds($hierarchy);
+	}
+}
+
 sub build() {
 	my $CmdsInHierarchys = [
 		"build pre",
 		"build cmds",
 		"build post"
 	];
-	foreach my $hierarchy (@{$CmdsInHierarchys}) {
-		runHierarchyCmds($hierarchy);
-	}
+	runCmdsInHierarchys($CmdsInHierarchys);
 }
 
 sub getIncludeFileRoot($) {
@@ -419,7 +424,7 @@ sub getUnpackCmdByLocationIdx($$) {
 	my $remoteWrokspace = getRemoteWorkspace();
 	my $idxLocation = $locations->[$idx];
 	my $idxAppLocation = "$idxLocation/$appName";
-	
+
 	my $cmd = "tar -xzvf $remoteWrokspace/$AppPkg->{name} -C $idxLocation/";
 	if (!$CiomData->{deploy}->{multiphysical} == 0 && $idx != 0) {
 		$cmd = "ln -s $locations->[0]/$appName $idxLocation/$appName";
@@ -458,39 +463,39 @@ sub getPermissions() {
 }
 
 sub deploy() {
-	runHierarchyCmds("$DeliverMode local pre");
+	runHierarchyCmds("$DeployMode local pre");
 
 	my $permissions = getPermissions();
-	my $locations = $CiomData->{$DeliverMode}->{locations};
-	my $hosts = $CiomData->{$DeliverMode}->{hosts};
+	my $locations = $CiomData->{$DeployMode}->{locations};
+	my $hosts = $CiomData->{$DeployMode}->{hosts};
 	my $hostsCnt = $#{$hosts} + 1;
 	for (my $i = 0; $i < $hostsCnt; $i++) {
 		my $host = $hosts->[$i];
 		
-		runHierarchyCmds("$DeliverMode host pre", $i);
+		runHierarchyCmds("$DeployMode host pre", $i);
 
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
-			runHierarchyCmds("$DeliverMode instance pre", $i, $j);
+			runHierarchyCmds("$DeployMode instance pre", $i, $j);
 			$CiomUtil->remoteExec({
 				host => $host,
 				cmd => getUnpackCmdByLocationIdx($j, $locations)
 			});
-			runHierarchyCmds("$DeliverMode instance cmds", $i, $j);
-			runHierarchyCmds("$DeliverMode instance post", $i, $j);
+			runHierarchyCmds("$DeployMode instance cmds", $i, $j);
+			runHierarchyCmds("$DeployMode instance post", $i, $j);
 		}
 
 		setPermissions($host, $locations, $permissions);
-		runHierarchyCmds("$DeliverMode host post", $i);
+		runHierarchyCmds("$DeployMode host post", $i);
 
 		if ($hostsCnt > 1 && $i < $hostsCnt - 1) {
 			$CiomUtil->exec("sleep 5");
 		}
 	}
 
-	runHierarchyCmds("$DeliverMode local post");
+	runHierarchyCmds("$DeployMode local post");
 }
 
-sub delivermode_deploy() {
+sub deploymode_deploy() {
 	updateCode();
 	setRevisionId();
 	initAppPkgInfo();
@@ -509,12 +514,12 @@ sub delivermode_deploy() {
 	deploy();
 }
 
-# begin - delivermode_rollback subs
+# begin - deploymode_rollback subs
 sub initRollbackNode() {
 	$CiomData->{rollback} = merge $CiomData->{deploy}, $CiomData->{rollback};
 }
 
-sub delivermode_rollback() {
+sub deploymode_rollback() {
 	initRollbackNode();
 
 	setRevisionId($RollbackTo);
@@ -523,7 +528,20 @@ sub delivermode_rollback() {
 	dispatch();
 	deploy();
 }
-# end - delivermode_rollback subs 
+# end - deploymode_rollback subs 
+
+sub test() {
+	my $CmdsInHierarchys = [
+		"test function pre",
+		"test function cmds",
+		"test function post",
+		"test performance pre",
+		"test performance cmds",
+		"test performance post"
+	];
+	runCmdsInHierarchys($CmdsInHierarchys);
+}
+
 
 sub main() {
 	enterWorkspace();
@@ -531,9 +549,10 @@ sub main() {
 	initTpl();
 	loadPlugin();
 	
-	eval("delivermode_${DeliverMode}()");
+	eval("deploymode_${DeployMode}()");
 
 	persistCiomAndPluginInfo();
+	test();
 	leaveWorkspace();
 	return 0;
 }

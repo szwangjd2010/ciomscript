@@ -171,18 +171,12 @@ sub _constructJenkinsJobParameters() {
 	return $str;
 }
 
-sub constructJenkinsJobCmd() {
+sub getJenkinsCliBase() {
 	my $self = shift;
-	my $job = shift;
-	my $hashParams = shift;
 
-	my $CmdPrefix = "java -jar /var/lib/jenkins/jenkins-cli.jar"
-		. " -s http://172.17.128.240:8080/"
-		. " -i /var/lib/jenkins/.ssh/id_rsa"
-		. " build $job"
-		. " -s -v";
-		
-	return $CmdPrefix . $self->_constructJenkinsJobParameters($hashParams);
+	return "java -jar /var/lib/jenkins/jenkins-cli.jar"
+		. " -s http://localhost:8080/"
+		. " -i /var/lib/jenkins/.ssh/id_rsa";
 }
 
 sub runJenkinsJob() {
@@ -190,7 +184,36 @@ sub runJenkinsJob() {
 	my $job = shift;
 	my $hashParams = shift;
 
-	my $cmd = $self->constructJenkinsJobCmd($job, $hashParams);
+	my $cmd = sprintf("%s %s %s %s",
+		$self->getJenkinsCliBase(),
+		"build",
+		$job,
+		$self->_constructJenkinsJobParameters($hashParams)
+	);
+	$self->exec($cmd);
+}
+
+sub reloadJenkinsJob() {
+	my $self = shift;
+	my $job = shift;
+
+	my $cmd = sprintf("%s %s %s",
+		$self->getJenkinsCliBase(),
+		"reload-job",
+		$job
+	);
+	$self->exec($cmd);
+}
+
+sub getJenkinsJob() {
+	my $self = shift;
+	my $job = shift;
+
+	my $cmd = sprintf("%s %s %s",
+		$self->getJenkinsCliBase(),
+		"get-job",
+		$job
+	);
 	$self->exec($cmd);
 }
 

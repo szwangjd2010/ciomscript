@@ -65,5 +65,14 @@ deploy:
 # final rollback is the merged result of deploy and rollback(prefer) nodes
 rollback: {}
 
+test:
+  function:
+    pre: []
+    cmds: []
+    post: []
 
-    
+  performace:
+    pre: []
+    cmds: []
+    post: []
+

@@ -63,5 +63,10 @@
     "version": "v0",
     "cloudId": "ucloud-qida-xjk",
     "appName": "elearning"
+  },
+  "ucloud.env-yxt.qida.h5web.community.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "qidah5webc"
   }
 }
