@@ -43,7 +43,6 @@ my $OldPwd = getcwd();
 
 my $UDV = {}; # user-defined variable
 my $AppPkg = {};
-my $Rollback = {};
 my $Plugin;
 my $Tpl;
 my $RevisionId;
@@ -138,7 +137,6 @@ sub getPluginDefinition {
 sub persistCiomAndPluginInfo() {
 	$CiomData->{Timestamp} = $Timestamp;
 	$CiomData->{AppPkg} = $AppPkg;
-	$CiomData->{Rollback} = $Rollback;
 	DumpFile("$Output/ciom.yaml", $CiomData);
 }
 
