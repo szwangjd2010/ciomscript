@@ -98,5 +98,10 @@
     "version": "v0",
     "cloudId": "ucloud-qida-xjk",
     "appName": "qidah5webs"
+  },
+  "dev.env-yxt.eschool.web.deploy.and.rollback":{
+    "version": "v0",
+    "cloudId": "dev",
+    "appName": "eschweb"
   }
 }

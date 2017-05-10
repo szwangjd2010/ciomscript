@@ -30,8 +30,8 @@ my $appName = $ARGV[2];
 # $DeployMode: deploy or rollback
 # it's corresponding to same name node which defined in %app%.ciom & %plugin%.yaml
 # in deploy process, will execute pre, cmds, post actions defined in the $DeployMode node
-my $DeployMode = lc($ENV{DeployMode}) || 'deploy'; 
-my $RollbackTo = lc($ENV{RollbackTo}) || '';
+my $DeployMode = lc($ENV{DeployMode} || 'deploy'); 
+my $RollbackTo = lc($ENV{RollbackTo} || '');
 
 my $CiomUtil = new CiomUtil(1);
 my $Timestamp = $CiomUtil->getTimestamp();
@@ -96,7 +96,7 @@ sub addTplVarsIntoCiomData {
 	};
 
 	my $appTypeTopDomain = substr($AppType, 0, index($AppType, '.'));
-	my $appTypeTopDomainVarsFile =  "$ENV{CIOM_SCRIPT_HOME}/plugins/vars/${appTypeTopDomain}";
+	my $appTypeTopDomainVarsFile =  "$ENV{CIOM_SCRIPT_HOME}/plugin/vars/${appTypeTopDomain}";
 	if (-e $appTypeTopDomainVarsFile) {
 		$CiomData->{vars} = LoadFile($appTypeTopDomainVarsFile);
 	}
@@ -113,7 +113,7 @@ sub getPluginDefinition {
 
 	local *getPluginFileByName = sub {
 		my ($pluginName) = @_;
-		return  "$ENV{CIOM_SCRIPT_HOME}/plugins/${pluginName}.yaml";
+		return  "$ENV{CIOM_SCRIPT_HOME}/plugin/${pluginName}.yaml";
 	};
 
 	my $plugin = LoadFile(getPluginFileByName($AppType));
@@ -539,7 +539,6 @@ sub test() {
 	];
 	runCmdsInHierarchys($CmdsInHierarchys);
 }
-
 
 sub main() {
 	enterWorkspace();
