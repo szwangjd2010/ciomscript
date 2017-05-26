@@ -103,12 +103,12 @@ sub addTplVarsIntoCiomData {
 }
 
 sub getPluginDefinition {
-	my $plugins = {};
+	my $definitions = {};
 	my $chain = [];
 	local *appendPluginInheritedChainNode = sub {
 		my ($name, $data) = @_;
 		push(@{$chain}, $name);
-		$plugins->{$name} = clone($data);
+		$definitions->{$name} = clone($data);
 	};
 
 	local *getPluginFileByName = sub {
@@ -126,12 +126,12 @@ sub getPluginDefinition {
 		$extend = $plugin->{__extend};
 	}
 
-	my $definition = {};
+	my $ret = {};
 	for (my $i = $#{$chain}; $i >= 0; $i--) {
-		$definition = merge $definition, $plugins->{$chain->[$i]};
+		$ret = merge $ret, $definitions->{$chain->[$i]};
 	}
-	$definition = merge $definition, {__extend => $chain};
-	return $definition;
+	$ret = merge $ret, {__extend => $chain};
+	return $ret;
 }
 
 sub persistCiomAndPluginInfo() {
@@ -272,9 +272,11 @@ sub addLazyOut2CiomData {
 		}
 	}
 
-	my $key = "host[$hostIdx]-instance[$instanceIdx]";
-	if (!defined($pointer->{$key})) {
-		$pointer->{$key} = $cmds;
+	if (defined($hostIdx) && defined($instanceIdx)) {
+		my $key = "host[$hostIdx]-instance[$instanceIdx]";
+		if (!defined($pointer->{$key})) {
+			$pointer->{$key} = $cmds;
+		}
 	}
 }
 

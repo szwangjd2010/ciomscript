@@ -72,6 +72,7 @@ sub generateCertInfo(){
             $certDetail->{CN}=getP12SubjectCN($outSubject);
             $certDetail->{uuid}=rmtGetUUIDForOrg($orgCode);
             $certDetail->{ProfileSpecifier}=rmtGetProfileSpecifierForOrg($orgCode);
+            $certDetail->{appId}=rmtGetApplictionIdentifierForOrg($orgCode);
             $certDetail->{p12md5sum}=getP12Md5sumForOrg($orgCode);
         }
         else {
@@ -81,6 +82,7 @@ sub generateCertInfo(){
             $certDetail->{CN}="";
             $certDetail->{ProfileSpecifier}="";
             $certDetail->{p12md5sum}="";
+            $certDetail->{appId}="";
         }
     	$certInfo->{$_}=$certDetail ;
 
@@ -125,6 +127,16 @@ sub rmtGetProfileSpecifierForOrg($){
 	my $name = "@cmdoutput";
 	chomp($name);
 	return $name;
+}
+
+sub rmtGetApplictionIdentifierForOrg($){
+	my $code = $_[0];
+	my $cmd="ssh ciom\@$iosHost \"$provisionReader -f $appCertRoot/$code/$code.mobileprovision -o Entitlements.application-identifier\"";
+	#print $cmd;
+	my @cmdoutput=readpipe($cmd);
+	my $appId = "@cmdoutput";
+	chomp($appId);
+	return $appId;
 }
 
 sub getP12Md5sumForOrg($){

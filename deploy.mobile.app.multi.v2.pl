@@ -29,12 +29,15 @@ our $Platform = "";
 our $AppVcaHome = "";
 our $CiomData = {};
 our $doUpload = "";
+our $doUpload2Pgyer = "";
 our $distDetail = {};
 our $DynamicParams ={};
 our $appName = "";
 our $version = "";
 our	$cloudId = "";
 our $wsLog = "build.log";
+our $orgCount;
+our $need2BuildOrgCodes;
 
 sub injectPlatformDependency() {
 	require "$ENV{CIOM_SCRIPT_HOME}/${Platform}.spec.v2.pl";
@@ -45,6 +48,7 @@ sub intialGlobalVars(){
 	$AppVcaHome = $DistInfo->{appVcaHome};
 	$CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
 	$doUpload = $DistInfo->{doUpload};
+	$doUpload2Pgyer = $DistInfo->{doUpload2Pgyer};
 	$distDetail = $DistInfo->{distInfo}->[$executorIdx];
 	$DynamicParams = $DistInfo->{dynamicParams};
 	$appName = $DistInfo->{appName};
@@ -117,6 +121,10 @@ sub replaceOrgCustomizedFiles($) {
 	my $code = $_[0];
 	my $orgCustomizedHome = "$AppVcaHome/resource/$code";
 	$ciomUtil->exec("/bin/cp -rf $orgCustomizedHome/* ./");
+}
+
+sub copyPlistFiles() {
+	$ciomUtil->exec("/bin/cp -rf $AppVcaHome/*.plist ./");
 }
 
 sub generateStreameditFile($) {
@@ -259,20 +267,23 @@ sub clearBuilingLog() {
 	$ciomUtil->writeToFile($wsLog,"");
 }
 
+
+
 sub buildOrgs() {
 	my @childs;
-	my $need2BuildOrgCodes = $distDetail->{needToBuildOrgCodes};
-	my $cnt = $#{$need2BuildOrgCodes} + 1;
+	$need2BuildOrgCodes = $distDetail->{needToBuildOrgCodes};
+	$orgCount = $#{$need2BuildOrgCodes} + 1;
 	clearBuilingLog();
 	
 	if ($Platform eq 'ios') {
 		streameditConfs4AllOrgs();
-		initCmds();
-		buildWithoutPackage();
+		initial();
+		copyPlistFiles();
+		resyncSourceCode();
+		achiveAndExportIpa();
 	}
 
-
-	for (my $i = 0; $i < $cnt; $i++) {
+	for (my $i = 0; $i < $orgCount; $i++) {
 		my $code = $need2BuildOrgCodes->[$i];
 		logBuildingStatus(1,"###############Start to build org <$code> on executor${executorIdx}################");
 		if ($Platform eq 'ios') {
@@ -285,11 +296,9 @@ sub buildOrgs() {
 			streameditConfs4Org($code);
 			build();
 		}
-		cleanAfterOrgBuild();
+		#cleanAfterOrgBuild();
 		moveApppkgFile($code);
-		if ($doUpload eq 'YES' ) {
-			uploadOrgPkgs($code);
-		}
+		uploadPackage($code);
 		logBuildingStatus(1,"###############Finish building org <$code> on executor${executorIdx}###############\n");
 		logBuildFinishedOrgs($code);
 	}
@@ -302,6 +311,16 @@ sub getUploadRemoteURI() {
 	my $path = $publishto->{path};
 
 	return "$user\@$ip:/$path/";
+}
+
+sub uploadPackage($) {
+	my $code = shift;
+	if ($doUpload eq 'YES' ) {
+		uploadOrgPkg($code);
+	}
+	if ($doUpload2Pgyer eq 'YES') {
+		uploadPkgs2Pgyer($code);
+	}
 }
 
 sub uploadOrgPkgs($) {
@@ -323,6 +342,19 @@ sub uploadAllPkgs() {
 
 	my $remoteURI = getUploadRemoteURI();
 	$ciomUtil->exec("scp -r $ApppkgPath/* $remoteURI");
+}
+
+sub uploadPkgs2Pgyer($) {
+	my $code = shift;
+	if (!defined($CiomData->{pgyer})) {
+		return;
+	}
+	my $appKey = $CiomData->{pgyer}->{appKey};
+	my $userKey = $CiomData->{pgyer}->{userKey};
+	my $uploadApiUrl = $CiomData->{pgyer}->{uploadApiUrl};
+	my $pkgName = getAppFinalPkgName($code);
+	my $uploadCmd = "curl -F \"file=\@$ApppkgPath/$pkgName\" -F \"_api_key=$appKey\" -F \"uKey=$userKey\" $uploadApiUrl";
+	$ciomUtil->exec("$uploadCmd");
 }
 
 sub main() {

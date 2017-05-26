@@ -103,5 +103,35 @@
     "version": "v0",
     "cloudId": "dev",
     "appName": "eschweb"
+  },
+  "ucloud.env-yxt.eschool.soa.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-eschool",
+    "appName": "eschoolsoa"
+  },
+  "ucloud.env-yxt.eschool.csapi.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-eschool",
+    "appName": "eschoolapi"
+  },
+  "ucloud.env-yxt.eschool.servicecenter.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-eschool",
+    "appName": "eschoolservicecenter"
+  },
+  "ucloud.env-yxt.eschool.web.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-eschool",
+    "appName": "eschool"
+  },
+  "ucloud.env-yxt.eschool.mobile.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-eschool",
+    "appName": "eschoolesm"
+  },
+  "ucloud.test.env-yxt.qida.api.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-qida-test",
+    "appName": "qidaapi"
   }
 }
