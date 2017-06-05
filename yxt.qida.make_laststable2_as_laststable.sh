@@ -10,10 +10,11 @@ password="pwdasdwx"
 svnparams="--username $username --password $password --non-interactive -m \"by jenkins\""
 
 setMode 0
-log 1
+log 0
+
+repoBranches="http://172.17.128.21:9000/svn/el/branches"
 
 if [ "$PC" = "true" ]; then
-    repoBranches="http://172.17.128.21:9000/svn/el/branches"
     execCmd "svn cp $svnparams $repoBranches/laststable $repoBranches/laststable-v$timestamp"
     execCmd "svn del $svnparams $repoBranches/laststable/eLearning"
     execCmd "svn del $svnparams $repoBranches/laststable/Dlls"
@@ -22,7 +23,6 @@ if [ "$PC" = "true" ]; then
 fi
 
 if [ "$H5" = "true" ]; then
-    repoBranches="http://172.17.128.21:9000/svn/el/branches"
     execCmd "svn cp $svnparams $repoBranches/laststable $repoBranches/laststable-v$timestamp"
     execCmd "svn del $svnparams $repoBranches/laststable/eLearningH5.01"
     execCmd "svn cp $svnparams $repoBranches/laststable2/eLearningH5.01 $repoBranches/laststable/"
