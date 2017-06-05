@@ -2,16 +2,25 @@
 # 
 
 RUN_MODE=1
-LOG=$CIOM_LOG_FILE
+LOG=1
+LOG_FILE=$CIOM_LOG_FILE
 
 setMode() {
 	RUN_MODE=$1
 }
 
+log() {
+	LOG=$1
+}
+
 execCmd() {
 	cmd=$1
 	run=${2:-0}
-	echo "$1" | tee -a $LOG
+
+	if [ $LOG -eq 1 ]; then
+		echo "$1" | tee -a $LOG_FILE
+	fi
+
 	if [ $RUN_MODE -eq 1 ] || [ $run -eq 1 ]; then
 		eval $1
 	fi
