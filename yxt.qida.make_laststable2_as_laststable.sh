@@ -9,7 +9,7 @@ password="pwdasdwx"
 
 svnparams="--username $username --password $password --non-interactive -m \"by jenkins\""
 
-setMode 0
+setMode 1
 log 0
 
 repoBranches="http://172.17.128.21:9000/svn/el/branches"
@@ -33,6 +33,8 @@ if [ "$JAVAAPI" = "true" ]; then
     execCmd "svn cp $svnparams $repoBranches/laststable-qida $repoBranches/laststable-qida-v$timestamp"
     execCmd "svn del $svnparams $repoBranches/laststable-qida/qidaapi"
     execCmd "svn del $svnparams $repoBranches/laststable-qida/waf-qida"
+    execCmd "svn del $svnparams $repoBranches/laststable-qida/waf-base"
     execCmd "svn cp $svnparams $repoBranches/laststable-qida-test/qidaapi $repoBranches/laststable-qida/"
     execCmd "svn cp $svnparams $repoBranches/laststable-qida-test/waf-qida $repoBranches/laststable-qida/"
+    execCmd "svn cp $svnparams $repoBranches/laststable-qida-test/waf-base $repoBranches/laststable-qida/"
 fi

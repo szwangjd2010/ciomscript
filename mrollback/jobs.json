@@ -133,5 +133,10 @@
     "version": "v0",
     "cloudId": "ucloud-qida-test",
     "appName": "qidaapi"
+  },
+  "ucloud.black.env-yxt.common.componentapi.publish": {
+    "version": "v0",
+    "cloudId": "ucloud-black",
+    "appName": "componentapi"
   }
 }

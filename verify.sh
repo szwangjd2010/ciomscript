@@ -56,5 +56,5 @@ fi
 if [ "$CiomPassphraseQidaC" == "jxf2016" ]; then
 	exit 0
 fi
-
+echo "[CIOM]passphrase incorrect"
 exit 1

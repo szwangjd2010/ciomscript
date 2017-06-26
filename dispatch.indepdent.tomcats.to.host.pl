@@ -36,7 +36,7 @@ sub generateTomcatInstances($) {
 		$tomcatSeed,
 		1,
 		$basePortDelta,
-		1,
+		0,
 		1,
 		"nio",
 		$fileJavaOptsTpl,

@@ -41,7 +41,7 @@ sub initial() {
 		$isPsTarget = "true";
 		$CiomData = json_file_to_perl("$AppCiomJsonFile");
 		$remoteHost = $CiomData->{hosts}->[0]->{ip};
-		$wsRoot = "$CiomData->{app3wPath}";
+		$wsRoot = $CiomData->{app3wPath} || $CiomData->{hosts}->[0]->{app3wPath};
 		$user = "ciom";
 	}
 }

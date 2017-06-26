@@ -6,8 +6,6 @@ package:
     - "*"
 
 deploy:
-  owner: nginx
-  group: nginx  
   mode: 755
   instance:
     pre: 
