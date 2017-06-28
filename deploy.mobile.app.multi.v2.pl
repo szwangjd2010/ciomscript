@@ -94,7 +94,7 @@ sub updateCode($) {
 	for (my $i = 0; $i < $cnt; $i++) {
 		my $name = $repos->[$i]->{name};
 		my $url = $repos->[$i]->{url};
-
+		$url = instantiateDynamicParamsInStr($url);
 		if ($doRevert == 1) {
 			$ciomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
 			$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
@@ -266,8 +266,6 @@ sub clearBuilingLog() {
 	$ciomUtil->exec("rm -rf $wsLog");
 	$ciomUtil->writeToFile($wsLog,"");
 }
-
-
 
 sub buildOrgs() {
 	my @childs;
