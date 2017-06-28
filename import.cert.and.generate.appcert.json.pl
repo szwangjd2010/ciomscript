@@ -258,7 +258,7 @@ sub getCertPwdFromFile($) {
 sub importCertificateForOrg($) {
 	my $code = $_[0];
 	my $certExist = isCertImported($code); 
-	my $oldP12Md5Sum = $oldCertInfo->{$code}->{p12md5sum};
+	my $oldP12Md5Sum = $oldCertInfo->{$code}->{p12md5sum}||"";
 	my $curP12Md5Sum = getP12Md5sumForOrg($code);
 	if ( $certExist eq 'certImported') {
 		if ( $curP12Md5Sum eq $oldP12Md5Sum ) {
