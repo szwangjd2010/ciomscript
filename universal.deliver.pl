@@ -277,7 +277,7 @@ sub addLazyOut2CiomData {
 		if (!defined($pointer->{$key})) {
 			$pointer->{$key} = $cmds;
 		}
-	}
+	}u
 }
 
 sub lazyProcessCmds {
