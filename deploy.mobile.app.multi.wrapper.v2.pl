@@ -219,6 +219,11 @@ sub main() {
 		return 1;
 	}
 	
+	if (!defined($CiomData->{scm})) {
+		$ciomUtil->log("\n\nbuild error: no scm info provided!\n\n");
+		return 1;
+	}
+	
 	constructDynamicParamsMap();
 	constructExecutorInfo();
 	initialDistInfo();

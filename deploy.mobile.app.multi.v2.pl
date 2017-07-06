@@ -78,35 +78,71 @@ sub makeApppkgDirectory() {
 
 #platform special#
 
-sub updateCode($) {
-	my $doRevert = shift || 0;
-	
+sub updateCode($){
+	my $dorevert = shift || 0;
 	my $repos = $CiomData->{scm}->{repos};
-	#my $username = $CiomData->{scm}->{username};
-	#my $password = $CiomData->{scm}->{password};
+	my $cnt = $#{$repos} + 1;
+	for (my $i = 0; $i < $cnt; $i++) {
+		my $scmInfo = $repos->[$i];
+		my $gitPostfix = ".git";
+		if ($scmInfo->{url} =~ /$gitPostfix/) {
+			updateCodeWithGit($dorevert,$scmInfo);
+		}
+		else{
+			updateCodeWithSvn($dorevert,$scmInfo);
+		}
+	}
+}
+
+sub updateCodeWithSvn($$) {
+	my $doRevert = shift;
+	my $scmRepoInfo = shift;
+
 	my $username = "jenkins";
 	my $password = "pwdasdwx";
-	my $cnt = $#{$repos} + 1;
-
 	my $cmdSvnPrefix = "svn --non-interactive --username $username --password '$password'";
 	my $cmdRmUnversionedTpl = "$cmdSvnPrefix status %s | grep -P '^\?' | awk '{print \$2}' | xargs -I{} rm -rf '{}'";
 
-	for (my $i = 0; $i < $cnt; $i++) {
-		my $name = $repos->[$i]->{name};
-		my $url = $repos->[$i]->{url};
-		$url = instantiateDynamicParamsInStr($url);
-		if ($doRevert == 1) {
+	my $name = $scmRepoInfo->{name};
+	my $url = $scmRepoInfo->{url};
+	$url = instantiateDynamicParamsInStr($url);
+	
+	if ($doRevert == 1) {
+		$ciomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
+		$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
+	} else {
+		if (! -d $name) {
+			$ciomUtil->exec("$cmdSvnPrefix co $url $name");
+		} else {
 			$ciomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
 			$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
+			$ciomUtil->exec("$cmdSvnPrefix update $name");			
+		}			
+	}
+}
+
+sub updateCodeWithGit($$) {
+	my $doRevert = shift;
+	my $scmRepoInfo = shift;
+
+	my $name = $scmRepoInfo->{name};
+	my $url = $scmRepoInfo->{url};
+	my $branch = $scmRepoInfo->{branch} || "master";
+
+	if ($doRevert == 1) {
+		chdir("$name");
+		$ciomUtil->exec("git checkout . && git clean -xdf");
+		chdir("..");
+	} else {
+		if (! -d $name) {
+			$ciomUtil->exec("git clone -b $branch $url $name");
 		} else {
-			if (! -d $name) {
-				$ciomUtil->exec("$cmdSvnPrefix co $url $name");
-			} else {
-				$ciomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
-				$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
-				$ciomUtil->exec("$cmdSvnPrefix update $name");
-			}			
-		}
+			chdir("$name");
+			$ciomUtil->exec("git checkout . && git clean -xdf");
+			$ciomUtil->exec("git checkout $branch");
+			$ciomUtil->exec("git pull");
+			chdir("..");
+		}			
 	}
 }
 
@@ -114,6 +150,7 @@ sub revertCode() {
 	my $ws = getcwd();
 	logBuildingStatus(1,"=== start update code for ${ws} ===");
 	updateCode(1);
+	#updateCodeWithSvn(1);
 	logBuildingStatus(1,"=== end update code for ${ws} ===");
 }
 
@@ -361,8 +398,9 @@ sub main() {
 
 	enterWorkspace();
 	updateCode(0);
+	#updateCodeWithSvn(0);
 	globalPreAction();
-	buildOrgs();
+	#buildOrgs();
 	globalPostAction();
 	leaveWorkspace();
  
