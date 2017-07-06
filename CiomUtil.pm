@@ -87,6 +87,21 @@ sub execWithReturn() {
 	}
 }
 
+sub execModuleAction() {
+	my $self = shift;
+	my $action = shift;
+
+	$self->log("execModuleAction: $action");
+}
+
+sub hasModuleActionInCmds() {
+	my $self = shift;
+	my $cmds = shift;
+
+	my @moduleActions = grep { $_ =~ m/^Module\(\w+\)/ } @{$cmds};
+	return $#moduleActions > -1;
+}
+
 sub remoteExec() {
 	my $self = shift;
 	my $info = shift;
@@ -99,8 +114,19 @@ sub remoteExec() {
 		if ($#{$cmd} == -1) {
 			return;
 		}
-		my $jointCmds = "(" . join("; ", @{$cmd}) . ")";
-		$self->exec("ssh -p $port $user\@$host '$jointCmds'");
+
+		if ($self->hasModuleActionInCmds($cmd)) {
+			foreach my $action (@{$cmd}) {
+				if ($action =~ m/^Module\(\w+\)/) {
+					$self->execModuleAction($action);
+				} else {
+					$self->exec("ssh -p $port $user\@$host '$action'");
+				}
+			}
+		} else {
+			my $jointCmds = "(" . join("; ", @{$cmd}) . ")";
+			$self->exec("ssh -p $port $user\@$host '$jointCmds'");
+		}
 	} else {
 		$self->exec("ssh -p $port $user\@$host '$cmd'");
 	}

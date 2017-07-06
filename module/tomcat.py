@@ -35,9 +35,9 @@ def attach(location, appName, asRoot, extract):
     webappName = 'ROOT' if asRoot else appName
     with cd(location):
         if extract:
-            run('unzip {}.war -d webapps/{}'.format(appName, webappName))
+            run('unzip {}/{}.war -d webapps/{}'.format(appName, appName, webappName))
         else:
-            run('cp {}.war webapps/{}.war'.format(appName, webappName))
+            run('cp {}/{}.war webapps/{}.war'.format(appName, appName, webappName))
 
 @task
 def deploy(location, appName, asRoot=False, extract=True):

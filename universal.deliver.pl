@@ -165,7 +165,7 @@ sub enterWorkspace() {
 }
 
 sub initWorkspace() {
-	$CiomUtil->exec("mkdir -p $Output");
+	$CiomUtil->exec("mkdir -p $Output;");
 }
 
 sub leaveWorkspace() {
@@ -277,7 +277,7 @@ sub addLazyOut2CiomData {
 		if (!defined($pointer->{$key})) {
 			$pointer->{$key} = $cmds;
 		}
-	}u
+	}
 }
 
 sub lazyProcessCmds {
@@ -351,7 +351,7 @@ sub getIncludeFileRoot($) {
 	my $include = shift;
 	my $idxFileRoot = index($include, '^');
 	if ($idxFileRoot <= 0) {
-		return '.';
+		return $include;
 	}
 	return substr($include, 0, $idxFileRoot);	
 }
@@ -374,6 +374,7 @@ sub packageApp() {
 
 	my $dir4Pkg = "$Output/$appName";
 	$CiomUtil->exec("mkdir -p $dir4Pkg");
+	$CiomUtil->exec("rm -rf $dir4Pkg/*");
 	if ($include0 eq '*') {
 		if ($reposCnt == 1) {
 			$CiomUtil->exec("rsync -avh $repo0Name/* $dir4Pkg/ --delete");
@@ -382,11 +383,18 @@ sub packageApp() {
 		}
 	} else {
 		for (my $i = 0; $i < $includesCnt; $i++) {
-			my $fileRoot = getIncludeFileRoot($includes->[$i]);
-			$CiomUtil->exec("/bin/cp -Rf $fileRoot/* $dir4Pkg/");
+			my $include = $includes->[$i];
+			if ($include =~ m/^f,/) {
+				$include = substr($include, 2);
+				$CiomUtil->exec("/bin/cp -Rf $include $dir4Pkg/");
+			} else {
+				my $fileRoot = getIncludeFileRoot($include);
+				$CiomUtil->exec("/bin/cp -Rf $fileRoot/* $dir4Pkg/");	
+			}
 		}
 	}
-	$CiomUtil->exec("/bin/cp -f *.revinfo *.rev $Output/");	
+	$CiomUtil->exec("/bin/cp -f $repo0Name/{.repoinfo,.revid} $dir4Pkg/");
+	$CiomUtil->exec("/bin/cp -f $AppPkg->{sumfile} $dir4Pkg/");	
 	$CiomUtil->exec("(cd $Output; tar --exclude-vcs -czvf $ENV{WORKSPACE}/$AppPkg->{file} $appName)");		
 }
 

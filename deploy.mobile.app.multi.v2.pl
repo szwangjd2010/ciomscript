@@ -101,7 +101,7 @@ sub updateCodeWithSvn($$) {
 	my $username = "jenkins";
 	my $password = "pwdasdwx";
 	my $cmdSvnPrefix = "svn --non-interactive --username $username --password '$password'";
-	my $cmdRmUnversionedTpl = "$cmdSvnPrefix status %s | grep -P '^\?' | awk '{print \$2}' | xargs -I{} rm -rf '{}'";
+	my $cmdRmUnversionedTpl = "$cmdSvnPrefix status %s | grep -P '^\\?' | awk '{print \$2}' | xargs -I{} rm -rf '{}'";
 
 	my $name = $scmRepoInfo->{name};
 	my $url = $scmRepoInfo->{url};
@@ -111,6 +111,9 @@ sub updateCodeWithSvn($$) {
 		$ciomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
 		$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
 	} else {
+		if (! -d "$name/.svn"){
+			$ciomUtil->exec("rm -rf $name");
+		}
 		if (! -d $name) {
 			$ciomUtil->exec("$cmdSvnPrefix co $url $name");
 		} else {
@@ -134,6 +137,9 @@ sub updateCodeWithGit($$) {
 		$ciomUtil->exec("git checkout . && git clean -xdf");
 		chdir("..");
 	} else {
+		if (! -d "$name/.git"){
+			$ciomUtil->exec("rm -rf $name");
+		}
 		if (! -d $name) {
 			$ciomUtil->exec("git clone -b $branch $url $name");
 		} else {
