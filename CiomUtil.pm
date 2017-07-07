@@ -1,6 +1,5 @@
 package CiomUtil;
 
-
 use strict;
 use English;
 use Data::Dumper;
@@ -91,7 +90,8 @@ sub execModuleAction() {
 	my $self = shift;
 	my $action = shift;
 
-	$self->log("execModuleAction: $action");
+	$action =~ s|^Module\((\w+)\)\.(\w+)|fab -u root -f $ENV{CIOM_SCRIPT_HOME}/module/tomcat.py $2|;
+	$self->exec($action);
 }
 
 sub hasModuleActionInCmds() {
@@ -248,6 +248,19 @@ sub prettyPath() {
 	my $path = shift;
 	$path =~ s|/{1,}|/|g;
 	return $path;
+}
+
+sub removeLastSlashForUrl() {
+	my $self = shift;
+	my $url = shift;
+	my $lastIndex = rindex($url,"/");
+	my $length = length($url);  
+        
+	if ($lastIndex == $length-1) {
+        my $newUrl = substr($url,0,$length-1);
+        return $newUrl;
+	}
+
 }
 
 sub getTimestamp() {

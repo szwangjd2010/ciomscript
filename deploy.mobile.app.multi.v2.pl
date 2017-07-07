@@ -105,13 +105,13 @@ sub updateCodeWithSvn($$) {
 
 	my $name = $scmRepoInfo->{name};
 	my $url = $scmRepoInfo->{url};
-	$url = instantiateDynamicParamsInStr($url);
-	
+	#$url = instantiateDynamicParamsInStr($url);
+	$url = $ciomUtil->removeLastSlashForUrl($url);
 	if ($doRevert == 1) {
 		$ciomUtil->execNotLogCmd(sprintf($cmdRmUnversionedTpl, $name));
 		$ciomUtil->exec("$cmdSvnPrefix revert -R $name");
 	} else {
-		if (! -d "$name/.svn"){
+		if (! -d "$name/.svn" || '0' == $ciomUtil->execWithReturn("svn info $name|grep -c \'$url\$\'")){
 			$ciomUtil->exec("rm -rf $name");
 		}
 		if (! -d $name) {
@@ -137,7 +137,7 @@ sub updateCodeWithGit($$) {
 		$ciomUtil->exec("git checkout . && git clean -xdf");
 		chdir("..");
 	} else {
-		if (! -d "$name/.git"){
+		if (! -d "$name/.git" || '0' == $ciomUtil->execWithReturn("grep -c $url $name/.git/config")) {
 			$ciomUtil->exec("rm -rf $name");
 		}
 		if (! -d $name) {
@@ -406,7 +406,7 @@ sub main() {
 	updateCode(0);
 	#updateCodeWithSvn(0);
 	globalPreAction();
-	#buildOrgs();
+	buildOrgs();
 	globalPostAction();
 	leaveWorkspace();
  

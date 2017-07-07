@@ -8,37 +8,18 @@ use Clone 'clone';
 use Hash::Merge::Simple qw( merge );
 use Data::Dumper;
 
-my $p1 = $ARGV[0] || 'm2';
+my $a = "aaaaaaaa";
 
-sub way_m1() {
-    p("m1");
+sub f($) {
+    my $va = shift;
+    $va =~ s/(\w+)/222222/g;
+
+    print $va;
 }
 
-sub way_m2() {
-    p("m2");
-}
+print $a;
 
-sub p {
-    my ($l) = @_;
-    print "$l\n";
-}
+f($a);
 
-
-sub f1 {
-    my ($a, $b) = @_;
-    p($a);
-    p($b);
-
-    f2(@_);
-}
-
-sub f2 {
-    my ($a, $b) = @_;
-    p($a);
-    p($b);
-}
-
-
-
-p(lc("AAAAAAAAAAAAAAAccc"));
+print $a;
 
