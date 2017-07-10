@@ -13,7 +13,7 @@ use Hash::Merge::Simple qw(merge);
 use Clone 'clone';
 use Template;
 use Cwd;
-use File::Slurp;
+use File::Slurp qw(read_dir);
 use YAML::XS qw(LoadFile DumpFile);
 use JSON::Parse 'json_file_to_perl';
 use String::Escape 'escape';
@@ -43,6 +43,7 @@ my $OldPwd = getcwd();
 
 my $UDV = {}; # user-defined variable
 my $AppPkg = {};
+my $Consts = {};
 my $Plugin;
 my $Tpl;
 my $RevisionId;
@@ -80,6 +81,12 @@ sub initAppPkgInfo() {
 	$AppPkg->{url} = getAppPkgUrl();
 	$AppPkg->{sumfile} = "$Output/$appName.sha256sum";
 	$AppPkg->{repoLocation} = "$ENV{CIOM_REPO_LOCAL_PATH}/$version/$cloudId/$appName/";
+}
+
+sub initConsts() {
+	$Consts->{repoinfo} = ".repoinfo";
+	$Consts->{revid} = ".revid";
+	$Consts->{appciomdata} = "ciom.yaml";
 }
 
 sub processTemplate {
@@ -137,7 +144,7 @@ sub getPluginDefinition {
 sub persistCiomAndPluginInfo() {
 	$CiomData->{Timestamp} = $Timestamp;
 	$CiomData->{AppPkg} = $AppPkg;
-	DumpFile("$Output/ciom.yaml", $CiomData);
+	DumpFile("$Output/$Consts->{appciomdata}", $CiomData);
 }
 
 sub loadPlugin() {
@@ -177,13 +184,60 @@ sub setRevisionId {
 	if (defined($id)) {
 		$RevisionId = $id;	
 	} else {
-		$RevisionId = $CiomUtil->execWithReturn("cat $CiomData->{scm}->{repos}->[0]->{name}/.revid | tr -d '\n'");
+		$RevisionId = $CiomUtil->execWithReturn("cat $CiomData->{scm}->{repos}->[0]->{name}/$Consts->{revid} | tr -d '\n'");
 	}
 
 	print $RevisionId;
 }
 
-sub updateCode() {
+sub pointoutRepoStatus {
+	my $appCiomDataFile = "$Output/$Consts->{appciomdata}";
+	if (! -e $appCiomDataFile) {
+		return;
+	}
+
+	my $lastCiomData = LoadFile($appCiomDataFile);
+	my $current = $CiomData->{scm}->{repos};
+	my $last = $lastCiomData->{scm}->{repos};
+	if (!defined($last)) {
+		return;
+	}
+
+	map {
+		my $repo = $_;
+
+		my @repoInLast = grep { $_->{name} eq $repo->{name} } @{$last};
+		if ($#repoInLast == -1) {
+			$repo->{status} = 'new';
+		} else {
+			if ($repo->{url} eq $repoInLast[0]->{url}) {
+				$repo->{status} = 'unchanged';
+			} else {
+				$repo->{status} = 'changed';
+			}
+		}
+	} @{$current};
+}
+
+sub removeUselessRepoCode() {
+	my $repos = $CiomData->{scm}->{repos};
+	foreach my $dir (read_dir('.')) {
+    	if ($dir eq "_output") {
+    		next;
+    	}
+
+    	my @repo = grep { $_->{name} eq $dir } @{$repos};
+    	if ($#repo == -1
+    		|| $repo[0]->{status} eq "changed") {
+    		$CiomUtil->exec("rm -rf $dir");
+    	}
+	}
+}
+
+sub pullCode() {
+	pointoutRepoStatus();
+	removeUselessRepoCode();
+
 	my $repos = $CiomData->{scm}->{repos};
 	my $username = $CiomData->{scm}->{username};
 	my $password = $CiomData->{scm}->{password};
@@ -205,8 +259,8 @@ sub updateCode() {
 				"$cmdSvnPrefix update $name"
 			]);
 		}
-		$CiomUtil->exec("$cmdSvnPrefix info $name > $name/.repoinfo");
-		$CiomUtil->exec("grep -P '(Revision|Last Changed Rev)' $name/.repoinfo | awk -F': ' '{print \$2}' | tr '\n', '.' | awk '{print \$1 \"$Timestamp\"}' > $name/.revid");
+		$CiomUtil->exec("$cmdSvnPrefix info $name > $name/$Consts->{repoinfo}");
+		$CiomUtil->exec("grep -P '(Revision|Last Changed Rev)' $name/$Consts->{repoinfo} | awk -F': ' '{print \$2}' | tr '\n', '.' | awk '{print \$1 \"$Timestamp\"}' > $name/$Consts->{revid}");
 	}
 }
 
@@ -393,7 +447,7 @@ sub packageApp() {
 			}
 		}
 	}
-	$CiomUtil->exec("/bin/cp -f $repo0Name/{.repoinfo,.revid} $dir4Pkg/");
+	$CiomUtil->exec("/bin/cp -f $repo0Name/{$Consts->{repoinfo},$Consts->{revid}} $dir4Pkg/");
 	$CiomUtil->exec("/bin/cp -f $AppPkg->{sumfile} $dir4Pkg/");	
 	$CiomUtil->exec("(cd $Output; tar --exclude-vcs -czvf $ENV{WORKSPACE}/$AppPkg->{file} $appName)");		
 }
@@ -504,7 +558,8 @@ sub deploy() {
 }
 
 sub deploymode_deploy() {
-	updateCode();
+	pullCode();
+exit(0);	
 	setRevisionId();
 	initAppPkgInfo();
 
@@ -553,6 +608,7 @@ sub test() {
 sub main() {
 	enterWorkspace();
 	initWorkspace();
+	initConsts();
 	initTpl();
 	loadPlugin();
 	

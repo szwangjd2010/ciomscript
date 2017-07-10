@@ -7,19 +7,42 @@ use Template;
 use Clone 'clone';
 use Hash::Merge::Simple qw( merge );
 use Data::Dumper;
+use File::Find::Rule;
+my $a = [
+    {
+        name => 'name1',
+        url => "url1"
+    },
+    {
+        name => 'name2',
+        url => "url2-new"
+    },
+    {
+        name => 'name3',
+        url => "url3"
+    }
 
-my $a = "aaaaaaaa";
+];
 
-sub f($) {
-    my $va = shift;
-    $va =~ s/(\w+)/222222/g;
 
-    print $va;
-}
+my $b = [
+    {
+        name => 'name1',
+        url => "url1"
+    },
+    {
+        name => 'name2',
+        url => "url2"
+    }
 
-print $a;
+];
 
-f($a);
 
-print $a;
+
+
+my @d = File::Find::Rule->new
+    ->directory
+    ->in(".")
+    ->maxdepth(1)
+    ->not(File::Find::Rule->new->name(qr/^\.\.?$/));
 
