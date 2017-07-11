@@ -199,7 +199,9 @@ sub pointoutRepoStatus {
 	my $lastCiomData = LoadFile($appCiomDataFile);
 	my $current = $CiomData->{scm}->{repos};
 	my $last = $lastCiomData->{scm}->{repos};
+	
 	if (!defined($last)) {
+		map { $_->{status} = 'new' } @{$current};
 		return;
 	}
 
