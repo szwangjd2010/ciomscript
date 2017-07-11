@@ -6,7 +6,6 @@ use Data::Dumper;
 use Clone 'clone';
 use Text::Sprintf::Named qw(named_sprintf);
 
-
 sub new() {
     my $class = shift;
     my $username = shift;
@@ -18,7 +17,7 @@ sub new() {
 			"co" => "%(prefix)s co %(url)s %(name)s",
 			"revert" => "%(prefix)s revert -R %(name)s",
 			"update" => "%(prefix)s up %(name)s",
-			"clearUnversioned" => "%(prefix)s status %(name)s | grep '^?' | awk '{print \$2}' | xargs -I{} rm -rf '{}'",
+			"clean" => "%(prefix)s status %(name)s | grep '^?' | awk '{print \$2}' | xargs -I{} rm -rf '{}'",
             "version" => "%(prefix)s info %(name)s | grep -P '(Revision|Last Changed Rev)'| awk -F': ' '{print \$2}' | tr '\n', '.' | awk '{print \$1}' | awk -F'.' '{print \$1 \".\" \$2}'"
 		},
 
@@ -27,7 +26,7 @@ sub new() {
 			"co" => "git clone -b %(branch)s --single-branch %(url)s %(name)s",
 			"revert" => "(cd %(name)s; git checkout .)",
 			"update" => "(cd %(name)s; git fetch)",
-			"clearUnversioned" => "(cd %(name)s; git clean -fd)",
+			"clean" => "(cd %(name)s; git clean -fd)",
 			"version" => "(cd %(name)s; git rev-parse --short HEAD)"
 		},
 
@@ -89,7 +88,7 @@ sub update() {
 	my $actor = $self->{actor};
     my $repo = $self->{repo};
 	return [
-		$self->format($actor->{clearUnversioned}, {
+		$self->format($actor->{clean}, {
 			prefix => $actor->{prefix},
 			name => $repo->{name}
     	}),

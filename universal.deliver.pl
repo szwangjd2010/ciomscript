@@ -410,10 +410,9 @@ sub packageApp() {
 	my $include0 = $includes->[0];
 
 	if ($include0 eq '*' 
-		&& $reposCnt == 1 
-		&& $repo0Name eq $appName) {
+			&& $reposCnt == 1 
+			&& $repo0Name eq $appName) {
 		$CiomUtil->exec("tar --exclude-vcs -czvf $AppPkg->{file} * --exclude $Output");
-		
 		return;
 	}
 
@@ -550,7 +549,7 @@ sub deploy() {
 
 sub deploymode_deploy() {
 	pullCode();
-exit(0);	
+#exit(0);	
 	setRevisionId();
 	initAppPkgInfo();
 
