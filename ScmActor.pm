@@ -19,7 +19,7 @@ sub new() {
 			"revert" => "%(prefix)s revert -R %(name)s",
 			"update" => "%(prefix)s up %(name)s",
 			"clearUnversioned" => "%(prefix)s status %(name)s | grep '^?' | awk '{print \$2}' | xargs -I{} rm -rf '{}'",
-			"version" => "%(prefix)s info %(name)s"
+            "version" => "%(prefix)s info %(name)s | grep -P '(Revision|Last Changed Rev)'| awk -F': ' '{print \$2}' | tr '\n', '.' | awk '{print \$1}' | awk -F'.' '{print \$1 \".\" \$2}'"
 		},
 
 		"git" => {
@@ -62,7 +62,7 @@ sub setRepo() {
     }
     if ($repo->{type} eq 'git') {
         $repo->{branch} = $repo->{branch} || 'master';
-        $repo->{url} =~ s|^(https?://)|\1$repo->{username}:$repo->{password}\@|m;
+        $repo->{url} =~ s|^(https?://)|$1$repo->{username}:$repo->{password}\@|m;
     }
 
     $self->{repo} = $repo;

@@ -21,6 +21,7 @@ use open ":encoding(utf8)";
 use open IN => ":encoding(utf8)", OUT => ":utf8";
 use IO::Handle;
 use CiomUtil;
+use ScmActor;
 STDOUT->autoflush(1);
 
 my $version = $ARGV[0];
@@ -84,7 +85,6 @@ sub initAppPkgInfo() {
 }
 
 sub initConsts() {
-	$Consts->{repoinfo} = ".repoinfo";
 	$Consts->{revid} = ".revid";
 	$Consts->{appciomdata} = "ciom.yaml";
 }
@@ -241,26 +241,17 @@ sub pullCode() {
 	my $repos = $CiomData->{scm}->{repos};
 	my $username = $CiomData->{scm}->{username};
 	my $password = $CiomData->{scm}->{password};
+	my $actor = new ScmActor($username, $password);
 
-	my $cmdSvnPrefix = "svn --non-interactive --username $username --password '$password'";
-	my $cmdRmUnversionedTpl = "$cmdSvnPrefix status %s | grep '^?' | awk '{print \$2}' | xargs -I{} rm -rf '{}'";
-	
 	foreach my $repo (@{$repos}) {
+		$actor->setRepo($repo);
 		my $name = $repo->{name};
-		my $url = $repo->{url};
-
 		if (! -d $name) {
-			$CiomUtil->exec("$cmdSvnPrefix co $url $name");
+			$CiomUtil->exec($actor->co());
 		} else {
-			my $removeUnversionedCmd = sprintf($cmdRmUnversionedTpl, $name);
-			$CiomUtil->exec([
-				$removeUnversionedCmd,
-				"$cmdSvnPrefix revert -R $name",
-				"$cmdSvnPrefix update $name"
-			]);
+			$CiomUtil->exec($actor->update());
 		}
-		$CiomUtil->exec("$cmdSvnPrefix info $name > $name/$Consts->{repoinfo}");
-		$CiomUtil->exec("grep -P '(Revision|Last Changed Rev)' $name/$Consts->{repoinfo} | awk -F': ' '{print \$2}' | tr '\n', '.' | awk '{print \$1 \"$Timestamp\"}' > $name/$Consts->{revid}");
+		$CiomUtil->exec($actor->version() . " | awk '{print \$1 \".\" \"$Timestamp\"}' > $name/$Consts->{revid}");
 	}
 }
 
@@ -447,7 +438,7 @@ sub packageApp() {
 			}
 		}
 	}
-	$CiomUtil->exec("/bin/cp -f $repo0Name/{$Consts->{repoinfo},$Consts->{revid}} $dir4Pkg/");
+	$CiomUtil->exec("/bin/cp -f $repo0Name/$Consts->{revid} $dir4Pkg/");
 	$CiomUtil->exec("/bin/cp -f $AppPkg->{sumfile} $dir4Pkg/");	
 	$CiomUtil->exec("(cd $Output; tar --exclude-vcs -czvf $ENV{WORKSPACE}/$AppPkg->{file} $appName)");		
 }
