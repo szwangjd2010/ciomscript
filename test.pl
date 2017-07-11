@@ -7,42 +7,32 @@ use Template;
 use Clone 'clone';
 use Hash::Merge::Simple qw( merge );
 use Data::Dumper;
-use File::Find::Rule;
-my $a = [
-    {
-        name => 'name1',
-        url => "url1"
-    },
-    {
-        name => 'name2',
-        url => "url2-new"
-    },
-    {
-        name => 'name3',
-        url => "url3"
-    }
+use ScmActor;
+use Text::Sprintf::Named qw(named_sprintf);
+
+my $repos = [
+{
+    name => 'lecaiapi',
+    url => "http://172.17.128.21:9000/svn/bigdata/trunk/datav_dashboardapi"
+},
+{
+    name => 'goldbrush',
+    url => "https://gitlab.yunxuetang.com.cn/pub/goldrush.git",
+    branch => 'b1.0'
+}
 
 ];
 
+my $scm = new ScmActor('jenkins', 'pwdasdwx');
+foreach my $repo (@{$repos}) {
+    $scm->setRepo( $repo);
+    print $scm->co();
+    print $scm->version();
 
-my $b = [
-    {
-        name => 'name1',
-        url => "url1"
-    },
-    {
-        name => 'name2',
-        url => "url2"
-    }
+    print Dumper $scm->update();
+}
 
-];
+print named_sprintf("hhhh", {aaa => "sdsdsad"});
 
 
-
-
-my @d = File::Find::Rule->new
-    ->directory
-    ->in(".")
-    ->maxdepth(1)
-    ->not(File::Find::Rule->new->name(qr/^\.\.?$/));
 
