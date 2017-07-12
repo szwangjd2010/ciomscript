@@ -392,7 +392,8 @@ sub runHierarchyCmds {
 
 	if (defined($hostIdx)) {
 		foreach my $action (@{$clonedCmds}) {
-			if ($action =~ m/^fab -u/) {
+			if ($action =~ m|^fab -u|
+				|| $action =~ m|java -jar /var/lib/jenkins/jenkins-cli|) {
 				$CiomUtil->exec($action);
 			} else {
 				$CiomUtil->remoteExec({

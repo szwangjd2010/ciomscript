@@ -26,13 +26,24 @@ my $repos = [
 my $scm = new ScmActor('jenkins', 'pwdasdwx');
 foreach my $repo (@{$repos}) {
     $scm->setRepo( $repo);
-    print $scm->co();
-    print $scm->version();
-
-    print Dumper $scm->update();
+    #print $scm->co();
+    #print $scm->version();
+    #print Dumper $scm->update();
 }
 
-print named_sprintf("hhhh", {aaa => "sdsdsad"});
+my $arr = [
+"aaaa",
+"bbbb"
+];
 
+map {
+    $_ = $_ . " " . $_;
+} @{$arr};
 
+print Dumper($arr);
+
+foreach my $a (@{$arr}) {
+    $a = $a . '---';
+}
+print Dumper($arr);
 
