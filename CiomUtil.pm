@@ -86,22 +86,6 @@ sub execWithReturn() {
 	}
 }
 
-sub execModuleAction() {
-	my $self = shift;
-	my $action = shift;
-
-	$action =~ s|^Module\((\w+)\)\.(\w+)|fab -u root -f $ENV{CIOM_SCRIPT_HOME}/module/tomcat.py $2|;
-	$self->exec($action);
-}
-
-sub hasModuleActionInCmds() {
-	my $self = shift;
-	my $cmds = shift;
-
-	my @moduleActions = grep { $_ =~ m/^Module\(\w+\)/ } @{$cmds};
-	return $#moduleActions > -1;
-}
-
 sub remoteExec() {
 	my $self = shift;
 	my $info = shift;
@@ -114,19 +98,8 @@ sub remoteExec() {
 		if ($#{$cmd} == -1) {
 			return;
 		}
-
-		if ($self->hasModuleActionInCmds($cmd)) {
-			foreach my $action (@{$cmd}) {
-				if ($action =~ m/^Module\(\w+\)/) {
-					$self->execModuleAction($action);
-				} else {
-					$self->exec("ssh -p $port $user\@$host '$action'");
-				}
-			}
-		} else {
-			my $jointCmds = "(" . join("; ", @{$cmd}) . ")";
-			$self->exec("ssh -p $port $user\@$host '$jointCmds'");
-		}
+		my $jointCmds = "(" . join("; ", @{$cmd}) . ")";
+		$self->exec("ssh -p $port $user\@$host '$jointCmds'");
 	} else {
 		$self->exec("ssh -p $port $user\@$host '$cmd'");
 	}
@@ -205,18 +178,20 @@ sub getJenkinsCliBase() {
 		. " -i /var/lib/jenkins/.ssh/id_rsa";
 }
 
-sub runJenkinsJob() {
-	my $self = shift;
-	my $job = shift;
-	my $hashParams = shift;
+sub getJenkinsJobCli {
+	my ($self, $job, $hashParams) = @_;
 
-	my $cmd = sprintf("%s %s %s %s",
+	return sprintf("%s %s %s %s",
 		$self->getJenkinsCliBase(),
 		"build",
 		$job,
 		$self->_constructJenkinsJobParameters($hashParams)
 	);
-	$self->exec($cmd);
+}
+
+sub runJenkinsJob {
+	my ($self, $job, $hashParams) = @_;
+	$self->exec($self->getJenkinsJobCli($job, $hashParams));
 }
 
 sub reloadJenkinsJob() {
@@ -255,10 +230,13 @@ sub removeLastSlashForUrl() {
 	my $url = shift;
 	my $lastIndex = rindex($url,"/");
 	my $length = length($url);  
-        
+    
 	if ($lastIndex == $length-1) {
         my $newUrl = substr($url,0,$length-1);
         return $newUrl;
+	}
+	else{
+		return $url;
 	}
 
 }

@@ -199,7 +199,7 @@ sub pointoutRepoStatus {
 	my $lastCiomData = LoadFile($appCiomDataFile);
 	my $current = $CiomData->{scm}->{repos};
 	my $last = $lastCiomData->{scm}->{repos};
-	
+
 	if (!defined($last)) {
 		map { $_->{status} = 'new' } @{$current};
 		return;
@@ -327,6 +327,27 @@ sub addLazyOut2CiomData {
 	}
 }
 
+sub translateActions($) {
+	my $cmds = shift;
+	map { 
+		if ($_ =~ m|^Job\(([^\)]+)\)\.run:(.+)$|) { #Job(%jobName).run
+			my $jobName = $1;
+			my $str = $2;
+			my @kvs = split(',', $str);
+
+			my $pms = {};
+			foreach my $kv (@kvs) {
+				my @tmp = split('=', $kv);
+				$pms->{$tmp[0]} = $tmp[1];
+			}
+
+			$_ = $CiomUtil->getJenkinsJobCli($jobName, $pms);
+		} else { # Module(%module).%tasks
+			$_ =~ s|^Module\((\w+)\)\.(\w+)|fab -u root -f $ENV{CIOM_SCRIPT_HOME}/module/${1}.py ${2}|;
+		}
+	} @{$cmds};
+}
+
 sub lazyProcessCmds {
 	my ($hierarchyArr, $cmds, $hostIdx, $instanceIdx) = @_;
 	my $vars = {
@@ -367,12 +388,19 @@ sub runHierarchyCmds {
 
 	my $clonedCmds = clone($cmds); 
 	lazyProcessCmds(\@hierarchyArr, $clonedCmds, $hostIdx, $instanceIdx);
+	translateActions($clonedCmds);
 
 	if (defined($hostIdx)) {
-		$CiomUtil->remoteExec({
-			host => $CiomData->{deploy}->{hosts}->[$hostIdx],
-			cmd => $clonedCmds
-		});
+		foreach my $action (@{$clonedCmds}) {
+			if ($action =~ m/^fab -u/) {
+				$CiomUtil->exec($action);
+			} else {
+				$CiomUtil->remoteExec({
+					host => $CiomData->{deploy}->{hosts}->[$hostIdx],
+					cmd => $action
+				});
+			}
+		}
 	} else {
 		$CiomUtil->exec($clonedCmds);
 	}
