@@ -32,7 +32,7 @@ sub new() {
 		},
 
 		"username" => $username,
-		"password" => $password,
+		"password" => $password
 	};
 
 	bless $self, $class;
