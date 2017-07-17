@@ -14,6 +14,7 @@ def stop(location):
     if alive(location):
         run("pkill -9 -f '%s'" % location, warn_only=True)
         sleep(2)
+        
     print('tomcat stoped: %s' % location)
 
 

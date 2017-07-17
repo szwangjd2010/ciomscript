@@ -393,7 +393,7 @@ sub runHierarchyCmds {
 	if (defined($hostIdx)) {
 		foreach my $action (@{$clonedCmds}) {
 			if ($action =~ m|^fab -u|
-				|| $action =~ m|java -jar /var/lib/jenkins/jenkins-cli|) {
+					|| $action =~ m|java -jar /var/lib/jenkins/jenkins-cli|) {
 				$CiomUtil->exec($action);
 			} else {
 				$CiomUtil->remoteExec({
@@ -571,7 +571,7 @@ sub deploy() {
 		runHierarchyCmds("$DeployMode host post", $i);
 
 		if ($hostsCnt > 1 && $i < $hostsCnt - 1) {
-			$CiomUtil->exec("sleep 5");
+			$CiomUtil->exec("sleep 3");
 		}
 	}
 
@@ -580,7 +580,6 @@ sub deploy() {
 
 sub deploymode_deploy() {
 	pullCode();
-#exit(0);	
 	setRevisionId();
 	initAppPkgInfo();
 

@@ -4,6 +4,7 @@ use strict;
 use English;
 use Data::Dumper;
 use Clone 'clone';
+use Hash::Merge::Simple qw(merge);
 use Text::Sprintf::Named qw(named_sprintf);
 
 sub new() {
@@ -41,12 +42,11 @@ sub new() {
 sub format() {
     my $self = shift;
     my $str = shift;
-    my $hash = shift;
-
+    
     if ($str eq '') {
         return $str;
     }
-    return named_sprintf($str, $hash);
+    return named_sprintf($str, $self->{namedHash});
 }
 
 sub setRepo() {
@@ -66,21 +66,15 @@ sub setRepo() {
 
     $self->{repo} = $repo;
     $self->{actor} = $self->{$repo->{type}};
-    $self->{actor}->{prefix} = $self->format($self->{actor}->{prefix}, $repo);
+    $self->{actor}->{prefix} = named_sprintf($self->{actor}->{prefix}, $repo);
+    $self->{namedHash} = merge $self->{actor}, $self->{repo};
 }
 
 sub co() {
     my $self = shift;
 	my $actor = $self->{actor};
     my $repo = $self->{repo};
-    return $self->format($actor->{co}, {
-		prefix => $actor->{prefix},
-        url => $repo->{url},
-		branch => $repo->{branch},
-		name => $repo->{name},
-        username => $repo->{username},
-        password => $repo->{password}
-    });
+    return $self->format($actor->{co});
 }
 
 sub update() {
@@ -88,18 +82,9 @@ sub update() {
 	my $actor = $self->{actor};
     my $repo = $self->{repo};
 	return [
-		$self->format($actor->{clean}, {
-			prefix => $actor->{prefix},
-			name => $repo->{name}
-    	}),
-		$self->format($actor->{revert}, {
-			prefix => $actor->{prefix},
-			name => $repo->{name}
-    	}),
-    	$self->format($actor->{update}, {
-			prefix => $actor->{prefix},
-			name => $repo->{name}
-    	}),
+		$self->format($actor->{clean}),
+		$self->format($actor->{revert}),
+    	$self->format($actor->{update}),
 	];
 }
 
@@ -107,10 +92,7 @@ sub version() {
     my $self = shift;
 	my $actor = $self->{actor};
     my $repo = $self->{repo};
-    return $self->format($actor->{version}, {
-		prefix => $actor->{prefix},
-		name => $repo->{name}
-    });
+    return $self->format($actor->{version});
 }
 
 

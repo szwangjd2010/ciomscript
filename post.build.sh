@@ -42,7 +42,7 @@ generateAppPackage() {
 	fi
 	
 	if [ "$bTarget" == "win" ]; then
-		execCmd "cd ..;rm -rf ../$AppPackageFile; zip -r ../$AppPackageFile $appName/*"
+		execCmd "cd ..;rm -rf ../$AppPackageFile; zip -q -r ../$AppPackageFile $appName/*"
 	fi
 }
 

@@ -98,6 +98,7 @@ sub remoteExec() {
 		if ($#{$cmd} == -1) {
 			return;
 		}
+		
 		my $jointCmds = "(" . join("; ", @{$cmd}) . ")";
 		$self->exec("ssh -p $port $user\@$host '$jointCmds'");
 	} else {
@@ -162,7 +163,7 @@ sub appendToFile() {
 sub _constructJenkinsJobParameters() {
 	my $self = shift;
 	my $hashParams = shift;
-	my $str = "";
+	my $str = "-s -v ";
 	while ( my ($key, $value) = each(%{$hashParams}) ) {
 		$str .= " -p $key='$value'";
 	}
