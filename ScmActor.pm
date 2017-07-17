@@ -73,14 +73,12 @@ sub setRepo() {
 sub co() {
     my $self = shift;
 	my $actor = $self->{actor};
-    my $repo = $self->{repo};
     return $self->format($actor->{co});
 }
 
 sub update() {
     my $self = shift;
 	my $actor = $self->{actor};
-    my $repo = $self->{repo};
 	return [
 		$self->format($actor->{clean}),
 		$self->format($actor->{revert}),
@@ -91,7 +89,6 @@ sub update() {
 sub version() {
     my $self = shift;
 	my $actor = $self->{actor};
-    my $repo = $self->{repo};
     return $self->format($actor->{version});
 }
 
