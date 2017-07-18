@@ -1,0 +1,37 @@
+---
+__extend: linux
+
+build:
+  cmds:
+    - cd [% root.scm.repos.0.name %]
+    - mvn package
+
+package:
+  includes:
+    - "f,[% root.scm.repos.0.name %]/target/*.war"
+
+deploy:
+  local:
+    pre:
+      - "Job(__dotnet.app.build).run:\
+        ver=[% root.vca.version %],\
+        env=[% root.vca.cloudId %],\
+        appName=lecaiweb"
+
+  instance:
+    pre:
+      - "Module(tomcat).stop:\
+        host=(% root.deploy.hosts.%hostIdx% %),\
+        location=(% root.deploy.locations.%instanceIdx% %)"
+
+    cmds:
+      - "Module(tomcat).deploy:\
+        host=(% root.deploy.hosts.%hostIdx% %),\
+        location=(% root.deploy.locations.%instanceIdx% %),\
+        appName=[% root.vca.appName %]"
+
+    post:
+      - "Module(tomcat).start:\
+        host=(% root.deploy.hosts.%hostIdx% %),\
+        location=(% root.deploy.locations.%instanceIdx% %)"
+
