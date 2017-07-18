@@ -1,5 +1,5 @@
 ---
-__extend: skeleton
+__extend: linux
 
 build:
   builder: maven

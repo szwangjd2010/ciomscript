@@ -42,17 +42,18 @@ dispatch:
   workspace: "/tmp/ciomworkspace/"
 
 deploy:
-  multiphysical: 1
-
-  owner: ""
-  group: ""
+  owner: "ciom"
+  group: "ciom"
   mode: "755"
-
+  
   host:
     pre: []
     post: []
 
   instance:
+    extract: []
+    chownmode: []
+
     pre: []
     cmds: []
     post: []

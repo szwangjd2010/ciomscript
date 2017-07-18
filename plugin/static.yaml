@@ -1,5 +1,5 @@
 ---
-__extend: skeleton
+__extend: linux
 
 package:
   includes:
@@ -9,6 +9,6 @@ deploy:
   mode: 755
   instance:
     pre: 
-      - echo %% root.deploy.hosts.%hostIdx% %%
-      - echo %% root.deploy.locations.%instanceIdx% %%
+      - 'echo (% root.deploy.hosts.%hostIdx% %)'
+      - 'echo (% root.deploy.locations.%instanceIdx% %)'
   

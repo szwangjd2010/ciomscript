@@ -45,8 +45,8 @@ my $OldPwd = getcwd();
 my $UDV = {}; # user-defined variable
 my $AppPkg = {};
 my $Consts = {};
-my $Plugin;
 my $Tpl;
+my $Plugin;
 my $RevisionId;
 
 
@@ -82,6 +82,8 @@ sub initAppPkgInfo() {
 	$AppPkg->{url} = getAppPkgUrl();
 	$AppPkg->{sumfile} = "$Output/$appName.sha256sum";
 	$AppPkg->{repoLocation} = "$ENV{CIOM_REPO_LOCAL_PATH}/$version/$cloudId/$appName/";
+
+	$CiomData->{apppkg} = $AppPkg;
 }
 
 sub initConsts() {
@@ -109,6 +111,11 @@ sub addTplVarsIntoCiomData {
 	}
 }
 
+sub getPluginFileByName {
+	my ($pluginName) = @_;
+	return  "$ENV{CIOM_SCRIPT_HOME}/plugin/${pluginName}.yaml";
+}
+
 sub getPluginDefinition {
 	my $definitions = {};
 	my $chain = [];
@@ -116,11 +123,6 @@ sub getPluginDefinition {
 		my ($name, $data) = @_;
 		push(@{$chain}, $name);
 		$definitions->{$name} = clone($data);
-	};
-
-	local *getPluginFileByName = sub {
-		my ($pluginName) = @_;
-		return  "$ENV{CIOM_SCRIPT_HOME}/plugin/${pluginName}.yaml";
 	};
 
 	my $plugin = LoadFile(getPluginFileByName($AppType));
@@ -143,19 +145,18 @@ sub getPluginDefinition {
 
 sub persistCiomAndPluginInfo() {
 	$CiomData->{Timestamp} = $Timestamp;
-	$CiomData->{AppPkg} = $AppPkg;
 	DumpFile("$Output/$Consts->{appciomdata}", $CiomData);
 }
 
-sub loadPlugin() {
+sub loadAndProcessPlugin() {
 	my $fileAppPlugin = "$Output/${AppType}.yaml";
 	my $plugin = getPluginDefinition();
-	DumpFile($fileAppPlugin, $plugin);
-	
-	addTplVarsIntoCiomData();
-	processTemplate($fileAppPlugin, {root => $CiomData}, $fileAppPlugin);
-	$Plugin = LoadFile($fileAppPlugin);
 
+	DumpFile($fileAppPlugin, $plugin);
+	addTplVarsIntoCiomData();
+	processTemplate($fileAppPlugin, {root => merge $CiomData, $plugin}, $fileAppPlugin);
+
+	$Plugin = LoadFile($fileAppPlugin);
 	my $SectionsToMerge = [
 		"build",
 		"package",
@@ -368,7 +369,7 @@ sub lazyProcessCmds {
 
 	foreach my $cmd (@{$cmds}) {
 		$cmd =~ s/%([\w\d]+)%/$vars->{$1}/g;
-		$cmd =~ s/%% ([\w\d\.]+) %%/[% $1 %]/g;
+		$cmd =~ s/\(% ([\w\d\.]+) %\)/[% $1 %]/g;
 
 		my $out = '';
 		processTemplate(\$cmd, {root => $CiomData}, \$out);
@@ -500,55 +501,9 @@ sub dispatch() {
 	}
 }
 
-sub getUnpackCmdByLocationIdx($$) {
-	my $idx = shift;
-	my $locations = shift;
-
-	my $remoteWrokspace = getRemoteWorkspace();
-	my $idxLocation = $locations->[$idx];
-	my $idxAppLocation = "$idxLocation/$appName";
-
-	my $cmd = "tar -xzvf $remoteWrokspace/$AppPkg->{name} -C $idxLocation/";
-	if (!$CiomData->{deploy}->{multiphysical} == 0 && $idx != 0) {
-		$cmd = "ln -s $locations->[0]/$appName $idxLocation/$appName";
-	}
-
-	return sprintf("%s; %s; %s",
-		"mkdir -p $idxLocation",
-		"[ -d $idxAppLocation ] && rm -rf $idxAppLocation",
-		$cmd
-	);
-}
-
-sub setPermissions {
-	my ($host, $locations, $permissions) = @_;
-	my $joinedLocations = join(' ', @{$locations});
-	if ($permissions->{owner} ne '') {
-		$CiomUtil->remoteExec({
-			host => $host,
-			cmd => "chown -R $permissions->{owner}:$permissions->{group} $joinedLocations"
-		});
-	}
-	if ($permissions->{mode} ne '') {
-		$CiomUtil->remoteExec({
-			host => $host,
-			cmd => "chmod -R $permissions->{mode} $joinedLocations"
-		});
-	}
-}
-
-sub getPermissions() {
-	return {
-		owner => Dive($CiomData, qw(deploy owner)) || '',
-		group => Dive($CiomData, qw(deploy group)) || '',
-		mode => Dive($CiomData, qw(deploy mode)) || ''
-	};
-}
-
 sub deploy() {
 	runHierarchyCmds("$DeployMode local pre");
 
-	my $permissions = getPermissions();
 	my $locations = $CiomData->{$DeployMode}->{locations};
 	my $hosts = $CiomData->{$DeployMode}->{hosts};
 	my $hostsCnt = $#{$hosts} + 1;
@@ -558,16 +513,13 @@ sub deploy() {
 		runHierarchyCmds("$DeployMode host pre", $i);
 
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
+			runHierarchyCmds("$DeployMode instance extract", $i, $j);
+			runHierarchyCmds("$DeployMode instance chownmode", $i, $j);
 			runHierarchyCmds("$DeployMode instance pre", $i, $j);
-			$CiomUtil->remoteExec({
-				host => $host,
-				cmd => getUnpackCmdByLocationIdx($j, $locations)
-			});
 			runHierarchyCmds("$DeployMode instance cmds", $i, $j);
 			runHierarchyCmds("$DeployMode instance post", $i, $j);
 		}
 
-		setPermissions($host, $locations, $permissions);
 		runHierarchyCmds("$DeployMode host post", $i);
 
 		if ($hostsCnt > 1 && $i < $hostsCnt - 1) {
@@ -582,6 +534,7 @@ sub deploymode_deploy() {
 	pullCode();
 	setRevisionId();
 	initAppPkgInfo();
+	loadAndProcessPlugin();
 
 	customizeFiles();
 	transformReAndGatherUDV();
@@ -607,6 +560,7 @@ sub deploymode_rollback() {
 
 	setRevisionId($RollbackTo);
 	initAppPkgInfo();
+	loadAndProcessPlugin();
 	
 	dispatch();
 	deploy();
@@ -630,7 +584,6 @@ sub main() {
 	initWorkspace();
 	initConsts();
 	initTpl();
-	loadPlugin();
 	
 	eval("deploymode_${DeployMode}()");
 

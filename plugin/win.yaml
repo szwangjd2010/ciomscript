@@ -1,0 +1,17 @@
+---
+__extend: skeleton
+
+dispatch:
+  workspace: "c:/ciomworkspace"
+
+deploy:
+  owner: ""
+  group: ""
+  mode: ""
+  
+  instance:
+    extract:
+      - mkdir -p (% root.deploy.locations.%instanceIdx% %)
+      - rm -rf (% root.deploy.locations.%instanceIdx% %)/[% root.vca.appName %]
+      - tar -xzvf [% root.dispatch.workspace %]/[% root.apppkg.name %] -C (% root.deploy.locations.%instanceIdx% %)/
+    chownmode: []
