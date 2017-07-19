@@ -10,40 +10,25 @@ use Data::Dumper;
 use ScmActor;
 use Text::Sprintf::Named qw(named_sprintf);
 
-my $repos = [
-{
-    name => 'lecaiapi',
-    url => "http://172.17.128.21:9000/svn/bigdata/trunk/datav_dashboardapi"
-},
-{
-    name => 'goldbrush',
-    url => "https://gitlab.yunxuetang.com.cn/pub/goldrush.git",
-    branch => 'b1.0'
+sub p($) {
+    print((shift || "default") . "\n");
+} 
+
+sub a {
+    my ($p1, $p2, $p3) = @_;
+
+    p($p1);
+    p($p2);
+    p($p3);
 }
 
-];
-
-my $scm = new ScmActor('jenkins', 'pwdasdwx');
-foreach my $repo (@{$repos}) {
-    $scm->setRepo( $repo);
-    #print $scm->co();
-    #print $scm->version();
-    #print Dumper $scm->update();
+sub b {
+    my ($p1, $p2, $p3) = @_;
+    
+    a($p1, $p2, $p3);       
 }
 
-my $arr = [
-"aaaa",
-"bbbb"
-];
-
-map {
-    $_ = $_ . " " . $_;
-} @{$arr};
-
-print Dumper($arr);
-
-foreach my $a (@{$arr}) {
-    $a = $a . '---';
-}
-print Dumper($arr);
-
+b(1, 2, 3);
+b(1, 2);
+b(1);
+b();

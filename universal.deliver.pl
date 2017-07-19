@@ -409,19 +409,18 @@ sub runHierarchyCmds {
 }
 
 sub runCmdsInHierarchys {
-	my ($hierarchys) = @_;
+	my ($hierarchys, $hostIdx, $instanceIdx) = @_;
 	foreach my $hierarchy (@{$hierarchys}) {
-		runHierarchyCmds($hierarchy);
+		runHierarchyCmds($hierarchy, $hostIdx, $instanceIdx);
 	}
 }
 
 sub build() {
-	my $CmdsInHierarchys = [
+	runCmdsInHierarchys([
 		"build pre",
 		"build cmds",
 		"build post"
-	];
-	runCmdsInHierarchys($CmdsInHierarchys);
+	]);
 }
 
 sub getIncludeFileRoot($) {
@@ -513,11 +512,13 @@ sub deploy() {
 		runHierarchyCmds("$DeployMode host pre", $i);
 
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
-			runHierarchyCmds("$DeployMode instance extract", $i, $j);
-			runHierarchyCmds("$DeployMode instance chownmode", $i, $j);
-			runHierarchyCmds("$DeployMode instance pre", $i, $j);
-			runHierarchyCmds("$DeployMode instance cmds", $i, $j);
-			runHierarchyCmds("$DeployMode instance post", $i, $j);
+			runCmdsInHierarchys([
+				"$DeployMode instance extract",
+				"$DeployMode instance chownmode",
+				"$DeployMode instance pre",
+				"$DeployMode instance cmds",
+				"$DeployMode instance post"
+			], $i, $j);
 		}
 
 		runHierarchyCmds("$DeployMode host post", $i);
@@ -568,15 +569,14 @@ sub deploymode_rollback() {
 # end - deploymode_rollback subs 
 
 sub test() {
-	my $CmdsInHierarchys = [
+	runCmdsInHierarchys([
 		"test function pre",
 		"test function cmds",
 		"test function post",
 		"test performance pre",
 		"test performance cmds",
 		"test performance post"
-	];
-	runCmdsInHierarchys($CmdsInHierarchys);
+	]);
 }
 
 sub main() {
