@@ -187,8 +187,6 @@ sub setRevisionId {
 	} else {
 		$RevisionId = $CiomUtil->execWithReturn("cat $CiomData->{scm}->{repos}->[0]->{name}/$Consts->{revid} | tr -d '\n'");
 	}
-
-	print $RevisionId;
 }
 
 sub pointoutRepoStatus {
