@@ -390,9 +390,19 @@ sub runHierarchyCmds {
 	translateActions($clonedCmds);
 
 	if (defined($hostIdx)) {
+		my $re = "^(fab -u|java -jar /var/lib/jenkins/jenkins-cli.jar)";
+		my @moduleAndJobCmds = grep { $_ =~ m"$re" } @{$clonedCmds};
+		if ($#moduleAndJobCmds == -1) {
+			$CiomUtil->remoteExec({
+				host => $CiomData->{deploy}->{hosts}->[$hostIdx],
+				cmd => $clonedCmds
+			});
+
+			return;
+		}
+
 		foreach my $action (@{$clonedCmds}) {
-			if ($action =~ m|^fab -u|
-					|| $action =~ m|java -jar /var/lib/jenkins/jenkins-cli|) {
+			if ($action =~ m"$re") {
 				$CiomUtil->exec($action);
 			} else {
 				$CiomUtil->remoteExec({
