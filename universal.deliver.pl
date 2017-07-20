@@ -181,9 +181,8 @@ sub leaveWorkspace() {
 }
 
 sub setRevisionId {
-	my ($id) = @_;
-	if (defined($id)) {
-		$RevisionId = $id;	
+	if ($DeployMode eq "rollback") {
+		$RevisionId = $RollbackTo;
 	} else {
 		$RevisionId = $CiomUtil->execWithReturn("cat $CiomData->{scm}->{repos}->[0]->{name}/$Consts->{revid} | tr -d '\n'");
 	}
@@ -274,7 +273,7 @@ sub escapeRe($) {
 	return $re;
 }
 
-sub transformReAndGatherUDV() {
+sub escapeReAndGatherUDV() {
 	my $streameditItems = $CiomData->{streameditItems};
 	for my $file (keys %{$streameditItems}) {
 		foreach my $substitute (@{$streameditItems->{$file}}) {
@@ -539,42 +538,9 @@ sub deploy() {
 	runHierarchyCmds("$DeployMode local post");
 }
 
-sub deploymode_deploy() {
-	pullCode();
-	setRevisionId();
-	initAppPkgInfo();
-	loadAndProcessPlugin();
-
-	customizeFiles();
-	transformReAndGatherUDV();
-	streamedit();
-	
-	build();
-
-	packageApp();
-	sumPackage();
-	putPackageToRepo();
-	
-	dispatch();
-	deploy();
-}
-
-# begin - deploymode_rollback subs
 sub initRollbackNode() {
 	$CiomData->{rollback} = merge $CiomData->{deploy}, $CiomData->{rollback};
 }
-
-sub deploymode_rollback() {
-	initRollbackNode();
-
-	setRevisionId($RollbackTo);
-	initAppPkgInfo();
-	loadAndProcessPlugin();
-	
-	dispatch();
-	deploy();
-}
-# end - deploymode_rollback subs 
 
 sub test() {
 	runCmdsInHierarchys([
@@ -587,13 +553,34 @@ sub test() {
 	]);
 }
 
+my $Subs = [
+    {fn => \&pullCode,				presence => 'deploy'},
+    {fn => \&initRollbackNode,		presence => 'rollback'},
+    {fn => \&setRevisionId,			presence => '.*'},
+    {fn => \&initAppPkgInfo,		presence => '.*'},
+    {fn => \&loadAndProcessPlugin,	presence => '.*'},
+    {fn => \&customizeFiles,		presence => 'deploy'},
+    {fn => \&escapeReAndGatherUDV, 	presence => 'deploy'},
+    {fn => \&streamedit,			presence => 'deploy'},
+    {fn => \&build,				    presence => 'deploy'},
+    {fn => \&packageApp,			presence => 'deploy'},
+    {fn => \&sumPackage,			presence => 'deploy'},
+    {fn => \&putPackageToRepo,		presence => 'deploy'},
+    {fn => \&dispatch,				presence => '.*'},
+    {fn => \&deploy,				presence => '.*'},
+];
+
 sub main() {
 	enterWorkspace();
 	initWorkspace();
 	initConsts();
 	initTpl();
 	
-	eval("deploymode_${DeployMode}()");
+	foreach my $o (@{$Subs}) {
+		if ($DeployMode =~ m/$o->{presence}/) {
+			$o->{fn}->();
+		}
+	}
 
 	persistCiomAndPluginInfo();
 	test();
