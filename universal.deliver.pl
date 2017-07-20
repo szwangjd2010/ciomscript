@@ -24,6 +24,7 @@ use CiomUtil;
 use ScmActor;
 STDOUT->autoflush(1);
 
+
 my $version = $ARGV[0];
 my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
@@ -50,8 +51,25 @@ my $Plugin;
 my $RevisionId;
 
 
-sub getBuildLogFile() {
-	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
+sub enterWorkspace() {
+	chdir($ENV{WORKSPACE}) || die "can not change working directory!";
+}
+
+sub leaveWorkspace() {
+	chdir($OldPwd);
+}
+
+sub initWorkspace() {
+	$CiomUtil->exec("mkdir -p $Output;");
+}
+
+sub initTpl() {
+	$Tpl = Template->new({
+		ABSOLUTE => 1,
+		TAG_STYLE => 'outline',
+		PRE_CHOMP  => 0,
+	    POST_CHOMP => 0
+	});	
 }
 
 sub getAppPkgUrl() {
@@ -67,16 +85,7 @@ sub getAppPkgUrl() {
 	);
 }
 
-sub initTpl() {
-	$Tpl = Template->new({
-		ABSOLUTE => 1,
-		TAG_STYLE => 'outline',
-		PRE_CHOMP  => 0,
-	    POST_CHOMP => 0
-	});	
-}
-
-sub initAppPkgInfo() {
+sub setAppPkgInfo() {
 	$AppPkg->{name} = "$appName.$RevisionId.tar.gz";
 	$AppPkg->{file} = "$Output/$AppPkg->{name}";
 	$AppPkg->{url} = getAppPkgUrl();
@@ -89,6 +98,16 @@ sub initAppPkgInfo() {
 sub initConsts() {
 	$Consts->{revid} = ".revid";
 	$Consts->{appciomdata} = "ciom.yaml";
+}
+
+sub init() {
+	initWorkspace();
+	initConsts();
+	initTpl();
+}
+
+sub getJobLogFile() {
+	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
 }
 
 sub processTemplate {
@@ -143,7 +162,7 @@ sub getPluginDefinition {
 	return $ret;
 }
 
-sub persistCiomAndPluginInfo() {
+sub dumpCiomAndPlugin() {
 	$CiomData->{Timestamp} = $Timestamp;
 	DumpFile("$Output/$Consts->{appciomdata}", $CiomData);
 }
@@ -168,24 +187,14 @@ sub loadAndProcessPlugin() {
 	}
 }
 
-sub enterWorkspace() {
-	chdir($ENV{WORKSPACE}) || die "can not change working directory!";
-}
-
-sub initWorkspace() {
-	$CiomUtil->exec("mkdir -p $Output;");
-}
-
-sub leaveWorkspace() {
-	chdir($OldPwd);
-}
-
 sub setRevisionId {
 	if ($DeployMode eq "rollback") {
 		$RevisionId = $RollbackTo;
 	} else {
 		$RevisionId = $CiomUtil->execWithReturn("cat $CiomData->{scm}->{repos}->[0]->{name}/$Consts->{revid} | tr -d '\n'");
 	}
+
+	setAppPkgInfo();
 }
 
 sub pointoutRepoStatus {
@@ -557,7 +566,6 @@ my $Subs = [
     {fn => \&pullCode,				presence => 'deploy'},
     {fn => \&initRollbackNode,		presence => 'rollback'},
     {fn => \&setRevisionId,			presence => '.*'},
-    {fn => \&initAppPkgInfo,		presence => '.*'},
     {fn => \&loadAndProcessPlugin,	presence => '.*'},
     {fn => \&customizeFiles,		presence => 'deploy'},
     {fn => \&escapeReAndGatherUDV, 	presence => 'deploy'},
@@ -568,23 +576,18 @@ my $Subs = [
     {fn => \&putPackageToRepo,		presence => 'deploy'},
     {fn => \&dispatch,				presence => '.*'},
     {fn => \&deploy,				presence => '.*'},
+    {fn => \&test,					presence => '.*'},
 ];
 
 sub main() {
 	enterWorkspace();
-	initWorkspace();
-	initConsts();
-	initTpl();
-	
-	foreach my $o (@{$Subs}) {
-		if ($DeployMode =~ m/$o->{presence}/) {
-			$o->{fn}->();
-		}
-	}
+	init();
 
-	persistCiomAndPluginInfo();
-	test();
+	map { $DeployMode =~ m/$_->{presence}/ && $_->{fn}->() } @{$Subs};
+	
+	dumpCiomAndPlugin();
 	leaveWorkspace();
+
 	return 0;
 }
 
