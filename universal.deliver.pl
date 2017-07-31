@@ -74,7 +74,7 @@ sub initTpl() {
 
 sub getAppPkgUrl() {
 	my $repo = uc ($CiomData->{dispatch}->{repo} || "inner");
-	my $repoBaseUrlKey = "CIOM_REPO_BASE_URL_$repo";
+	my $repoBaseUrlKey = "CIOM_REPO_${repo}_URL";
 
 	return sprintf("%s/%s/%s/%s/%s",
 		$ENV{$repoBaseUrlKey},
@@ -90,7 +90,7 @@ sub setAppPkgInfo() {
 	$AppPkg->{file} = "$Output/$AppPkg->{name}";
 	$AppPkg->{url} = getAppPkgUrl();
 	$AppPkg->{sumfile} = "$Output/$appName.sha256sum";
-	$AppPkg->{repoLocation} = "$ENV{CIOM_REPO_LOCAL_PATH}/$version/$cloudId/$appName/";
+	$AppPkg->{repoLocation} = "$ENV{CIOM_REPO_LOCAL}/$version/$cloudId/$appName/";
 
 	$CiomData->{apppkg} = $AppPkg;
 }
@@ -494,8 +494,13 @@ sub sumPackage() {
 }
 
 sub putPackageToRepo() {
+	my $files = "$AppPkg->{file} $AppPkg->{sumfile}";
 	$CiomUtil->exec("mkdir -p $AppPkg->{repoLocation}");
-	$CiomUtil->exec("/bin/cp -f $AppPkg->{file} $AppPkg->{sumfile} $AppPkg->{repoLocation}");
+	$CiomUtil->exec("/bin/cp -f $files $AppPkg->{repoLocation}");
+	if ($CiomData->{dispatch}->{repo} eq 'public') {
+		my $host = $ENV{CIOM_REPO_PUBLIC_HOST};
+		$CiomUtil->exec("ssh root\@$host 'mkdir -p $AppPkg->{repoLocation}'; scp $files root\@$host:$AppPkg->{repoLocation}");
+	}
 }
 
 sub getRemoteWorkspace() {

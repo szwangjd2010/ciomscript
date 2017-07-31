@@ -12,11 +12,11 @@ package:
 
 deploy:
   local:
-    pre:
-      - "Job(__dotnet.app.build).run:\
-        ver=[% root.vca.version %],\
-        env=[% root.vca.cloudId %],\
-        appName=lecaiweb"
+    pre: []
+#      - "Job(__dotnet.app.build).run:\
+#        ver=[% root.vca.version %],\
+#        env=[% root.vca.cloudId %],\
+#        appName=lecaiweb"
 
   instance:
     pre:
