@@ -322,8 +322,8 @@ sub addLazyOut2CiomData {
 	foreach my $node (@{$hierarchyArr}) {
 		if (!defined($pointer->{$node})) {
 			$pointer->{$node} = {};
-			$pointer = $pointer->{$node};
 		}
+		$pointer = $pointer->{$node};
 	}
 
 	if (defined($hostIdx) && defined($instanceIdx)) {
@@ -356,6 +356,7 @@ sub translateActions($) {
 }
 
 sub lazyProcessCmds {
+	
 	my ($hierarchyArr, $cmds, $hostIdx, $instanceIdx) = @_;
 	my $vars = {
 		hostIdx => $hostIdx,

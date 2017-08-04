@@ -65,11 +65,19 @@ sub leaveWorkspace() {
 	chdir($OldPwd);
 }
 
+sub chmod4AppTarget() {
+	if (defined($Cloud->{chmod})) {
+		$SshInfo->{cmd} = "chmod $Cloud->{chmod} $appTargetRoot/$appName";
+		$ciomUtil->remoteExec($SshInfo);
+	}
+}
+
 sub main() {
 	initial();
 	checkBackupExist();
 	enterWorkspace();
 	rollback();
+	chmod4AppTarget();
 	leaveWorkspace();
 }
 

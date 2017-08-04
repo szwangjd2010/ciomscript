@@ -92,7 +92,6 @@ sub deployH5WithTarget() {
 sub deployDirectly() {
 	#Step1, zip and move to target machine
 	$ciomUtil->exec("zip -r $appName.zip $appName/*; scp -r $appName.zip root\@$Cloud->{host}:$CiomHome/");
-	
 	#Step2, remote deployment
 	#my $timestamp = strftime("%04Y%02m%02d.%02k%02M%02S",localtime());
 	my $getVersionTxt = "version=\$(head -1 $AppTargetRoot/$appName/version.txt)";
@@ -101,6 +100,13 @@ sub deployDirectly() {
 	my $mvAppToTargetCmd = "mv $CiomHome/$appName $AppTargetRoot/$appName";
 	$SshInfo->{cmd} = "( $getVersionTxt; $remoteBackupCmd; $remoteUnzipCmd; $mvAppToTargetCmd )";
 	$ciomUtil->remoteExec($SshInfo);
+}
+
+sub chmod4AppTarget() {
+	if (defined($Cloud->{chmod})) {
+		$SshInfo->{cmd} = "chmod $Cloud->{chmod} $AppTargetRoot/$appName";
+		$ciomUtil->remoteExec($SshInfo);
+	}
 }
 
 sub deploy() {
@@ -136,6 +142,7 @@ sub main() {
 	initial4Deploy();
 	enterWorkspace();
 	deploy();
+	chmod4AppTarget();
 	leaveWorkspace();
 }
 
