@@ -1,7 +1,8 @@
 #!/bin/bash
+#
 
 source $CIOM_SCRIPT_HOME/ciom.util.sh
-setMode 0
+setMode 1
 
 lastMonth=$(date -d '-1 month' +%Y%m)
 month=${1:-$lastMonth}
@@ -22,13 +23,15 @@ leaveWorkspace() {
 
 backupLog() {
 	logFileList=$1
+	cnt=$(wc -l $logFileList | awk '{print $1}')
+	counter=1
 	cat $logFileList | while read logFile; do
 		logFileName=$(echo $logFile | grep -oP '(?<=/)[^/]+(?=$)')
 		ym=$(echo $logFileName | grep -oP '(?<=\.)[\d]{6}(?=\.|\d)')
 		localLogFile="$ym/$logFileName"
-		localLogFileInPort=" $Port/$localLogFile"
-		if [ -f $localLogFileInPort ] || [ -f ${localLogFileInPort}.tgz ]; then
-			echo "$localLogFileInPort already exist!"
+		portLogFile=" $Port/$localLogFile"
+		if [ -f $portLogFile ] || [ -f ${portLogFile}.tgz ]; then
+			echo "$portLogFile already exist!"
 			continue
 		fi
 
@@ -36,15 +39,18 @@ backupLog() {
 		execCmd "tar -czvf ${localLogFile}.tgz $localLogFile"
 		execCmd "cp --parents ${localLogFile}.tgz $Port/"
 		execCmd "rm -rf $localLogFile ${localLogFile}.tgz"
+		execCmd "touch ${localLogFile}.${counter}..${cnt}.done"
+		(( counter++ ))
 	done		
 }
 
 main() {
 	enterWorkspace
 
+	listFile="${month}.list"
 	execCmd "mkdir -p $month"
-	execCmd "$HDFS dfs -find /raw -name '*.$month.log' > monthly.list" 1
-	backupLog "monthly.list"
+	execCmd "$HDFS dfs -find /raw -name '*.$month.log' > $listFile" 
+	backupLog "$listFile"
 
 	leaveWorkspace
 }
