@@ -3,6 +3,8 @@ __extend: skeleton
 
 build:
   pre:
+    - "/bin/cp $CIOM_VCA_HOME/[% root.vca.version %]/pre/[% root.vca.cloudId %]/[% root.vca.appName %]/ciom.json \
+      $WORKSPACE/[% root.vca.appName %]"
     - $CIOM_SCRIPT_HOME/syncup.to.slave.sh [% root.vca.version %] [% root.vca.cloudId %] [% root.vca.appName %] win
   cmds: 
     - "Job(__dotnet.app.build).run:\
