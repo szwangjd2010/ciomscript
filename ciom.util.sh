@@ -90,7 +90,7 @@ startTomcat() {
 }
 
 simulateJenkinsContainer() {
-	if [ "$JENKINS_HOME" == "" ]; then
+	if [ "$JENKINS_HOME" = "" ]; then
 		export JENKINS_HOME=/var/lib/jenkins
 		export BUILD_ID=20881212
 		export WORKSPACE=/jenkins_workspace
@@ -99,7 +99,7 @@ simulateJenkinsContainer() {
 }
 
 unsimulateJenkinsContainer() {
-	if [ "$CIOM_XXX" == "CIOM_XXX" ]; then
+	if [ "$CIOM_XXX" = "CIOM_XXX" ]; then
 		unset JENKINS_HOME
 		unset BUILD_ID
 		unset WORKSPACE
