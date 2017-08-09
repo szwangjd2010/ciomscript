@@ -11,12 +11,19 @@ build:
       ver=[% root.vca.version %],\
       env=[% root.vca.cloudId %],\
       appName=[% root.vca.appName %]"
+  post:
+    - "/bin/cp $CIOM_SLAVE_WIN_WORKSPACE/[% root.vca.version %]/[% root.vca.cloudId %]/[% root.vca.appName %].zip \
+      $WORKSPACE/[% root.scm.repos.0.name %]/"
+
+package:
+  includes:
+    - "f,[% root.scm.repos.0.name %]/[% root.vca.appName %].zip"
 
 dispatch:
   workspace: "c:/ciomworkspace"
 
 deploy:
-  owner: ""
+  owner: "ciom"
   group: ""
   mode: ""
   
@@ -24,5 +31,22 @@ deploy:
     extract:
 #      - mkdir -p (% root.deploy.locations.%instanceIdx% %)
 #      - rm -rf (% root.deploy.locations.%instanceIdx% %)/[% root.vca.appName %]
-#      - tar -xzvf [% root.dispatch.workspace %]/[% root.apppkg.name %] -C (% root.deploy.locations.%instanceIdx% %)/
+      - "\"C:\\Program Files\\2345Soft\\HaoZip\\HaoZipC.exe\" x \
+       [% root.dispatch.workspace %]/[% root.apppkg.name %] \
+       -aoa -o(% root.deploy.locations.%instanceIdx% %)\\"
     chownmode: []
+#    pre:
+#      - "Module(iis).stop:\
+#        host=(% root.deploy.hosts.%hostIdx% %),\
+#        location=(% root.deploy.locations.%instanceIdx% %)"
+
+    cmds:
+     - "Module(iis).deploy:\
+       host=(% root.deploy.hosts.%hostIdx% %),\
+       location=(% root.deploy.locations.%instanceIdx% %),\
+       appName=[% root.vca.appName %]"
+
+#    post:
+#      - "Module(iis).start:\
+#        host=(% root.deploy.hosts.%hostIdx% %),\
+#        location=(% root.deploy.locations.%instanceIdx% %)"

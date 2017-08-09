@@ -350,7 +350,8 @@ sub translateActions($) {
 
 			$_ = $CiomUtil->getJenkinsJobCli($jobName, $pms);
 		} else { # Module(%module).%tasks
-			$_ =~ s|^Module\((\w+)\)\.(\w+)|fab -u root -f $ENV{CIOM_SCRIPT_HOME}/module/${1}.py ${2}|;
+			$_ =~ s|^Module\((\w+)\)\.(\w+)|fab -u $CiomData->{deployuser} -f $ENV{CIOM_SCRIPT_HOME}/module/${1}.py ${2}|;
+			$_ =~ s|\\|\\\\|;
 		}
 	} @{$cmds};
 }
@@ -386,6 +387,31 @@ sub lazyProcessCmds {
 	addLazyOut2CiomData(@_);
 }
 
+sub setDeployUser {
+	if ( defined($CiomData->{deploy}->{owner}) ){
+		my $user = $CiomData->{deploy}->{owner};
+		if ($user eq "") {
+			$CiomData->{deployuser} = "root";
+		}
+		else{
+			$CiomData->{deployuser} = $user;
+		}
+	}
+	else {
+		$CiomData->{deployuser} = "root";
+	}
+}
+
+sub remoteExec {
+	my ($host, $cmds) = @_;
+	my $user = $CiomData->{deployuser};
+	$CiomUtil->remoteExec({
+				user => $user,
+				host => $host,
+				cmd => $cmds
+			});
+}
+
 sub runHierarchyCmds {
 	my ($hierarchyCmds, $hostIdx, $instanceIdx) = @_;
 	my @hierarchyArr = split(' ', $hierarchyCmds);
@@ -402,11 +428,11 @@ sub runHierarchyCmds {
 		my $re = "^(fab -u|java -jar /var/lib/jenkins/jenkins-cli.jar)";
 		my @moduleAndJobCmds = grep { $_ =~ m"$re" } @{$clonedCmds};
 		if ($#moduleAndJobCmds == -1) {
-			$CiomUtil->remoteExec({
-				host => $CiomData->{deploy}->{hosts}->[$hostIdx],
-				cmd => $clonedCmds
-			});
-
+			# $CiomUtil->remoteExec({
+			# 	host => $CiomData->{deploy}->{hosts}->[$hostIdx],
+			# 	cmd => $clonedCmds
+			# });
+			remoteExec($CiomData->{deploy}->{hosts}->[$hostIdx],$clonedCmds);
 			return;
 		}
 
@@ -414,10 +440,11 @@ sub runHierarchyCmds {
 			if ($action =~ m"$re") {
 				$CiomUtil->exec($action);
 			} else {
-				$CiomUtil->remoteExec({
-					host => $CiomData->{deploy}->{hosts}->[$hostIdx],
-					cmd => $action
-				});
+				# $CiomUtil->remoteExec({
+				# 	host => $CiomData->{deploy}->{hosts}->[$hostIdx],
+				# 	cmd => $action
+				# });
+				remoteExec($CiomData->{deploy}->{hosts}->[$hostIdx],$clonedCmds);
 			}
 		}
 	} else {
@@ -509,6 +536,14 @@ sub getRemoteWorkspace() {
 }
 
 sub dispatch() {
+	if ( $AppType =~ /win/) {
+		dispatchBySsh();
+	} else {
+		dispatchByAnsibale();
+	}
+}
+
+sub dispatchByAnsibale() {
 	my $method = Dive( $CiomData, qw(dispatch method)) || "push";
 	
 	my $joinedHosts = join(',', @{$CiomData->{deploy}->{hosts}}) . ',';
@@ -519,6 +554,21 @@ sub dispatch() {
 		$CiomUtil->exec("$ansibleCmdPrefix -m copy -a \"src=$AppPkg->{repoLocation}/$AppPkg->{name} dest=$remoteWrokspace\"");
 	} else {
 		$CiomUtil->exec("$ansibleCmdPrefix -m get_url -a \"url=$AppPkg->{url} dest=$remoteWrokspace\"");
+	}
+}
+
+sub dispatchBySsh() {
+	my $hosts = $CiomData->{deploy}->{hosts};
+	my $cnt = $#{$hosts} + 1;
+	my $remoteWrokspace = getRemoteWorkspace();
+
+	for (my $i = 0; $i < $cnt; $i++) {
+		$CiomUtil->remoteExec({
+					user => "ciom",
+					host => $hosts->[$i],
+					cmd => "md $remoteWrokspace"
+				});
+		$CiomUtil->exec("scp $AppPkg->{repoLocation}/$AppPkg->{name} ciom\@$hosts->[$i]:/$remoteWrokspace/");
 	}
 }
 
@@ -581,6 +631,7 @@ my $Subs = [
     {fn => \&sumPackage,			presence => 'deploy'},
     {fn => \&putPackageToRepo,		presence => 'deploy'},
     {fn => \&dispatch,				presence => '.*'},
+    {fn => \&setDeployUser,			presence => '.*'},
     {fn => \&deploy,				presence => '.*'},
     {fn => \&test,					presence => '.*'},
 ];

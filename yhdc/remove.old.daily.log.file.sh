@@ -1,28 +1,16 @@
 #!/bin/bash
 #
 
-HDFS=/opt/hadoop-2.7.1/bin/hdfs
-currentYM=$(date +%Y%m)
-currentDay=$(date +%d)
-allDailyLogList=all.instances.log.file
-candidateToDeleteFileList=candidate.daily.log.file.list
+lastYM=$(date -d '-1 month' +%Y%m)
+targetYM=${1:-$lastYM}
 
-echo > $candidateToDeleteFileList
-$HDFS dfs -find /raw -name "*-instances.log" | sort > $allDailyLogList
-
-cat $allDailyLogList | while read line; do 
-	if (( $currentDay < 6 )); then
-		continue
-	fi
-
-	fileYM=$(echo $line | grep -oP '(?<=\.)\d{6}(?=\d{2}\.)')
-	if (( $fileYM < $currentYM )); then
-		echo $line >> $candidateToDeleteFileList
-	fi
-done
-
-if [ $(wc -l $candidateToDeleteFileList | awk '{print $1}') -gt 0 ]; then
-	xargs -a $candidateToDeleteFileList $HDFS dfs -rm -f
+dayOfMonth=$(date +%e)
+if (( $dayOfMonth < 10 )); then
+    echo "day of month is less than 10, exit 0."
+    exit 0
 fi
 
-true
+HDFS=/opt/hadoop-2.7.1/bin/hdfs
+candidateToDeleteFileList=candidate.daily.log.file.list
+$HDFS dfs -find /raw -name "*.${targetYM}??.all-instances.log" | sort > $candidateToDeleteFileList
+cat $candidateToDeleteFileList | xargs -i $HDFS dfs -rm -f {}
