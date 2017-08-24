@@ -4,6 +4,7 @@
 use lib "$ENV{CIOM_SCRIPT_HOME}";
 use strict;
 use English;
+use Encode;
 use Data::Dumper;
 use Cwd;
 use CiomUtil;
@@ -22,6 +23,7 @@ our $appName = $ARGV[2];
 our $orgCodes = $ARGV[3] || '*';
 our $doUpload = $ENV{UploadPackage} || 'NO';
 our $doUpload2Pgyer = $ENV{UploadToPgyer} || 'NO';
+our $pgyComments = $ENV{PgyComments} || '';
 
 our $ciomUtil = new CiomUtil(1);
 our $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
@@ -172,10 +174,12 @@ sub initialDistInfo(){
 	$DistInfo->{appVcaHome} = $AppVcaHome;
 	$DistInfo->{doUpload} = $doUpload;
 	$DistInfo->{doUpload2Pgyer} = $doUpload2Pgyer;
+	$DistInfo->{pgyComments} = decode('utf8',$pgyComments);
 	$DistInfo->{version} = $version;
 	$DistInfo->{cloudId} = $cloudId;
 	$DistInfo->{dynamicParams} = $DynamicParams;
 
+    #print $DistInfo->{pgyComments};
 	print "$totalOrgCodesCount Orgs need to build. \n";
 	print "$executorsCnt excutor(s) for building. \n";
 	for (my $i=0; $i < $slavesCount; $i++) {
@@ -212,18 +216,35 @@ sub logNeedToBuildOrgCodes4Executor($) {
 	$ciomUtil->log(Dumper($DistInfo->{distInfo}->[$executorIdx]->{needToBuildOrgCodes}));
 }
 
-sub main() {
-	my @childs;
+sub preVerification() {
 	if (!validateInputOrgCodes()) {
-		$ciomUtil->log("\n\nbuild error: org code \"$orgCodes\" does not exists!\n\n");
-		return 1;
+		$ciomUtil->log("\n\n[CIOM] build error: org code \"$orgCodes\" does not exists!\n\n");
+		exit 1;
 	}
 	
 	if (!defined($CiomData->{scm})) {
-		$ciomUtil->log("\n\nbuild error: no scm info provided!\n\n");
-		return 1;
+		$ciomUtil->log("\n\n[CIOM] build error: no scm info provided!\n\n");
+		exit 1;
+	}
+
+	if (!defined($CiomData->{pkgName})) {
+		$ciomUtil->log("\n\n[CIOM] build error: no package name info provided!\n\n");
+		exit 1;
+	}
+
+	if ($doUpload2Pgyer eq 'YES'){
+		if (!defined($CiomData->{pgyer})) {
+			$ciomUtil->log("\n\n[CIOM] build error: no pgyer upload info provided!\n\n");
+			exit 1;
+		}
 	}
 	
+}
+
+sub main() {
+	my @childs;
+	
+	preVerification();
 	constructDynamicParamsMap();
 	constructExecutorInfo();
 	initialDistInfo();

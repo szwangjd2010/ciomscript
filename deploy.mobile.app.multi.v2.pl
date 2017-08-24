@@ -3,6 +3,7 @@
 #
 use lib "$ENV{CIOM_SCRIPT_HOME}";
 use strict;
+use Encode;
 use English;
 use Data::Dumper;
 use Cwd;
@@ -30,6 +31,7 @@ our $AppVcaHome = "";
 our $CiomData = {};
 our $doUpload = "";
 our $doUpload2Pgyer = "";
+our $pgyComments = "";
 our $distDetail = {};
 our $DynamicParams ={};
 our $appName = "";
@@ -40,7 +42,13 @@ our $orgCount;
 our $need2BuildOrgCodes;
 
 sub injectPlatformDependency() {
-	require "$ENV{CIOM_SCRIPT_HOME}/${Platform}.spec.v2.pl";
+	if ($Platform eq 'ios') {
+		require "$ENV{CIOM_SCRIPT_HOME}/${Platform}.spec.v2.pl";
+	}
+	else {
+		require "$ENV{CIOM_SCRIPT_HOME}/${Platform}.spec.pl";
+	}
+	
 }
 
 sub intialGlobalVars(){
@@ -49,6 +57,7 @@ sub intialGlobalVars(){
 	$CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
 	$doUpload = $DistInfo->{doUpload};
 	$doUpload2Pgyer = $DistInfo->{doUpload2Pgyer};
+	$pgyComments = $DistInfo->{pgyComments};
 	$distDetail = $DistInfo->{distInfo}->[$executorIdx];
 	$DynamicParams = $DistInfo->{dynamicParams};
 	$appName = $DistInfo->{appName};
@@ -131,6 +140,7 @@ sub updateCodeWithGit($$) {
 	my $name = $scmRepoInfo->{name};
 	my $url = $scmRepoInfo->{url};
 	my $branch = $scmRepoInfo->{branch} || "master";
+	
 
 	if ($doRevert == 1) {
 		chdir("$name");
@@ -145,8 +155,17 @@ sub updateCodeWithGit($$) {
 		} else {
 			chdir("$name");
 			$ciomUtil->exec("git checkout . && git clean -xdf");
-			$ciomUtil->exec("git checkout $branch");
+			$ciomUtil->exec("git checkout master");
 			$ciomUtil->exec("git pull");
+			if (defined($scmRepoInfo->{tag})) {
+				my $tag = $scmRepoInfo->{tag};
+				if ( $tag ne '') {
+					$ciomUtil->exec("git checkout $tag");
+				}
+			} else {
+				$ciomUtil->exec("git checkout $branch");
+			}
+			
 			chdir("..");
 		}			
 	}
@@ -394,7 +413,8 @@ sub uploadPkgs2Pgyer($) {
 	my $userKey = $CiomData->{pgyer}->{userKey};
 	my $uploadApiUrl = $CiomData->{pgyer}->{uploadApiUrl};
 	my $pkgName = getAppFinalPkgName($code);
-	my $uploadCmd = "curl -F \"file=\@$ApppkgPath/$pkgName\" -F \"_api_key=$appKey\" -F \"uKey=$userKey\" $uploadApiUrl";
+	my $updateDes = decode('utf8',$pgyComments);
+	my $uploadCmd = "curl -F \"updateDescription=$updateDes\" -F \"file=\@$ApppkgPath/$pkgName\" -F \"_api_key=$appKey\" -F \"uKey=$userKey\" $uploadApiUrl";
 	$ciomUtil->exec("$uploadCmd");
 }
 
