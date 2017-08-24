@@ -120,7 +120,7 @@ sub addTplVarsIntoCiomData {
 	$CiomData->{vca} = {
 		version => $version,
 		cloudId => $cloudId,
-		appName => $appName		
+		appName => $appName
 	};
 
 	my $appTypeTopDomain = substr($AppType, 0, index($AppType, '.'));
@@ -388,14 +388,8 @@ sub lazyProcessCmds {
 }
 
 sub setDeployUser {
-	if ( defined($CiomData->{deploy}->{owner}) ){
-		my $user = $CiomData->{deploy}->{owner};
-		if ($user eq "") {
-			$CiomData->{deployuser} = "root";
-		}
-		else{
-			$CiomData->{deployuser} = $user;
-		}
+	if ( defined($CiomData->{username}) ){
+		$CiomData->{deployuser} = $CiomData->{username};
 	}
 	else {
 		$CiomData->{deployuser} = "root";
