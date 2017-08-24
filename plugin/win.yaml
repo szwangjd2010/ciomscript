@@ -23,7 +23,7 @@ dispatch:
   workspace: "c:/ciomworkspace"
 
 deploy:
-  owner: "ciom"
+  owner: ""
   group: ""
   mode: ""
   
@@ -34,19 +34,21 @@ deploy:
       - "\"C:\\Program Files\\2345Soft\\HaoZip\\HaoZipC.exe\" x \
        [% root.dispatch.workspace %]/[% root.apppkg.name %] \
        -aoa -o(% root.deploy.locations.%instanceIdx% %)\\"
+
     chownmode: []
-#    pre:
-#      - "Module(iis).stop:\
-#        host=(% root.deploy.hosts.%hostIdx% %),\
-#        location=(% root.deploy.locations.%instanceIdx% %)"
+
+    pre:
+      - "Module(iis).stopSite:\
+        host=(% root.deploy.hosts.%hostIdx% %),\
+        sitename=[% root.siteName %]"
 
     cmds:
-     - "Module(iis).deploy:\
+      - "Module(iis).deploy:\
        host=(% root.deploy.hosts.%hostIdx% %),\
        location=(% root.deploy.locations.%instanceIdx% %),\
        appName=[% root.vca.appName %]"
 
-#    post:
-#      - "Module(iis).start:\
-#        host=(% root.deploy.hosts.%hostIdx% %),\
-#        location=(% root.deploy.locations.%instanceIdx% %)"
+    post:
+      - "Module(iis).startSite:\
+        host=(% root.deploy.hosts.%hostIdx% %),\
+        sitename=[% root.siteName %]"
