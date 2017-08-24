@@ -6,8 +6,8 @@ def hello():
     run("echo hello")
 
 def alive(location):
-    output = run("pgrep -c -f '%s'" % location, warn_only=True)
-    return int(output) == 1
+    output = run("pgrep -f '%s' | wc -l" % location, warn_only=True)
+    return int(output) >= 1
 
 @task
 def stop(location):
@@ -42,7 +42,7 @@ def attach(location, appName, asRoot, extract):
 
 @task
 def deploy(location, appName, asRoot=False, extract=True):
-    stop(location)
+    #stop(location)
     detach(location, appName, asRoot, extract)
     attach(location, appName, asRoot, extract)
-    start(location)
+    #start(location)
