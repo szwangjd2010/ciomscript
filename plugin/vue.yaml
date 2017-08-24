@@ -13,6 +13,6 @@ package:
     - "[% root.scm.repos.0.name %]/dist/^"
 
 deploy:
-  owner: nginx
-  group: nginx
-  mode: 755
+  owner: www
+  group: www
+  mode: 775
