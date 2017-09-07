@@ -47,7 +47,7 @@ sub resyncSourceCode() {
 }
 
 sub gradleBuild() {
-	my $cmdGradleBuild = "gradle -b $BuildInfo->{location}/$BuildInfo->{file} $BuildInfo->{target}";
+	my $cmdGradleBuild = "gradle -b $BuildInfo->{location}/$BuildInfo->{file} $BuildInfo->{target} --no-daemon";
 	my $cmd2Workspace = "cd $WsRoot/$cloudId/$Ws/$appName";
 	$SshInfo->{cmd} = "( $cmd2Workspace; $cmdGradleBuild )";
 	$SshInfo->{host} = getCiomHost();
