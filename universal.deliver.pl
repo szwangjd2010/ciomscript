@@ -533,11 +533,11 @@ sub dispatch() {
 	if ( $AppType =~ /win/) {
 		dispatchBySsh();
 	} else {
-		dispatchByAnsibale();
+		dispatchByAnsible();
 	}
 }
 
-sub dispatchByAnsibale() {
+sub dispatchByAnsible() {
 	my $method = Dive( $CiomData, qw(dispatch method)) || "push";
 	
 	my $joinedHosts = join(',', @{$CiomData->{deploy}->{hosts}}) . ',';
