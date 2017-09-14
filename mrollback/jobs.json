@@ -138,5 +138,10 @@
     "version": "v0",
     "cloudId": "ucloud-black",
     "appName": "componentapi"
+  },
+  "aliyun.jst.env-yxt.lecai.web.publish": {
+    "version": "v0",
+    "cloudId": "aliyun-jst",
+    "appName": "jinpaiweb"
   }
 }
