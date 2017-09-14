@@ -42,12 +42,14 @@ sub resyncSourceCode() {
 	logBuildingStatus(0,"=== Start sync SourceCode to android build salve$distDetail->{slaveid}, ws$distDetail->{wsid} ===");
 	my $codeSrc = "$ENV{WORKSPACE}/$Ws/$appName";
 	my $codeDst = "$WsRoot/$cloudId/$Ws/";
-	$ciomUtil->exec("rsync -rlptoDz --exclude .svn --delete --force $codeSrc $SshInfo->{user}\@$SshInfo->{host}:$codeDst");
+	$ciomUtil->exec("rsync -rlptoDz --exclude .svn --exclude $BuildInfo->{location}/build --delete --force $codeSrc $SshInfo->{user}\@$SshInfo->{host}:$codeDst");
+	#$ciomUtil->exec("rsync -rlptoDz --exclude .svn --delete --force $codeSrc $SshInfo->{user}\@$SshInfo->{host}:$codeDst");
 	logBuildingStatus(0,"=== end sync SourceCode to android build salve ===");
 }
 
 sub gradleBuild() {
-	my $cmdGradleBuild = "gradle -b $BuildInfo->{location}/$BuildInfo->{file} $BuildInfo->{target} --no-daemon";
+	my $cmdGradleBuild = "gradle -b $BuildInfo->{location}/$BuildInfo->{file} $BuildInfo->{target}";
+	#my $cmdGradleBuild = "gradle assR";
 	my $cmd2Workspace = "cd $WsRoot/$cloudId/$Ws/$appName";
 	$SshInfo->{cmd} = "( $cmd2Workspace; $cmdGradleBuild )";
 	$SshInfo->{host} = getCiomHost();
