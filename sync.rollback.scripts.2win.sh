@@ -18,7 +18,9 @@ replaceRollbackScripts() {
 		mkdir "$WORKSPACE/$appName"
 	fi
 
-	execCmd "/bin/cp -rf $SrcLocation/$appName/*.rollback.* $DestLocation/$appName/"
+	if [ -f "$SrcLocation/$appName/*.rollback.*" ]; then
+		execCmd "/bin/cp -rf $SrcLocation/$appName/*.rollback.* $DestLocation/$appName/"
+	fi
 }
 
 main() {
