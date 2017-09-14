@@ -33,7 +33,7 @@ def detach(location, appName, asRoot, extract):
 
 
 def attach(location, appName, asRoot, extract):
-    webappName = 'ROOT' if asRoot else appName
+    webappName = 'ROOT' if asRoot=='True' else appName
     with cd(location):
         if extract:
             run('unzip {}/{}.war -d webapps/{}'.format(appName, appName, webappName))
