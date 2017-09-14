@@ -269,7 +269,13 @@ sub main() {
     	if ($pid == 0) {     
     		#print "Child $i$j : My pid = $$\n";
 			#print "building for executor$i\n";
-			$ciomUtil->exec("$ENV{CIOM_SCRIPT_HOME}/deploy.mobile.app.multi.v2.pl $i");
+			#if ($appName eq 'daxue') {
+				$ciomUtil->exec("$ENV{CIOM_SCRIPT_HOME}/deploy.mobile.app.multi.v3.pl $i");
+			#}
+			#else {
+			#	$ciomUtil->exec("$ENV{CIOM_SCRIPT_HOME}/deploy.mobile.app.multi.v2.pl $i");
+			#}
+			
         	#print "Child $i$j : end\n";
         	exit 0;
         }
