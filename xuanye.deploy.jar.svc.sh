@@ -8,9 +8,9 @@ fi
 #platform=$1
 host=$1
 path=$2
-svcport=$3
-svcjarname=$4
-logfullpath=$5
+#svcport=$3
+svcjarname=$3
+logfullpath=$4
 
 source /etc/profile
 timestamp=$(date +%04Y%02m%02d.%02k%02M%02S)
@@ -36,16 +36,16 @@ copyJarToTarget() {
 	execCmd "scp -r $targetJarWithFullPath root@$host:$path"
 }
 
-killSvcProcess() {
+#killSvcProcess() {
 	#echo "function killSvcProcess() called"
 	#netstat -nlp | grep 18086 | awk '{print $7}' | awk -F"/" '{print $1} | xargs kill -9'
-	execRemoteCmd $host $port "netstat -nlp| grep 18086| awk '{print \\\$7}'| awk -F\\\"/\\\" '{print \\\$1}'| xargs kill -9"
-}
+#	execRemoteCmd $host $port "netstat -nlp| grep $svcport| awk '{print \\\$7}'| awk -F\\\"/\\\" '{print \\\$1}'| xargs kill -9"
+#}
 
-startSvc() {
+#startSvc() {
 	#echo "function startSvc() called"
-	execRemoteCmd $host $port "nohup java -jar $path/$svcjarname.jar --server.port=$svcport >/dev/null 2>&1 &"
-}
+#	execRemoteCmd $host $port "nohup java -jar $path/$svcjarname.jar --server.port=$svcport >/dev/null 2>&1 &"
+#}
 
 printLog() {
 	execRemoteCmd $host $port "sleep 2; tail -n 50 $logfullpath"
@@ -53,11 +53,11 @@ printLog() {
 
 main() {
 	enterWorkspace
-	killSvcProcess
+	#killSvcProcess
 	backupOldJar
 	copyJarToTarget
-	startSvc
-	printLog
+	#startSvc
+	#printLog
 	leaveWorkspace
 }
 

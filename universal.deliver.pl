@@ -268,7 +268,7 @@ sub customizeFiles() {
 	my $customizedFilesLocation = "$AppVcaHome/customized/";
 	if ( -d $customizedFilesLocation) {
 		my $dirNotEmpty = sprintf('[ "$(ls -A %s)" ]', $customizedFilesLocation);
-		$CiomUtil->exec("$dirNotEmpty && /bin/cp -rf $customizedFilesLocation ./");
+		$CiomUtil->exec("$dirNotEmpty && /bin/cp -rf $customizedFilesLocation/* ./");
 	}
 }
 
