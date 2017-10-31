@@ -1,0 +1,23 @@
+---
+__extend: linux
+
+build:
+  cmds:
+    - cd [% root.scm.repos.0.name %]
+    - mvn package
+
+package:
+  includes:
+    - "f,[% root.scm.repos.0.name %]/target/*.jar"
+
+deploy:
+  local:
+    pre: []
+  portbase: 8080
+  instance:
+    cmds:
+      - "Module(springboot).deploy:\
+         host=(% root.deploy.hosts.%hostIdx% %),\
+         location=(% root.deploy.locations.%instanceIdx% %),\
+         appName=[% root.vca.appName %],\
+         svcport=(% root.deploy.portbase + %instanceIdx% %)"
