@@ -377,7 +377,7 @@ sub lazyProcessCmds {
 
 	foreach my $cmd (@{$cmds}) {
 		$cmd =~ s/%([\w\d]+)%/$vars->{$1}/g;
-		$cmd =~ s/\(% ([\w\d\.]+) %\)/[% $1 %]/g;
+		$cmd =~ s/\(% ([\w\.\s\+\-\*\/]+) %\)/[% $1 %]/g;
 
 		my $out = '';
 		processTemplate(\$cmd, {root => $CiomData}, \$out);

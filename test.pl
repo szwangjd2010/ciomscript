@@ -9,26 +9,32 @@ use Hash::Merge::Simple qw( merge );
 use Data::Dumper;
 use ScmActor;
 use Text::Sprintf::Named qw(named_sprintf);
+use Template;
 
-sub p($) {
-    print((shift || "default") . "\n");
-} 
+my $Tpl;
 
-sub a {
-    my ($p1, $p2, $p3) = @_;
-
-    p($p1);
-    p($p2);
-    p($p3);
+sub initTpl() {
+    $Tpl = Template->new({
+        ABSOLUTE => 1,
+        TAG_STYLE => 'outline',
+        PRE_CHOMP  => 0,
+        POST_CHOMP => 0
+    }); 
 }
 
-sub b {
-    my ($p1, $p2, $p3) = @_;
-    
-    a($p1, $p2, $p3);       
+
+sub processTemplate {
+    my ($in, $data, $out) = @_;
+    $Tpl->process($in, $data, $out) 
+        || die "Template process failed: ", $Tpl->error(), "\n";    
 }
 
-\&b->(1, 2, 3);
-\&b->(1, 2);
-\&b->(1);
-\&b->();
+sub main() {
+     initTpl();
+     my $out = "";
+     processTemplate(\"[% root.a + root.b %]", {root => {a => 11, b => 1}}, $out);
+     print $out . "\n";
+}
+
+
+main()
