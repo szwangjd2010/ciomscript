@@ -20,4 +20,5 @@ deploy:
          host=(% root.deploy.hosts.%hostIdx% %),\
          location=(% root.deploy.locations.%instanceIdx% %),\
          appName=[% root.vca.appName %],\
+         jvmopt=[% root.deploy.jvmopt %],\
          svcport=(% root.deploy.portbase + %instanceIdx% %)"

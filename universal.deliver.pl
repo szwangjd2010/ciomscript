@@ -278,7 +278,10 @@ sub escapeRe($) {
 	$re =~ s/'/'"'"'/g;
 
 	#vertical bar 
-	$re =~ s/\|/\\|/g;	
+	$re =~ s/\|/\\|/g;
+
+	#@
+	$re =~ s/\@/\\@/g;	
 	return $re;
 }
 
