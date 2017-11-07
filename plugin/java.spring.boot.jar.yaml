@@ -13,12 +13,14 @@ package:
 deploy:
   local:
     pre: []
-  portbase: 8080
+  #portbase: 8080
   instance:
     cmds:
-      - "Module(springboot).deploy:\
+      - "Module(springboot).showRefs:\
          host=(% root.deploy.hosts.%hostIdx% %),\
          location=(% root.deploy.locations.%instanceIdx% %),\
          appName=[% root.vca.appName %],\
          jvmopt=[% root.deploy.jvmopt %],\
-         svcport=(% root.deploy.portbase + %instanceIdx% %)"
+         profile=(% root.deploy.profile.%instanceIdx%.pActive %),\
+         svcport=(% root.deploy.profile.%instanceIdx%.port %)"
+  #       svcport=(% root.deploy.portbase + %instanceIdx% %)"

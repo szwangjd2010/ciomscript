@@ -24,18 +24,18 @@ dump() {
 			--set-gtid-purged=OFF \
 			--flush-logs \
 			--master-data=2 \
-			--databases $db > ${realm}.${db}-${today}
+			--databases $db > ${realm}.${db}-${today}.sql
 	done
 }
 
 schemaDump() {
 	for db in $dbs; do
-		$MysqlDump --no-data --databases $db > ${realm}.schema.${db}-${today}
+		$MysqlDump --no-data --databases $db > ${realm}.schema.${db}-${today}.sql
 	done
 }
 
 tarFiles() {
-	tar -czvf $dumpout ${realm}.*-$today
+	tar -czvf $dumpout ${realm}.*-${today}.sql
 }
 
 backupToStorage() {
@@ -43,7 +43,7 @@ backupToStorage() {
 }
 
 clean() {
-	rm -rf ${realm}.*-$today	
+	rm -rf ${realm}.*-${today}.sql
 }
 
 leaveWorkspace() {

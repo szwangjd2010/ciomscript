@@ -360,7 +360,6 @@ sub translateActions($) {
 }
 
 sub lazyProcessCmds {
-	
 	my ($hierarchyArr, $cmds, $hostIdx, $instanceIdx) = @_;
 	my $vars = {
 		hostIdx => $hostIdx,
@@ -380,11 +379,18 @@ sub lazyProcessCmds {
 
 	foreach my $cmd (@{$cmds}) {
 		$cmd =~ s/%([\w\d]+)%/$vars->{$1}/g;
-		$cmd =~ s/\(% ([\w\.\s\+\-\*\/]+) %\)/[% $1 %]/g;
-
 		my $out = '';
-		processTemplate(\$cmd, {root => $CiomData}, \$out);
-		$cmd = $out;
+		my $lasyRe = '\(% ([\w_\.\s\+\-\*\/]+) %\)';
+		if ($cmd =~ m/$lasyRe/) {
+			while ($cmd =~ m/$lasyRe/) {
+				$cmd =~ s/$lasyRe/[% $1 %]/g;
+				processTemplate(\$cmd, {root => $CiomData}, \$out);
+				$cmd = $out;
+			}
+		} else {
+			processTemplate(\$cmd, {root => $CiomData}, \$out);
+			$cmd = $out;
+		}
 	}
 
 	addLazyOut2CiomData(@_);
