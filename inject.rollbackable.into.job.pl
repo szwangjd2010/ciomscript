@@ -94,7 +94,7 @@ sub generateJobsRollbackList() {
 		}
 		my $reRevisionId = '(\d+\.){2}\d{8}\+\d{6}';
 		my $rollbackListFile = "${jobName}.rbl";
-		$CiomUtil->exec("find $jobPkgLocation -name $job->{appName}.*.tar.gz | grep -oP '$reRevisionId' | sort -rn > $rollbackListFile");
+		$CiomUtil->exec("find $jobPkgLocation -name $job->{appName}.*.tar.gz | grep -oP '$reRevisionId' | sort -rn > $rollbackListFile | head -n 10");
 
 		my @rollbackList = read_file($rollbackListFile, chomp => 1);
 		$job->{rollbackList} = \@rollbackList;
