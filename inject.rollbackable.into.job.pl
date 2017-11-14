@@ -1,6 +1,15 @@
 #!/usr/bin/perl -W
 # 
+# usages:
+# 1. make job rollbackable and add available rollback-items 
+#   perl inject.rollbackable.into.job.pl dev.env-yxt.datav.test.lecaiapi.deploy
+#   perl inject.rollbackable.into.job.pl dev.env-yxt.datav.test.lecaiapi.deploy EnbaleRollback
 #
+# 2. remove rollback support from job
+#   perl inject.rollbackable.into.job.pl dev.env-yxt.datav.test.lecaiapi.deploy DisableRollback
+#
+#
+
 package UniveralDeliver;
 
 use lib "$ENV{CIOM_SCRIPT_HOME}";
@@ -24,7 +33,8 @@ use String::Buffer;
 STDOUT->autoflush(1);
 
 my $JobName = $ARGV[0];
-my $maxRollbackEntrys = $ARGV[1] || 10; 
+my $EnableRollback = $ARGV[1] || "EnableRollback"; #DisableRollback or EnableRollback
+my $MaxRollbackEntrys = 10;
 
 my $CiomUtil = new CiomUtil(1);
 my $Timestamp = $CiomUtil->getTimestamp();
@@ -95,7 +105,7 @@ sub generateJobsRollbackList() {
 		}
 		my $reRevisionId = '(\d+\.){2}\d{8}\+\d{6}';
 		my $rollbackListFile = "${jobName}.rbl";
-		$CiomUtil->exec("find $jobPkgLocation -name $job->{appName}.*.tar.gz | grep -oP '$reRevisionId' | sort -rn | head -n $maxRollbackEntrys > $rollbackListFile");
+		$CiomUtil->exec("find $jobPkgLocation -name $job->{appName}.*.tar.gz | grep -oP '$reRevisionId' | sort -rn | head -n $MaxRollbackEntrys > $rollbackListFile");
 
 		my @rollbackList = read_file($rollbackListFile, chomp => 1);
 		$job->{rollbackList} = \@rollbackList;
@@ -120,6 +130,10 @@ sub updateJobXml($) {
 		$CiomUtil->exec([
 			"sed -i.$Timestamp '/$injectBeginIndicator/,/$injectEndIndicator/d' $jobXml",
 		]);
+	}
+
+	if ($EnableRollback eq "DisableRollback") {
+		return;
 	}
 	$CiomUtil->exec([
 		"/bin/cp -rf ${jobXml} ${jobXml}.${Timestamp}",
