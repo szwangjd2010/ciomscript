@@ -24,6 +24,7 @@ use String::Buffer;
 STDOUT->autoflush(1);
 
 my $JobName = $ARGV[0];
+my $maxRollbackEntrys = $ARGV[1] || 10; 
 
 my $CiomUtil = new CiomUtil(1);
 my $Timestamp = $CiomUtil->getTimestamp();
@@ -94,7 +95,7 @@ sub generateJobsRollbackList() {
 		}
 		my $reRevisionId = '(\d+\.){2}\d{8}\+\d{6}';
 		my $rollbackListFile = "${jobName}.rbl";
-		$CiomUtil->exec("find $jobPkgLocation -name $job->{appName}.*.tar.gz | grep -oP '$reRevisionId' | sort -rn > $rollbackListFile | head -n 10");
+		$CiomUtil->exec("find $jobPkgLocation -name $job->{appName}.*.tar.gz | grep -oP '$reRevisionId' | sort -rn | head -n $maxRollbackEntrys > $rollbackListFile");
 
 		my @rollbackList = read_file($rollbackListFile, chomp => 1);
 		$job->{rollbackList} = \@rollbackList;
