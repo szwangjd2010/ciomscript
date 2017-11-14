@@ -1,14 +1,12 @@
 #!/bin/bash
-
-username=$1
-password=$2
+#
+#
 
 # dbs can not multi database names separated by space
 dbs="skyeye"
 today=$(date +%04Y%02m%02d.%02k%02M%02S)
 realm="yxt.datav"
 dumpout="${realm}.all-$today.tgz"
-MysqlDump="mysqldump -u$username -p$password"
 
 enterWorkspace() {
 	cd /data/backup
@@ -16,7 +14,7 @@ enterWorkspace() {
 
 dump() {
 	for db in $dbs; do
-		$MysqlDump \
+		mysqldump \
 			--default-character-set=utf8 \
 			--add-drop-database \
 			--add-drop-table \
@@ -30,7 +28,7 @@ dump() {
 
 schemaDump() {
 	for db in $dbs; do
-		$MysqlDump --no-data --databases $db > ${realm}.schema.${db}-${today}.sql
+		mysqldump --no-data --databases $db > ${realm}.schema.${db}-${today}.sql
 	done
 }
 

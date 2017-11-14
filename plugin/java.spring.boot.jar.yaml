@@ -16,7 +16,7 @@ deploy:
   #portbase: 8080
   instance:
     cmds:
-      - "Module(springboot).showRefs:\
+      - "Module(springboot).deploy:\
          host=(% root.deploy.hosts.%hostIdx% %),\
          location=(% root.deploy.locations.%instanceIdx% %),\
          appName=[% root.vca.appName %],\

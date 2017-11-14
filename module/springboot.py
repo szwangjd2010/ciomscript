@@ -2,6 +2,7 @@ from fabric.api import *
 from time import sleep
 
 jvmRefs = {
+    'OPT_S64M_X512M_SS512K' : '-Xms64m -Xmx512m -Xss512k',
     'OPT_S128M_X1024M_SS512K' : '-Xms128m -Xmx1024m -Xss512k'
 }
 
@@ -22,7 +23,7 @@ def deploy(location, appName, jvmopt, profile, svcport):
     #sleep(2)
     #print run('curl localhost:{}/{}/v1/health'.format(port, appName),warn_only=True)
 
-def start(location, appName, jvmopt, port):
+def start(location, appName, jvmopt, profile, port):
     jvmOption = jvmRefs.get(jvmopt)
     run('nohup java {} -jar {}/{}/{}.jar --spring.profiles.active={} --server.port={} >/dev/null &'.format(jvmOption, location, appName, appName, profile, port), pty=False)  
 

@@ -64,7 +64,7 @@ sub processTemplate {
 sub getJobPackageLocation($) {
 	my $job = shift;
 	return sprintf("%s/%s/%s/%s",
-		$ENV{CIOM_REPO_LOCAL_PATH},
+		$ENV{CIOM_REPO_LOCAL},
 		$job->{version},
 		$job->{cloudId},
 		$job->{appName}
@@ -106,30 +106,29 @@ sub updateJobXml($) {
 	my $jobName = $job->{name};
 	my $jobXml = "$JobsHome/$jobName/config.xml";
 	my $tplFile = "$ENV{CIOM_SCRIPT_HOME}/rollback.segment.tpl";
-
-	my $data = {
-		parameterDefinitions => 1,
-		rollbackList => $job->{rollbackList}
-	};
-
-	my $macthed = $CiomUtil->execWithReturn("grep -o '<properties/>' $jobXml");
-	if ($macthed =~ m|^<properties/>|) {
-		$data->{parameterDefinitions} = 0;
+	if ($#{ $job->{rollbackList}} == -1) {
+		return;
 	}
-	processTemplate($tplFile, { root => $data}, "${jobName}.pds");
 
-	if ($data->{parameterDefinitions} == 1) {
+	processTemplate($tplFile, { root => {rollbackList => $job->{rollbackList}}}, "${jobName}.pds");
+
+	my $injectBeginIndicator = "<!-- ciom auto injected begin -->";
+	my $injectEndIndicator = "<!-- ciom auto injected end -->";
+	my $counter = $CiomUtil->execWithReturn("grep -c '$injectBeginIndicator' $jobXml");
+	if ($counter > 0) {
 		$CiomUtil->exec([
-			"sed -i.$Timestamp '/<!-- auto injected begin - ciom rollback -->/,/<!-- auto injected end - ciom rollback -->/d' $jobXml",
-			"sed -i '/<parameterDefinitions>/r ${jobName}.pds' ${jobXml}",
-		]);
-	} else {
-		$CiomUtil->exec([
-			"sed -i.$Timestamp '/<properties\\/>/r ${jobName}.pds' ${jobXml}",
-			"sed -i '/<properties\\/>/d' ${jobXml}"
+			"sed -i.$Timestamp '/$injectBeginIndicator/,/$injectEndIndicator/d' $jobXml",
 		]);
 	}
-	
+	$CiomUtil->exec([
+		"/bin/cp -rf ${jobXml} ${jobXml}.${Timestamp}",
+		"perl -pe 'if (/<scm class=\"hudson.scm.NullSCM\"\\/>/) {system(\"cat ${jobName}.pds\")}' ${jobXml} > ${jobXml}.tmp",
+		"mv -f ${jobXml}.tmp ${jobXml}"
+	]);
+
+	$CiomUtil->exec([
+		"sed -i '/<properties\\/>/d' ${jobXml}"
+	]);
 }
 
 sub updateJobs() {

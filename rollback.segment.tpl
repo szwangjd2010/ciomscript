@@ -1,11 +1,7 @@
-[% IF root.rollbackList.size > 0 %]
-[% IF !root.parameterDefinitions %]
-   <properties>
+[% IF root.rollbackList.size > 0 %]  <!-- ciom auto injected begin -->
+  <properties>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-
-[% END %]
-        <!-- auto injected begin - ciom rollback -->
         <hudson.model.ChoiceParameterDefinition>
           <name>DeployMode</name>
           <description></description>
@@ -28,12 +24,9 @@
             </a>
           </choices>
         </hudson.model.ChoiceParameterDefinition>
-        <!-- auto injected end - ciom rollback -->
-[% IF !root.parameterDefinitions %]
-      
       </parameterDefinitions>
     </hudson.model.ParametersDefinitionProperty>
   </properties>
+  <!-- ciom auto injected end -->
 
-[% END %]
 [% END %]
