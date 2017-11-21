@@ -143,5 +143,10 @@
     "version": "v0",
     "cloudId": "aliyun-jst",
     "appName": "jinpaiweb"
+  },
+  "ucloud.xjk.env-yxt.qida.o2o.web.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "qidao2oweb"
   }
 }

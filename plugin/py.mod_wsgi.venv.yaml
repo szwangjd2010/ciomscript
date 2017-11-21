@@ -8,7 +8,7 @@ build:
     - source ./bin/activate
     - "[% root.vars.pip %] install -r ./requirement.txt"
     - deactivate
-    - perl -i -pE 's|(VIRTUAL_ENV=\").*(\")|${1}[% root.deploy.locations.0 %]/[% root.vca.appName %]${2}|' ./bin/activate
+    - perl -i -pE 's|(VIRTUAL_ENV=").*(")|${1}[% root.deploy.locations.0 %]/[% root.vca.appName %]${2}|' ./bin/activate
 
 package:
   includes:
@@ -19,6 +19,6 @@ deploy:
   group: apache
   mode: 755
 
-  host:
+  instance:
     post:
-      - touch [% root.deploy.locations.0 %]/[% root.vca.appName %]/config/wsgi.py
+      - touch (% root.deploy.locations.%instanceIdx% %)/[% root.vca.appName %]/config/wsgi.py
