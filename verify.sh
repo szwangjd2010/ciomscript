@@ -56,5 +56,14 @@ fi
 if [ "$CiomPassphraseQidaC" == "jxf2016" ]; then
 	exit 0
 fi
+
+if [ "$CiomPassphraseLj" == "ljzb" ]; then
+	exit 0
+fi
+
+if [ "$CiomPwdSptingCloud" == "scjef@2018" ]; then
+	exit 0
+fi
+
 echo "[CIOM]passphrase incorrect"
 exit 1

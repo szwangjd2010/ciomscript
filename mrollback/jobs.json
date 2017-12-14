@@ -148,5 +148,30 @@
     "version": "v0",
     "cloudId": "ucloud-qida-xjk",
     "appName": "qidao2oweb"
+  },
+  "ucloud.env-yxt.qida.o2o.web.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "qidao2oweb"
+  },
+  "ucloud.xjk.env-yxt.qida.ote.web.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "qidaoteweb"
+  },
+  "ucloud.env-yxt.qida.ote.web.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "qidaoteweb"
+  },
+  "ucloud.xjk.env-yxt.qida.shike.web.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "qidashikeweb"
+  },
+  "ucloud.env-yxt.qida.shike.web.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "qidashikeweb"
   }
 }

@@ -15,6 +15,12 @@ deploy:
     pre: []
   #portbase: 8080
   instance:
+    pre:
+      - "Module(springboot).shutdown:\
+        host=(% root.deploy.hosts.%hostIdx% %),\
+        appName=[% root.vca.appName %],\
+        port=(% root.deploy.profile.%instanceIdx%.port %)"
+
     cmds:
       - "Module(springboot).deploy:\
          host=(% root.deploy.hosts.%hostIdx% %),\

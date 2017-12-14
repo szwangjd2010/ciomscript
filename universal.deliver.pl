@@ -365,7 +365,7 @@ sub lazyProcessCmds {
 		hostIdx => $hostIdx,
 		instanceIdx => $instanceIdx
 	};
-
+	
 	my $needProcess = 0;
 	foreach my $val (values %{$vars}) {
 		if (defined($val)) {
@@ -588,9 +588,9 @@ sub deploy() {
 
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
 			runCmdsInHierarchys([
+				"$DeployMode instance pre",
 				"$DeployMode instance extract",
 				"$DeployMode instance chownmode",
-				"$DeployMode instance pre",
 				"$DeployMode instance cmds",
 				"$DeployMode instance post"
 			], $i, $j);

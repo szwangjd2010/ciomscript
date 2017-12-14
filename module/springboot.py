@@ -14,11 +14,18 @@ def alive(port):
     output = run("pgrep -f 'server.port={}'| wc -l".format(port), warn_only=True)
     return int(output) > 1
 
+def stop(port):
+    if alive(port):
+        run("pkill -9 -f 'server.port={}'".format(port), warn_only=True)
+        sleep(2)
+        print('Process stoped on port %s' % port)
+    
+
 @task
 def deploy(location, appName, jvmopt, profile, svcport):
     #for port in svcports.split('-'):
-    shutdown(appName, svcport)
-    sleep(2)
+    #shutdown(appName, svcport)
+    #sleep(2)
     start(location, appName, jvmopt, profile, svcport)
     #sleep(2)
     #print run('curl localhost:{}/{}/v1/health'.format(port, appName),warn_only=True)
@@ -27,9 +34,12 @@ def start(location, appName, jvmopt, profile, port):
     jvmOption = jvmRefs.get(jvmopt)
     run('nohup java {} -jar {}/{}/{}.jar --spring.profiles.active={} --server.port={} >/dev/null &'.format(jvmOption, location, appName, appName, profile, port), pty=False)  
 
+@task
 def shutdown(appName, port):
     if alive(port):
         run('curl -X POST localhost:{}/shutdown'.format(port), warn_only=True)
+        sleep(2)
+        stop(port)
     print('Application {} was stopped on port {}!!!'.format(appName, port))
 
 @task
