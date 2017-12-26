@@ -12,8 +12,22 @@ enterWorkspace() {
 	cd /data/backup
 }
 
+getSkyeyeIgnoreTable() {
+	tables="core_knowledge knowledge_intermediate_data"
+	ignores=""
+	for tb in $tables; do
+		ignores="$ignores --ignore-table=skyeye.$tb"
+	done
+	echo -n "$ignores"
+}
+
 dump() {
 	for db in $dbs; do
+		ignoreTables=""
+		if [ $db == "skyeye" ]; then
+			ignoreTables=$(getSkyeyeIgnoreTable)
+		fi
+
 		mysqldump \
 			--default-character-set=utf8 \
 			--add-drop-database \
@@ -22,6 +36,7 @@ dump() {
 			--set-gtid-purged=OFF \
 			--flush-logs \
 			--master-data=2 \
+			$ignoreTables \
 			--databases $db > ${realm}.${db}-${today}.sql
 	done
 }
