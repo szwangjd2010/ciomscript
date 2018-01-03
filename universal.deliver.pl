@@ -52,7 +52,7 @@ my $RevisionId;
 
 
 sub enterWorkspace() {
-	chdir($ENV{WORKSPACE}) || die "can not change working directory!";
+	chdir($ENV{WORKSPACE} || ".") || die "can not change working directory!";
 }
 
 sub leaveWorkspace() {

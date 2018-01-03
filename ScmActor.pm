@@ -66,7 +66,9 @@ sub setRepo() {
 
     $self->{repo} = $repo;
     $self->{actor} = $self->{$repo->{type}};
-    $self->{actor}->{prefix} = named_sprintf($self->{actor}->{prefix}, $repo);
+    if ($self->{actor}->{prefix} ne '') {
+        $self->{actor}->{prefix} = named_sprintf($self->{actor}->{prefix}, $repo);
+    }
     $self->{namedHash} = merge $self->{actor}, $self->{repo};
 }
 
