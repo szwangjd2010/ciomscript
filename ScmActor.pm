@@ -26,7 +26,7 @@ sub new() {
 			"prefix" => "",
 			"co" => "git clone -b %(branch)s --single-branch %(url)s %(name)s",
 			"revert" => "(cd %(name)s; git checkout .)",
-			"update" => "(cd %(name)s; git fetch)",
+			"update" => "(cd %(name)s; git pull)",
 			"clean" => "(cd %(name)s; git clean -fd)",
 			"version" => "(cd %(name)s; git rev-parse --short HEAD)"
 		},
