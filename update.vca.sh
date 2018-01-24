@@ -2,7 +2,7 @@
 # 
 
 version=$1
-cloudId=$2
+cloudId=${2:-""}
 appName=${3:-""}
 
 if [ "$appName" == "" ]; then
