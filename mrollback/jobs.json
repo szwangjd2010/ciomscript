@@ -173,5 +173,15 @@
     "version": "v0",
     "cloudId": "ucloud-qida",
     "appName": "qidashikeweb"
+  },
+  "ucloud.env-yxt.qida.msg.web.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "qidamsgweb"
+  },
+  "ucloud.xjk.env-yxt.qida.msg.web.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "qidamsgweb"
   }
 }

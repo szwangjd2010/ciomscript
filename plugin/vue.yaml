@@ -11,6 +11,7 @@ build:
 package:
   includes:
     - "[% root.scm.repos.0.name %]/dist/^"
+    #- "f,[% root.scm.repos.0.name %]/README.md"
 
 deploy:
   owner: www
