@@ -4,6 +4,7 @@ __extend: linux
 build:
   cmds:
     - cd [% root.scm.repos.0.name %]
+    - mvn clean
     - mvn package
 
 package:
