@@ -639,6 +639,24 @@ my $Subs = [
     {fn => \&test,					presence => '.*'},
 ];
 
+sub getBuildLogFile() {
+	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
+}
+
+sub getSvnError() {
+	my $logFile = getBuildLogFile();
+	my $buildFailedCnt = $CiomUtil->execWithReturn("grep -c 'svn: E' $logFile");
+	return $buildFailedCnt - 1;	
+}
+
+sub getErrorInLog(){
+	my $svnErrorCnt = getSvnError();
+	if ( $svnErrorCnt > 0){
+		return 1;
+	}
+	return 0;
+}
+
 sub main() {
 	enterWorkspace();
 	init();
@@ -647,8 +665,8 @@ sub main() {
 	
 	dumpCiomAndPlugin();
 	leaveWorkspace();
-
-	return 0;
+	return getErrorInLog();
+	#return 0;
 }
 
 exit main();
