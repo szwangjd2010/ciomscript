@@ -1,0 +1,16 @@
+---
+__extend: linux
+
+package:
+  includes:
+    - "*"
+
+deploy:
+  owner: apache
+  group: apache
+  mode: 755
+
+  instance:
+    post:
+      - "[% root.vars.pip %] install -r (% root.deploy.locations.%instanceIdx% %)/[% root.vca.appName %]/requirements.txt"
+      - systemctl restart [% root.vca.appName %]
