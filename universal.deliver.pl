@@ -623,9 +623,9 @@ sub test() {
 
 my $Subs = [
     {fn => \&pullCode,				presence => 'deploy'},
-    {fn => \&initRollbackNode,		presence => 'rollback'},
     {fn => \&setRevisionId,			presence => '.*'},
     {fn => \&loadAndProcessPlugin,	presence => '.*'},
+    {fn => \&initRollbackNode,		presence => 'rollback'},
     {fn => \&customizeFiles,		presence => 'deploy'},
     {fn => \&escapeReAndGatherUDV, 	presence => 'deploy'},
     {fn => \&streamedit,			presence => 'deploy'},

@@ -3,7 +3,7 @@
 # usages:
 # 1. make job rollbackable and add available rollback-items 
 #   perl inject.rollbackable.into.job.pl dev.env-yxt.datav.test.lecaiapi.deploy
-#   perl inject.rollbackable.into.job.pl dev.env-yxt.datav.test.lecaiapi.deploy EnbaleRollback
+#   perl inject.rollbackable.into.job.pl dev.env-yxt.datav.test.lecaiapi.deploy EnableRollback
 #
 # 2. remove rollback support from job
 #   perl inject.rollbackable.into.job.pl dev.env-yxt.datav.test.lecaiapi.deploy DisableRollback
