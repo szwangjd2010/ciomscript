@@ -117,33 +117,57 @@ sub updateJobXml($) {
 	my $jobName = $job->{name};
 	my $jobXml = "$JobsHome/$jobName/config.xml";
 	my $tplFile = "$ENV{CIOM_SCRIPT_HOME}/rollback.segment.tpl";
+	my $injectBeginIndicator = "<!-- ciom auto injected begin -->";
+	my $injectEndIndicator = "<!-- ciom auto injected end -->";
+	
 	if ($#{ $job->{rollbackList}} == -1) {
 		return;
 	}
 
-	processTemplate($tplFile, { root => {rollbackList => $job->{rollbackList}}}, "${jobName}.pds");
+	my $data = {		
+		parameterDefinitions => 1,		
+		rollbackList => $job->{rollbackList}		
+	};		
+	
+	my $macthed = $CiomUtil->execWithReturn("grep -o '<properties/>' $jobXml");	
+	# if <properties/> exists in config.xml, means there is no parameterDefiniions for job	
+	if ($macthed =~ m|^<properties/>|) {		
+		$data->{parameterDefinitions} = 0;
+ 	}
 
-	my $injectBeginIndicator = "<!-- ciom auto injected begin -->";
-	my $injectEndIndicator = "<!-- ciom auto injected end -->";
 	my $counter = $CiomUtil->execWithReturn("grep -c '$injectBeginIndicator' $jobXml");
 	if ($counter > 0) {
 		$CiomUtil->exec([
 			"sed -i.$Timestamp '/$injectBeginIndicator/,/$injectEndIndicator/d' $jobXml",
+			"sed -i 's/<!--<properties\\/>-->/<properties\\/>/g' ${jobXml}"
 		]);
 	}
 
 	if ($EnableRollback eq "DisableRollback") {
 		return;
 	}
-	$CiomUtil->exec([
-		"/bin/cp -rf ${jobXml} ${jobXml}.${Timestamp}",
-		"perl -pe 'if (/<scm class=\"hudson.scm.NullSCM\"\\/>/) {system(\"cat ${jobName}.pds\")}' ${jobXml} > ${jobXml}.tmp",
-		"mv -f ${jobXml}.tmp ${jobXml}"
-	]);
+	else {
+		processTemplate($tplFile, { root => $data }, "${jobName}.pds");
 
-	$CiomUtil->exec([
-		"sed -i '/<properties\\/>/d' ${jobXml}"
-	]);
+		if ($data->{parameterDefinitions} == 0) {
+			$CiomUtil->exec([
+				"/bin/cp -rf ${jobXml} ${jobXml}.${Timestamp}",
+				"perl -pe 'if (/<scm class=\"hudson.scm.NullSCM\"\\/>/) {system(\"cat ${jobName}.pds\")}' ${jobXml} > ${jobXml}.tmp",
+				"mv -f ${jobXml}.tmp ${jobXml}"
+			]);
+
+			$CiomUtil->exec([
+				#"sed -i '/<properties\\/>/d' ${jobXml}"
+				"sed -i 's/<properties\\/>/<!--<properties\\/>-->/g' ${jobXml}"
+			]);
+		}
+		else {
+			$CiomUtil->exec([
+				"sed -i '/<parameterDefinitions>/r ${jobName}.pds' ${jobXml}"
+			]);
+		}
+	}
+	
 }
 
 sub updateJobs() {
