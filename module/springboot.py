@@ -37,7 +37,7 @@ def start(location, appName, jvmopt, profile, port):
 @task
 def shutdown(appName, port):
     if alive(port):
-        run('curl -X POST localhost:{}/shutdown'.format(port), warn_only=True)
+        run('curl -X POST localhost:{}/act/shutdown'.format(port), warn_only=True)
         sleep(2)
         stop(port)
     print('Application {} was stopped on port {}!!!'.format(appName, port))
