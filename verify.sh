@@ -61,7 +61,7 @@ if [ "$CiomPassphraseLj" == "ljzb" ]; then
 	exit 0
 fi
 
-if [ "$CiomPwdSptingCloud" == "scjef@2018" ]; then
+if [ "$CiomPwdSpringCloud" == "scjef@2018" ]; then
 	exit 0
 fi
 
