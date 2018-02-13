@@ -649,9 +649,19 @@ sub getSvnError() {
 	return $buildFailedCnt - 1;	
 }
 
+sub getMavenCompilationError() {
+	my $logFile = getBuildLogFile();
+	my $mvnCompileErrorCnt = $CiomUtil->execWithReturn("grep -c '[ERROR] COMPILATION ERROR :' $logFile");
+	return $mvnCompileErrorCnt - 1;	
+}
+
 sub getErrorInLog(){
 	my $svnErrorCnt = getSvnError();
-	if ( $svnErrorCnt > 0){
+	my $mvnCompileErrCnt = getMavenCompilationError();
+	if ( $svnErrorCnt > 0) {
+		return 1;
+	}
+	if ( $mvnCompileErrCnt > 0) {
 		return 1;
 	}
 	return 0;

@@ -12,5 +12,5 @@ if [ $# -lt 3 ]; then
 fi
 
 net='10.200.70.'
-echo "${prefix}_${nid}" > /etc/hostname
+echo "${prefix}-${nid}" > /etc/hostname
 perl -i -pE "s/(?<g1>IPADDR=).+/$+{g1}$net$nid/" /etc/sysconfig/network-scripts/ifcfg-${nic}

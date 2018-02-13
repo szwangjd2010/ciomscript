@@ -52,3 +52,5 @@ tcpdump -e -s 0 -A 'dst port 80 and tcp[((tcp[12:1]&0xf0)>>2):4]='$(python -c "p
 curl --proxy socks5h://localhost:12306 http://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png -I -w %{http_code} -s -o /dev/null
 
 strace -e trace=file $(ps -aux | grep httpd | awk '{print $2}' | perl -i -pE 's/^(\d+)\n/-p $1 /g')
+
+perl -nE 'print "$1 $2\n" if /(10.200.70.\d+) - (uydc-\d+)/' a > uydc.hosts

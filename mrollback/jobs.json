@@ -1,5 +1,5 @@
 {
-  "dev.env-yxt.qida.web.deploy.and.rollback": {
+  "dev.env-yxt.qida.core.web.deploy.and.rollback": {
     "version": "v0",
     "cloudId": "dev",
     "appName": "qidaweb"
@@ -14,87 +14,87 @@
     "cloudId": "dev",
     "appName": "crmh5web"
   },
-  "ucloud.env-yxt.qida.api.publish": {
+  "ucloud.env-yxt.qida.core.api.publish": {
     "version": "v0",
     "cloudId": "ucloud",
     "appName": "qidaapi"
   },
-  "ucloud.env-yxt.qida.soa.publish": {
+  "ucloud.env-yxt.qida.core.soa.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida",
     "appName": "elsoa"
   },
-  "ucloud.env-yxt.qida.csapi.publish": {
+  "ucloud.env-yxt.qida.core.csapi.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida",
     "appName": "elapi"
   },
-  "ucloud.env-yxt.qida.servicecenter.publish": {
+  "ucloud.env-yxt.qida.core.servicecenter.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida",
     "appName": "elservicecenter"
   },
-  "ucloud.env-yxt.qida.web.publish": {
+  "ucloud.env-yxt.qida.core.web.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida",
     "appName": "elearning"
   },
-  "ucloud.xjk.env-yxt.qida.api.publish": {
+  "ucloud.xjk.env-yxt.qida.core.api.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida-xjk",
     "appName": "qidaapi"
   },
-  "ucloud.xjk.env-yxt.qida.soa.publish": {
+  "ucloud.xjk.env-yxt.qida.core.soa.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida-xjk",
     "appName": "elsoa"
   },
-  "ucloud.xjk.env-yxt.qida.csapi.publish": {
+  "ucloud.xjk.env-yxt.qida.core.csapi.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida-xjk",
     "appName": "elapi"
   },
-  "ucloud.xjk.env-yxt.qida.servicecenter.publish": {
+  "ucloud.xjk.env-yxt.qida.core.servicecenter.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida-xjk",
     "appName": "elservicecenter"
   },
-  "ucloud.xjk.env-yxt.qida.web.publish": {
+  "ucloud.xjk.env-yxt.qida.core.web.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida-xjk",
     "appName": "elearning"
   },
-  "ucloud.env-yxt.qida.h5web.community.publish": {
+  "ucloud.env-yxt.qida.core.h5web.community.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida",
     "appName": "qidah5webc"
   },
-  "ucloud.env-yxt.qida.h5web.embedded.publish":{
+  "ucloud.env-yxt.qida.core.h5web.embedded.publish":{
     "version": "v0",
     "cloudId": "ucloud-qida",
     "appName": "qidah5webs"
   },
-  "ucloud.env-yxt.qida.h5web.core.publish": {
+  "ucloud.env-yxt.qida.core.h5web.main.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida",
     "appName": "qidah5web"
   },
-  "ucloud.env-yxt.qida.h5web.core.new.publish": {
+  "ucloud.env-yxt.qida.core.h5web.main.new.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida",
     "appName": "qidah5new"
   },
-  "ucloud.xjk.env-yxt.qida.h5web.community.publish": {
+  "ucloud.xjk.env-yxt.qida.core.h5web.community.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida-xjk",
     "appName": "qidah5webc"
   },
-  "ucloud.xjk.env-yxt.qida.h5web.core.publish": {
+  "ucloud.xjk.env-yxt.qida.core.h5web.main.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida-xjk",
     "appName": "qidah5web"
   },
-  "ucloud.xjk.env-yxt.qida.h5web.embedded.publish":{
+  "ucloud.xjk.env-yxt.qida.core.h5web.embedded.publish":{
     "version": "v0",
     "cloudId": "ucloud-qida-xjk",
     "appName": "qidah5webs"
@@ -129,7 +129,7 @@
     "cloudId": "ucloud-eschool",
     "appName": "eschoolesm"
   },
-  "ucloud.test.env-yxt.qida.api.publish": {
+  "ucloud.test.env-yxt.qida.core.api.publish": {
     "version": "v0",
     "cloudId": "ucloud-qida-test",
     "appName": "qidaapi"
@@ -183,5 +183,15 @@
     "version": "v0",
     "cloudId": "ucloud-qida-xjk",
     "appName": "qidamsgweb"
+  },
+  "ucloud.env-yxt.qida.udp.web.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "qidaudpweb"
+  },
+  "ucloud.xjk.env-yxt.qida.udp.web.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "qidaudpweb"
   }
 }
