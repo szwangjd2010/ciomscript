@@ -1,0 +1,15 @@
+---
+__extend: linux
+
+build:
+  builder: npm
+  cmds:
+    - cd [% root.scm.repos.0.name %]
+    - cnpm install
+    - cnpm run build
+
+package:
+  includes:
+    - "[% root.scm.repos.0.name %]/.nuxt"
+    - "[% root.scm.repos.0.name %]/node_modules"
+    - "f,[% root.scm.repos.0.name %]/package.json"
