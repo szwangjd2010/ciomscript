@@ -511,7 +511,11 @@ sub packageApp() {
 				$CiomUtil->exec("/bin/cp -Rf $include $dir4Pkg/");
 			} else {
 				my $fileRoot = getIncludeFileRoot($include);
-				$CiomUtil->exec("/bin/cp -Rf $fileRoot/* $dir4Pkg/");	
+				if ($include =~ m|/$|) {
+					$CiomUtil->exec("/bin/cp -Rf $fileRoot/* $dir4Pkg/");
+				} else {
+					$CiomUtil->exec("/bin/cp -Rf $include $dir4Pkg/");
+				}
 			}
 		}
 	}
