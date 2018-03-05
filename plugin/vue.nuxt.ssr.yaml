@@ -12,4 +12,5 @@ package:
   includes:
     - "[% root.scm.repos.0.name %]/.nuxt"
     - "[% root.scm.repos.0.name %]/node_modules"
+    - "[% root.scm.repos.0.name %]/static"
     - "f,[% root.scm.repos.0.name %]/package.json"

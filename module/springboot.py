@@ -32,7 +32,7 @@ def deploy(location, appName, jvmopt, profile, svcport):
 def start(location, appName, jvmopt, profile, port):
     jvmOption = jvmRefs.get(jvmopt)
     run('nohup java {} -jar {}/{}/{}.jar --spring.profiles.active={} --server.port={} >/dev/null &'.format(jvmOption, location, appName, appName, profile, port), pty=False)  
-    #run('nohup java {} -jar {}/{}/{}.jar --spring.profiles.active={} --server.port={} >/logback/test &'.format(jvmOption, location, appName, appName, profile, port), pty=False)  
+    #run('nohup java {} -jar {}/{}/{}.jar --spring.profiles.active={} --server.port={} >/data/logback/test &'.format(jvmOption, location, appName, appName, profile, port), pty=False)  
 
 @task
 def shutdown(appName, port):

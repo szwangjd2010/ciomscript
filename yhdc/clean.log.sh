@@ -35,6 +35,7 @@ createYmdWorkspace() {
 }
 
 cleanExec() {
+	echo $1
 	t0=$(date +%s)
 	eval $1
 	t1=$(date +%s)
@@ -45,6 +46,19 @@ cleanExec() {
 
 truncateLog4jPrefix() {
 	cleanExec "perl -i.origin -pE '"'s/^.+ \[\w+\.java:\d+\] - //g'"' $1"
+}
+
+binaryFilter() {
+	goodFile=${1}.binaryFilter.good
+	badFile=${1}.binaryFilter.bad
+	cleanExec "awk -F'\t' '{if (NF == 32) print > \"$goodFile\"; else print > \"$badFile\"}' ${1}"
+	
+	mv $1 $1.pre.binaryFilter
+	if [ -e $goodFile ]; then
+		mv $goodFile $1
+	else
+		touch $1
+	fi
 }
 
 nullToEmpty() {
@@ -63,29 +77,10 @@ removeFieldClosureSignDoubleQuotes() {
 	cleanExec "perl -i.FieldSeparator_CommaToTab -pE '"'s/(^"|"$|(?<=\t)"|"(?=\t))//g'"' $1"
 }
 
-showFieldsSeparatorInfo() {
-	f=$1
-	echo -n "FS info - "
-	awk -F','  '{printf ",: %02d", NF; exit}' $f
-	awk -F' '  '{printf "  \\s: %02d", NF; exit}' $f
-	awk -F'\t' '{printf "  \\t: %02d", NF; exit}' $f
-	echo
-}
-
-# first: 			FS->','		null value -> null 		field clouser sign -> '"'
-# after 20160226, 	FS->'\t'	null value -> ""		field clouser sign -> '"'
-# after 20160510, 	FS->'\t'	null value -> ""		field clouser sign -> no clouser sign
 cleanActionAccessLog() {
 	fileOperated=$1
 	truncateLog4jPrefix $fileOperated
-	if (( $ymd < 20160226 )); then
-		nullToEmpty $fileOperated
-		filedValueTabToSpace $fileOperated
-		FieldSeparator_CommaToTab $fileOperated
-	fi
-	if (( $ymd < 20160510 )); then
-		removeFieldClosureSignDoubleQuotes $fileOperated
-	fi
+	binaryFilter $fileOperated
 }
 
 cleanEventLog() {
@@ -102,10 +97,6 @@ clean() {
 
 		if (( $ymd > $ymdEnd )); then
 			break
-		fi
-		
-		if [ "$ymd" = "20160226" ]; then
-			continue
 		fi
 
 		fileOriginal=$(getFileOriginalFullPath $ymd)
@@ -135,8 +126,6 @@ clean() {
 		
 		touch $fileOperated.clean-done
 		echo file total cost: $itemTotalCost secs
-
-		showFieldsSeparatorInfo $fileOperated
 	done
 }
 
