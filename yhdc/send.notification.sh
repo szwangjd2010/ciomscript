@@ -4,9 +4,10 @@ source $CIOM_SCRIPT_HOME/yhdc/log.common.sh "$@"
 
 oldPwd=$(pwd)
 logRootLocation="$LogLocalHome/_clean"
+Domain="yxt.com"
 
 getViolateLogSetFile() {
-	echo -n "${logType}.${ymd}.bad.log.tar.gz"
+	echo -n "${ymd}.${logType}.bad.log.tar.gz"
 }
 
 mailViolateSetFile() {
@@ -24,7 +25,7 @@ mailViolateSetFile() {
 		-S smtp-auth-password="pwdasdwx" \
 		-S ssl-verify=ignore \
 		-S nss-config-dir=/etc/pki/nssdb/ \
-		lile@yxt.com
+		kfjl@yxt.com
 }
 
 main() {
