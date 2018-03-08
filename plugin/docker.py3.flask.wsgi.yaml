@@ -1,0 +1,15 @@
+---
+__extend: linux
+
+package:
+  includes:
+    - "*"
+
+deploy:
+  owner: apache
+  group: apache
+  mode: 755
+
+  host:
+    post:
+      - touch [% root.deploy.locations.0 %]/[% root.vca.appName %]/config/wsgi.py
