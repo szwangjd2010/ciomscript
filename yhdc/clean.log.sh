@@ -50,7 +50,7 @@ truncateLog4jPrefix() {
 
 binaryFilter() {
 	goodFile=${1}.binaryFilter.good
-	badFile=${1}.binaryFilter.bad
+	badFile=${1}.binaryFilter.bad.tsv
 	cleanExec "awk -F'\t' '{if (NF == 32) print > \"$goodFile\"; else print > \"$badFile\"}' ${1}"
 	
 	mv $1 $1.pre.binaryFilter

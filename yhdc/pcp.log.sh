@@ -7,3 +7,4 @@ $YHDC_SCRIPT_HOME/pull.log.sh "$@"
 $YHDC_SCRIPT_HOME/clean.log.sh "$@"
 $YHDC_SCRIPT_HOME/put.log.into.hdfs.sh "$@"
 $YHDC_SCRIPT_HOME/refresh.impala.metadata.sh
+$YHDC_SCRIPT_HOME/send.notification.sh "$@"
