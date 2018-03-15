@@ -1,0 +1,19 @@
+---
+__extend: linux
+
+build:
+  builder: npm
+  cmds:
+    - cd [% root.scm.repos.0.name %]
+    - yxtnpm install
+    - yxtnpm run build
+
+package:
+  includes:
+    - "[% root.scm.repos.0.name %]/dist/^"
+    #- "f,[% root.scm.repos.0.name %]/README.md"
+
+deploy:
+  owner: www
+  group: www
+  mode: 775
