@@ -35,7 +35,7 @@ def attach(location, appName, asRoot, extract):
     webappName = 'ROOT' if asRoot=='True' else appName
     with cd(location):
         if extract:
-            run('unzip {}/{}.war -d webapps/{}'.format(appName, appName, webappName))
+            run('unzip -q {}/{}.war -d webapps/{}'.format(appName, appName, webappName))
         else:
             run('cp {}/{}.war webapps/{}.war'.format(appName, appName, webappName))
 
