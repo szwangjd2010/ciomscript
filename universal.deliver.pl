@@ -262,6 +262,12 @@ sub pullCode() {
 		}
 		$CiomUtil->exec($actor->version() . " | awk '{print \$1 \".\" \"$Timestamp\"}' > $name/$Consts->{revid}");
 	}
+
+	#check if svn error happen
+	my $svnErrorCnt = getSvnError();
+	if ( $svnErrorCnt > 0) {
+		exit 1;
+	}
 }
 
 sub customizeFiles() {
@@ -590,15 +596,7 @@ sub deploy() {
 		
 		runHierarchyCmds("$DeployMode host pre", $i);
 
-		for (my $j = 0; $j <= $#{$locations}; $j++) {
-			runCmdsInHierarchys([
-				"$DeployMode instance pre",
-				"$DeployMode instance extract",
-				"$DeployMode instance chownmode",
-				"$DeployMode instance cmds",
-				"$DeployMode instance post"
-			], $i, $j);
-		}
+		deployOnHostByIndex($i);
 
 		runHierarchyCmds("$DeployMode host post", $i);
 
@@ -608,6 +606,50 @@ sub deploy() {
 	}
 
 	runHierarchyCmds("$DeployMode local post");
+}
+
+sub deployOnHostByIndex($) {
+	my $index = shift ;
+	my $locations = $CiomData->{$DeployMode}->{locations};
+	if (defined($CiomData->{$DeployMode}->{async}) && 
+		 	$CiomData->{$DeployMode}->{async} eq 'True'){
+		my @childs;
+		for (my $j = 0; $j <= $#{$locations}; $j++) {
+			my $pid = fork();
+			if (!defined($pid)) {
+	        	print "Error in fork: $!";
+	        	exit 1;
+	    	}                   
+	    	if ($pid == 0) {     
+	    		runCmdsInHierarchys([
+					"$DeployMode instance pre",
+					"$DeployMode instance extract",
+					"$DeployMode instance chownmode",
+					"$DeployMode instance cmds",
+					"$DeployMode instance post"
+				], $index, $j);
+				exit 0;
+	        }
+	        else {
+	        	#print "push $$ \n";
+	        	push(@childs, $pid);
+	        }
+		}
+		foreach (@childs) {
+			my $tmp = waitpid($_, 0);
+		}
+	}
+	else{
+		for (my $j = 0; $j <= $#{$locations}; $j++) {
+		 	runCmdsInHierarchys([
+		 		"$DeployMode instance pre",
+		 		"$DeployMode instance extract",
+		 		"$DeployMode instance chownmode",
+		 		"$DeployMode instance cmds",
+		 		"$DeployMode instance post"
+		 	], $index, $j);
+		}
+	}
 }
 
 sub initRollbackNode() {
@@ -655,16 +697,12 @@ sub getSvnError() {
 
 sub getMavenCompilationError() {
 	my $logFile = getBuildLogFile();
-	my $mvnCompileErrorCnt = $CiomUtil->execWithReturn("grep -c '[ERROR] COMPILATION ERROR' $logFile");
+	my $mvnCompileErrorCnt = $CiomUtil->execWithReturn("grep -c 'COMPILATION ERROR' $logFile");
 	return $mvnCompileErrorCnt - 1;	
 }
 
 sub getErrorInLog(){
-	my $svnErrorCnt = getSvnError();
 	my $mvnCompileErrCnt = getMavenCompilationError();
-	if ( $svnErrorCnt > 0) {
-		return 1;
-	}
 	if ( $mvnCompileErrCnt > 0) {
 		return 1;
 	}
