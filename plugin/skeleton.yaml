@@ -8,15 +8,17 @@
 #
 #
 # supported builtin variables
-#   1. all CiomData variables can be used in plugin file
-#   2. version, cloudId, appName locate at CiomData.vca node
-#   3. plugin vars locates at CiomData.vars
+#   1. all AppAvatar variables can be used in plugin file
+#   2. version, cloudId, appName locate at AppAvatar.vca node
+#   3. plugin vars locates at AppAvatar.vars
+#   4. UDV(user defined variable) locates at AppAvatar.udv
+#
 #
 # format spec misc:  
 #   1. [% root.deploy.locations.0 %]/[% root.vca.appName %]
 #     a. [% root.xx.xx %] in plugin is Template variable 
-#     b. It will be replaced with variable in CiomData
-#     c. CiomData is a hash/dictionary data, and is merged from %app%.ciom 
+#     b. It will be replaced with variable in AppAvatar
+#     c. AppAvatar is a hash/dictionary data, and is merged from %app%.ciom 
 #        and %plugin%.yaml
 #   2. include, exclude
 #     a. f,/path/of/file
