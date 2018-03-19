@@ -24,7 +24,6 @@ use CiomUtil;
 use ScmActor;
 STDOUT->autoflush(1);
 
-
 my $version = $ARGV[0];
 my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
@@ -35,11 +34,17 @@ my $appName = $ARGV[2];
 my $DeployMode = lc($ENV{DeployMode} || 'deploy'); 
 my $RollbackTo = lc($ENV{RollbackTo} || '');
 
+# if $HostDeployMode set as 'parallel', will deploy apps in parallel on one host
+# it will host count reach $HostCntCriteria and location count reach $LocationCntCriteria
+my $HostDeployMode = 'normal'; 
+my $HostCntCriteria = 4;
+my $LocationCntCriteria = 3;
+
 my $CiomUtil = new CiomUtil(1);
 my $Timestamp = $CiomUtil->getTimestamp();
 my $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
-my $CiomData = json_file_to_perl("$AppVcaHome/ciom.json");
-my $AppType = $CiomData->{AppType};
+my $AppAvatar = json_file_to_perl("$AppVcaHome/ciom.json");
+my $AppType = $AppAvatar->{AppType};
 my $Output = "_output";
 my $OldPwd = getcwd();
 
@@ -49,7 +54,6 @@ my $Consts = {};
 my $Tpl;
 my $Plugin;
 my $RevisionId;
-
 
 sub enterWorkspace() {
 	chdir($ENV{WORKSPACE} || ".") || die "can not change working directory!";
@@ -73,7 +77,7 @@ sub initTpl() {
 }
 
 sub getAppPkgUrl() {
-	my $repo = uc ($CiomData->{dispatch}->{repo} || "inner");
+	my $repo = uc ($AppAvatar->{dispatch}->{repo} || "inner");
 	my $repoBaseUrlKey = "CIOM_REPO_${repo}_URL";
 
 	return sprintf("%s/%s/%s/%s/%s",
@@ -92,12 +96,12 @@ sub setAppPkgInfo() {
 	$AppPkg->{sumfile} = "$Output/$appName.sha256sum";
 	$AppPkg->{repoLocation} = "$ENV{CIOM_REPO_LOCAL}/$version/$cloudId/$appName/";
 
-	$CiomData->{apppkg} = $AppPkg;
+	$AppAvatar->{apppkg} = $AppPkg;
 }
 
 sub initConsts() {
 	$Consts->{revid} = ".revid";
-	$Consts->{appciomdata} = "ciom.yaml";
+	$Consts->{appavatar} = "ciom.yaml";
 }
 
 sub init() {
@@ -106,27 +110,33 @@ sub init() {
 	initTpl();
 }
 
-sub getJobLogFile() {
-	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
-}
-
 sub processTemplate {
 	my ($in, $data, $out) = @_;
 	$Tpl->process($in, $data, $out) 
 		|| die "Template process failed: ", $Tpl->error(), "\n";	
 }
 
-sub addTplVarsIntoCiomData {
-	$CiomData->{vca} = {
+sub gatherUDV() {
+	while ( my ($key, $value) = each(%ENV) ) {
+        if ($key =~ m/^CIOMPM_([\w_]+)$/) {
+        	$UDV->{$1} = $value;
+        }
+    }
+}
+
+sub enrichAppAvatar {
+	$AppAvatar->{vca} = {
 		version => $version,
 		cloudId => $cloudId,
 		appName => $appName
 	};
 
+	$AppAvatar->{udv} = $UDV;
+
 	my $appTypeTopDomain = substr($AppType, 0, index($AppType, '.'));
 	my $appTypeTopDomainVarsFile =  "$ENV{CIOM_SCRIPT_HOME}/plugin/vars/${appTypeTopDomain}";
 	if (-e $appTypeTopDomainVarsFile) {
-		$CiomData->{vars} = LoadFile($appTypeTopDomainVarsFile);
+		$AppAvatar->{vars} = LoadFile($appTypeTopDomainVarsFile);
 	}
 }
 
@@ -163,8 +173,8 @@ sub getPluginDefinition {
 }
 
 sub dumpCiomAndPlugin() {
-	$CiomData->{Timestamp} = $Timestamp;
-	DumpFile("$Output/$Consts->{appciomdata}", $CiomData);
+	$AppAvatar->{Timestamp} = $Timestamp;
+	DumpFile("$Output/$Consts->{appavatar}", $AppAvatar);
 }
 
 sub loadAndProcessPlugin() {
@@ -172,8 +182,8 @@ sub loadAndProcessPlugin() {
 	my $plugin = getPluginDefinition();
 
 	DumpFile($fileAppPlugin, $plugin);
-	addTplVarsIntoCiomData();
-	processTemplate($fileAppPlugin, {root => merge $CiomData, $plugin}, $fileAppPlugin);
+	enrichAppAvatar();
+	processTemplate($fileAppPlugin, {root => merge $AppAvatar, $plugin}, $fileAppPlugin);
 
 	$Plugin = LoadFile($fileAppPlugin);
 	my $SectionsToMerge = [
@@ -183,7 +193,7 @@ sub loadAndProcessPlugin() {
 		"dispatch"
 	];
 	foreach my $section (@{$SectionsToMerge}) {
-		$CiomData->{$section} = merge $Plugin->{$section}, $CiomData->{$section} || {};
+		$AppAvatar->{$section} = merge $Plugin->{$section}, $AppAvatar->{$section} || {};
 	}
 }
 
@@ -191,21 +201,21 @@ sub setRevisionId {
 	if ($DeployMode eq "rollback") {
 		$RevisionId = $RollbackTo;
 	} else {
-		$RevisionId = $CiomUtil->execWithReturn("cat $CiomData->{scm}->{repos}->[0]->{name}/$Consts->{revid} | tr -d '\n'");
+		$RevisionId = $CiomUtil->execWithReturn("cat $AppAvatar->{scm}->{repos}->[0]->{name}/$Consts->{revid} | tr -d '\n'");
 	}
 
 	setAppPkgInfo();
 }
 
 sub pointoutRepoStatus {
-	my $appCiomDataFile = "$Output/$Consts->{appciomdata}";
-	if (! -e $appCiomDataFile) {
+	my $appAppAvatarFile = "$Output/$Consts->{appavatar}";
+	if (! -e $appAppAvatarFile) {
 		return;
 	}
 
-	my $lastCiomData = LoadFile($appCiomDataFile);
-	my $current = $CiomData->{scm}->{repos};
-	my $last = $lastCiomData->{scm}->{repos};
+	my $lastAppAvatar = LoadFile($appAppAvatarFile);
+	my $current = $AppAvatar->{scm}->{repos};
+	my $last = $lastAppAvatar->{scm}->{repos};
 
 	if (!defined($last)) {
 		map { $_->{status} = 'new' } @{$current};
@@ -229,7 +239,7 @@ sub pointoutRepoStatus {
 }
 
 sub removeUselessRepoCode() {
-	my $repos = $CiomData->{scm}->{repos};
+	my $repos = $AppAvatar->{scm}->{repos};
 	foreach my $dir (read_dir('.')) {
     	if ($dir eq "_output") {
     		next;
@@ -247,9 +257,9 @@ sub pullCode() {
 	pointoutRepoStatus();
 	removeUselessRepoCode();
 
-	my $repos = $CiomData->{scm}->{repos};
-	my $username = $CiomData->{scm}->{username};
-	my $password = $CiomData->{scm}->{password};
+	my $repos = $AppAvatar->{scm}->{repos};
+	my $username = $AppAvatar->{scm}->{username};
+	my $password = $AppAvatar->{scm}->{password};
 	my $actor = new ScmActor($username, $password);
 
 	foreach my $repo (@{$repos}) {
@@ -291,15 +301,14 @@ sub escapeRe($) {
 	return $re;
 }
 
-sub escapeReAndGatherUDV() {
-	my $streameditItems = $CiomData->{streameditItems};
+sub processSEIs() {
+	my $streameditItems = $AppAvatar->{streameditItems};
 	for my $file (keys %{$streameditItems}) {
 		foreach my $substitute (@{$streameditItems->{$file}}) {
 			$substitute->{re} = escapeRe($substitute->{re});
 			$substitute->{to} = escapeRe($substitute->{to});
 			
 			if ($substitute->{to} =~ m|<ciompm>([\w_]+)</ciompm>|) {
-				$UDV->{$1} = $ENV{"CIOMPM_$1"} || '';
 				#ciom dynamic variable to template directive
 				$substitute->{to} =~ s|<ciompm>([\w_]+)</ciompm>|[% UDV.$1 %]|g;
 			}
@@ -312,7 +321,7 @@ sub streamedit() {
 	my $StreameditFile = "$Output/streamedit.ciom";
 	my $firstOut =  "${StreameditFile}.0";
 
-	processTemplate($StreameditTpl, {files => $CiomData->{streameditItems}}, $firstOut);
+	processTemplate($StreameditTpl, {files => $AppAvatar->{streameditItems}}, $firstOut);
     $CiomUtil->exec("cat $firstOut");
     
     processTemplate($firstOut, {UDV => $UDV}, $StreameditFile);
@@ -320,14 +329,14 @@ sub streamedit() {
 	$CiomUtil->exec("bash $StreameditFile");
 }
 
-sub addLazyOut2CiomData {
+sub addLazyOut2AppAvatar {
 	my ($hierarchyArr, $cmds, $hostIdx, $instanceIdx) = @_;
 	my $lazyOutKey = "lazyout";
-	if (!defined($CiomData->{$lazyOutKey})) {
-		$CiomData->{$lazyOutKey} = {};
+	if (!defined($AppAvatar->{$lazyOutKey})) {
+		$AppAvatar->{$lazyOutKey} = {};
 	}
 
-	my $pointer = $CiomData->{$lazyOutKey};
+	my $pointer = $AppAvatar->{$lazyOutKey};
 	foreach my $node (@{$hierarchyArr}) {
 		if (!defined($pointer->{$node})) {
 			$pointer->{$node} = {};
@@ -359,7 +368,7 @@ sub translateActions($) {
 
 			$_ = $CiomUtil->getJenkinsJobCli($jobName, $pms);
 		} else { # Module(%module).%tasks
-			$_ =~ s|^Module\((\w+)\)\.(\w+)|fab -u $CiomData->{deployuser} -f $ENV{CIOM_SCRIPT_HOME}/module/${1}.py ${2}|;
+			$_ =~ s|^Module\((\w+)\)\.(\w+)|fab -u $AppAvatar->{deployuser} -f $ENV{CIOM_SCRIPT_HOME}/module/${1}.py ${2}|;
 			$_ =~ s|\\|\\\\|;
 		}
 	} @{$cmds};
@@ -390,30 +399,30 @@ sub lazyProcessCmds {
 		if ($cmd =~ m/$lasyRe/) {
 			while ($cmd =~ m/$lasyRe/) {
 				$cmd =~ s/$lasyRe/[% $1 %]/g;
-				processTemplate(\$cmd, {root => $CiomData}, \$out);
+				processTemplate(\$cmd, {root => $AppAvatar}, \$out);
 				$cmd = $out;
 			}
 		} else {
-			processTemplate(\$cmd, {root => $CiomData}, \$out);
+			processTemplate(\$cmd, {root => $AppAvatar}, \$out);
 			$cmd = $out;
 		}
 	}
 
-	addLazyOut2CiomData(@_);
+	addLazyOut2AppAvatar(@_);
 }
 
 sub setDeployUser {
-	if ( defined($CiomData->{username}) ){
-		$CiomData->{deployuser} = $CiomData->{username};
+	if ( defined($AppAvatar->{username}) ){
+		$AppAvatar->{deployuser} = $AppAvatar->{username};
 	}
 	else {
-		$CiomData->{deployuser} = "root";
+		$AppAvatar->{deployuser} = "root";
 	}
 }
 
 sub remoteExec {
 	my ($host, $cmds) = @_;
-	my $user = $CiomData->{deployuser};
+	my $user = $AppAvatar->{deployuser};
 	$CiomUtil->remoteExec({
 				user => $user,
 				host => $host,
@@ -424,7 +433,7 @@ sub remoteExec {
 sub runHierarchyCmds {
 	my ($hierarchyCmds, $hostIdx, $instanceIdx) = @_;
 	my @hierarchyArr = split(' ', $hierarchyCmds);
-	my $cmds = Dive($CiomData, @hierarchyArr);
+	my $cmds = Dive($AppAvatar, @hierarchyArr);
 	if (!defined($cmds) || $#{$cmds} == -1) {
 		return;
 	}
@@ -438,10 +447,10 @@ sub runHierarchyCmds {
 		my @moduleAndJobCmds = grep { $_ =~ m"$re" } @{$clonedCmds};
 		if ($#moduleAndJobCmds == -1) {
 			# $CiomUtil->remoteExec({
-			# 	host => $CiomData->{deploy}->{hosts}->[$hostIdx],
+			# 	host => $AppAvatar->{deploy}->{hosts}->[$hostIdx],
 			# 	cmd => $clonedCmds
 			# });
-			remoteExec($CiomData->{deploy}->{hosts}->[$hostIdx],$clonedCmds);
+			remoteExec($AppAvatar->{deploy}->{hosts}->[$hostIdx],$clonedCmds);
 			return;
 		}
 
@@ -450,10 +459,10 @@ sub runHierarchyCmds {
 				$CiomUtil->exec($action);
 			} else {
 				# $CiomUtil->remoteExec({
-				# 	host => $CiomData->{deploy}->{hosts}->[$hostIdx],
+				# 	host => $AppAvatar->{deploy}->{hosts}->[$hostIdx],
 				# 	cmd => $action
 				# });
-				remoteExec($CiomData->{deploy}->{hosts}->[$hostIdx],$clonedCmds);
+				remoteExec($AppAvatar->{deploy}->{hosts}->[$hostIdx],$clonedCmds);
 			}
 		}
 	} else {
@@ -486,8 +495,8 @@ sub getIncludeFileRoot($) {
 }
 
 sub packageApp() {
-	my $includes = $CiomData->{package}->{includes};
-	my $repos = $CiomData->{scm}->{repos};
+	my $includes = $AppAvatar->{package}->{includes};
+	my $repos = $AppAvatar->{scm}->{repos};
 	my $includesCnt = $#{$includes} + 1;
 	my $reposCnt = $#{$repos} + 1;
 	my $repo0Name = $repos->[0]->{name};
@@ -538,14 +547,14 @@ sub putPackageToRepo() {
 	my $files = "$AppPkg->{file} $AppPkg->{sumfile}";
 	$CiomUtil->exec("mkdir -p $AppPkg->{repoLocation}");
 	$CiomUtil->exec("/bin/cp -f $files $AppPkg->{repoLocation}");
-	if ($CiomData->{dispatch}->{repo} eq 'public') {
+	if ($AppAvatar->{dispatch}->{repo} eq 'public') {
 		my $host = $ENV{CIOM_REPO_PUBLIC_HOST};
 		$CiomUtil->exec("ssh root\@$host 'mkdir -p $AppPkg->{repoLocation}'; scp $files root\@$host:$AppPkg->{repoLocation}");
 	}
 }
 
 sub getRemoteWorkspace() {
-	return $CiomData->{dispatch}->{workspace};
+	return $AppAvatar->{dispatch}->{workspace};
 }
 
 sub dispatch() {
@@ -557,9 +566,9 @@ sub dispatch() {
 }
 
 sub dispatchByAnsible() {
-	my $method = Dive( $CiomData, qw(dispatch method)) || "push";
+	my $method = Dive( $AppAvatar, qw(dispatch method)) || "push";
 	
-	my $joinedHosts = join(',', @{$CiomData->{deploy}->{hosts}}) . ',';
+	my $joinedHosts = join(',', @{$AppAvatar->{deploy}->{hosts}}) . ',';
 	my $remoteWrokspace = getRemoteWorkspace();
 	my $ansibleCmdPrefix = "ansible all -i $joinedHosts -u root";
 	$CiomUtil->exec("$ansibleCmdPrefix -m file -a \"path=$remoteWrokspace state=directory\"");
@@ -571,7 +580,7 @@ sub dispatchByAnsible() {
 }
 
 sub dispatchBySsh() {
-	my $hosts = $CiomData->{deploy}->{hosts};
+	my $hosts = $AppAvatar->{deploy}->{hosts};
 	my $cnt = $#{$hosts} + 1;
 	my $remoteWrokspace = getRemoteWorkspace();
 
@@ -586,10 +595,13 @@ sub dispatchBySsh() {
 }
 
 sub deploy() {
+
+	setHostDeployMode();
+
 	runHierarchyCmds("$DeployMode local pre");
 
-	my $locations = $CiomData->{$DeployMode}->{locations};
-	my $hosts = $CiomData->{$DeployMode}->{hosts};
+	my $locations = $AppAvatar->{$DeployMode}->{locations};
+	my $hosts = $AppAvatar->{$DeployMode}->{hosts};
 	my $hostsCnt = $#{$hosts} + 1;
 	for (my $i = 0; $i < $hostsCnt; $i++) {
 		my $host = $hosts->[$i];
@@ -608,11 +620,28 @@ sub deploy() {
 	runHierarchyCmds("$DeployMode local post");
 }
 
+sub setHostDeployMode() {
+	my $locations = $AppAvatar->{$DeployMode}->{locations};
+	my $hosts = $AppAvatar->{$DeployMode}->{hosts};
+
+	if ( $#{$hosts} + 1 >= $HostCntCriteria &&  $#{$locations} + 1 >= $LocationCntCriteria ) {
+		$HostDeployMode = "parallel" ;
+	}
+}
+
 sub deployOnHostByIndex($) {
 	my $index = shift ;
-	my $locations = $CiomData->{$DeployMode}->{locations};
-	if (defined($CiomData->{$DeployMode}->{async}) && 
-		 	$CiomData->{$DeployMode}->{async} eq 'True'){
+	my $locations = $AppAvatar->{$DeployMode}->{locations};
+	my $deployCmds = [
+					"$DeployMode instance pre",
+					"$DeployMode instance extract",
+					"$DeployMode instance chownmode",
+					"$DeployMode instance cmds",
+					"$DeployMode instance post"
+				];
+
+	if ( $HostDeployMode eq 'parallel') {
+		print "[CIOM] deploy on host in parallel\n";
 		my @childs;
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
 			my $pid = fork();
@@ -621,13 +650,7 @@ sub deployOnHostByIndex($) {
 	        	exit 1;
 	    	}                   
 	    	if ($pid == 0) {     
-	    		runCmdsInHierarchys([
-					"$DeployMode instance pre",
-					"$DeployMode instance extract",
-					"$DeployMode instance chownmode",
-					"$DeployMode instance cmds",
-					"$DeployMode instance post"
-				], $index, $j);
+	    		runCmdsInHierarchys($deployCmds, $index, $j);
 				exit 0;
 	        }
 	        else {
@@ -641,19 +664,13 @@ sub deployOnHostByIndex($) {
 	}
 	else{
 		for (my $j = 0; $j <= $#{$locations}; $j++) {
-		 	runCmdsInHierarchys([
-		 		"$DeployMode instance pre",
-		 		"$DeployMode instance extract",
-		 		"$DeployMode instance chownmode",
-		 		"$DeployMode instance cmds",
-		 		"$DeployMode instance post"
-		 	], $index, $j);
+		 	runCmdsInHierarchys($deployCmds, $index, $j);
 		}
 	}
 }
 
 sub initRollbackNode() {
-	$CiomData->{rollback} = merge $CiomData->{deploy}, $CiomData->{rollback};
+	$AppAvatar->{rollback} = merge $AppAvatar->{deploy}, $AppAvatar->{rollback};
 }
 
 sub test() {
@@ -668,12 +685,13 @@ sub test() {
 }
 
 my $Subs = [
-    {fn => \&pullCode,				presence => 'deploy'},
+    {fn => \&gatherUDV,				presence => '.*'},
     {fn => \&setRevisionId,			presence => '.*'},
     {fn => \&loadAndProcessPlugin,	presence => '.*'},
     {fn => \&initRollbackNode,		presence => 'rollback'},
+    {fn => \&pullCode,				presence => 'deploy'},
     {fn => \&customizeFiles,		presence => 'deploy'},
-    {fn => \&escapeReAndGatherUDV, 	presence => 'deploy'},
+    {fn => \&processSEIs, 			presence => 'deploy'},
     {fn => \&streamedit,			presence => 'deploy'},
     {fn => \&build,				    presence => 'deploy'},
     {fn => \&packageApp,			presence => 'deploy'},
