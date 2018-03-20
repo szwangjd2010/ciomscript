@@ -29,34 +29,9 @@ my $version = $ARGV[0];
 my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
 
-my $RuntimeContext = defined($ENV{JENKINS_URL}) ? "JENKINS" : "CLI";
-
-# $DeployMode, $RollbackTo value set 
-my $DeployMode = (sub {
-    my $mode = "deploy";
-    if ($RuntimeContext eq "JENKINS" && defined($ENV{DeployMode})) {
-        $mode = $ENV{DeployMode};
-    }
-    if ($RuntimeContext eq "CLI" && $#ARGV + 1 > 3) {
-        $mode = $ARGV[3];
-    }
-    return lc($mode);
-})->();
-
-my $RollbackTo = (sub {
-    if ($DeployMode eq "deploy") {
-        return "";
-    }
-    my $to = "";
-    if ($RuntimeContext eq "JENKINS" && defined($ENV{RollbackTo})) {
-        $to = $ENV{RollbackTo};
-    }
-    if ($RuntimeContext eq "CLI" && $#ARGV + 1 > 4) {
-        $to = $ARGV[4];
-    }
-    return lc($to);
-})->();
-# $DeployMode, $RollbackTo value set end
+my $Context = defined($ENV{JENKINS_URL}) ? "JENKINS" : "CLI";
+my $DeployMode = "deploy";
+my $RollbackTo = "";
 
 # if $HostDeployMode set as 'parallel', will deploy apps in parallel on one host
 # it will host count reach $HostCntCriteria and location count reach $LocationCntCriteria
@@ -79,24 +54,32 @@ my $Tpl;
 my $Plugin;
 my $RevisionId;
 
-sub setVcaEnv() {
-	if ($RuntimeContext eq "JENKINS") {
-		$ENV{VCA_HOME} = "$ENV{WORKSPACE}/..";
-		$ENV{VCA_WORKSPACE} = $ENV{WORKSPACE};
-		$ENV{VCA_BUILDNO} = $ENV{BUILD_NUMBER};
-		$ENV{VCA_BUILDNO_LOCATION} = "$ENV{VCA_HOME}/builds/$ENV{VCA_BUILDNO}";
-	}
-	
-	if ($RuntimeContext eq "CLI") {
-		$ENV{VCA_HOME} = "$ENV{CIOM_CLI_WORKSPACE}/${version}/${cloudId}/${appName}";
-		$ENV{VCA_WORKSPACE} = "$ENV{VCA_HOME}/workspace";
-		$ENV{VCA_BUILDNO} = $CiomUtil->getTimestamp();
-		$ENV{VCA_BUILDNO_LOCATION} = "$ENV{VCA_HOME}/builds/$ENV{VCA_BUILDNO}";
-	}
+sub setContextBased() {
+    if ($Context eq "JENKINS") {
+        $ENV{VCA_HOME} = "$ENV{WORKSPACE}/..";
+        $ENV{VCA_WORKSPACE} = $ENV{WORKSPACE};
+        $ENV{VCA_BUILDNO} = $ENV{BUILD_NUMBER};
+        $ENV{VCA_BUILDNO_LOCATION} = "$ENV{VCA_HOME}/builds/$ENV{VCA_BUILDNO}";
+
+        $DeployMode = lc($ENV{DeployMode} || 'deploy');
+        $RollbackTo = $ENV{RollbackTo} || '';
+    }
+    
+    if ($Context eq "CLI") {
+        $ENV{VCA_HOME} = "$ENV{CIOM_CLI_WORKSPACE}/${version}/${cloudId}/${appName}";
+        $ENV{VCA_WORKSPACE} = "$ENV{VCA_HOME}/workspace";
+        $ENV{VCA_BUILDNO} = $CiomUtil->getTimestamp();
+        $ENV{VCA_BUILDNO_LOCATION} = "$ENV{VCA_HOME}/builds/$ENV{VCA_BUILDNO}";
+
+        if ($#ARGV + 1 > 4) {
+            $DeployMode = lc($ARGV[3]);
+            $RollbackTo = $ARGV[4];
+        }
+    }
 }
 
 sub enterWorkspace() {
-	setVcaEnv();
+	setContextBased();
 	(! -d $ENV{VCA_WORKSPACE}) && make_path($ENV{VCA_WORKSPACE});
 	(! -d $ENV{VCA_BUILDNO_LOCATION}) && make_path($ENV{VCA_BUILDNO_LOCATION});	
 	chdir($ENV{VCA_WORKSPACE});
