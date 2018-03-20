@@ -20,6 +20,7 @@ use String::Escape 'escape';
 use open ":encoding(utf8)";
 use open IN => ":encoding(utf8)", OUT => ":utf8";
 use IO::Handle;
+use File::Path qw(make_path remove_tree);
 use CiomUtil;
 use ScmActor;
 STDOUT->autoflush(1);
@@ -27,6 +28,8 @@ STDOUT->autoflush(1);
 my $version = $ARGV[0];
 my $cloudId = $ARGV[1];
 my $appName = $ARGV[2];
+
+my $RuntimeContext = defined($ENV{JENKINS_URL}) ? "JENKINS" : "CLI";
 
 # $DeployMode: deploy or rollback
 # it's corresponding to same name node which defined in %app%.ciom & %plugin%.yaml
@@ -42,8 +45,8 @@ my $LocationCntCriteria = 3;
 
 my $CiomUtil = new CiomUtil(1);
 my $Timestamp = $CiomUtil->getTimestamp();
-my $AppVcaHome = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
-my $AppAvatar = json_file_to_perl("$AppVcaHome/ciom.json");
+my $VcaDefLocation = "$ENV{CIOM_VCA_HOME}/$version/pre/$cloudId/$appName";
+my $AppAvatar = json_file_to_perl("$VcaDefLocation/ciom.json");
 my $AppType = $AppAvatar->{AppType};
 my $Output = "_output";
 my $OldPwd = getcwd();
@@ -55,16 +58,29 @@ my $Tpl;
 my $Plugin;
 my $RevisionId;
 
+sub initVcaEnv() {
+	$ENV{VCA_HOME} = "$ENV{WORKSPACE}/..";
+	$ENV{VCA_WORKSPACE} = $ENV{WORKSPACE};
+	$ENV{VCA_BUILDNO} = $ENV{BUILD_NUMBER};
+	$ENV{VCA_BUILDNO_LOCATION} = "$ENV{VCA_HOME}/builds/$ENV{VCA_BUILDNO}";
+	
+	if ($RuntimeContext eq "CLI") {
+		$ENV{VCA_HOME} = "$ENV{CIOM_CLI_WORKSPACE}/${version}/${cloudId}/${appName}";
+		$ENV{VCA_WORKSPACE} = "$ENV{VCA_HOME}/workspace";
+		$ENV{VCA_BUILDNO} = $CiomUtil->getTimestamp();
+		$ENV{VCA_BUILDNO_LOCATION} = "$ENV{VCA_HOME}/builds/$ENV{VCA_BUILDNO}";
+	}
+}
+
 sub enterWorkspace() {
-	chdir($ENV{WORKSPACE} || ".") || die "can not change working directory!";
+	(! -d $ENV{VCA_WORKSPACE}) && make_path($ENV{VCA_WORKSPACE});
+	(! -d $ENV{VCA_BUILDNO_LOCATION}) && make_path($ENV{VCA_BUILDNO_LOCATION});	
+	chdir($ENV{VCA_WORKSPACE});
+	make_path($Output);
 }
 
 sub leaveWorkspace() {
 	chdir($OldPwd);
-}
-
-sub initWorkspace() {
-	$CiomUtil->exec("mkdir -p $Output;");
 }
 
 sub initTpl() {
@@ -105,7 +121,7 @@ sub initConsts() {
 }
 
 sub init() {
-	initWorkspace();
+	initVcaEnv();
 	initConsts();
 	initTpl();
 }
@@ -281,7 +297,7 @@ sub pullCode() {
 }
 
 sub customizeFiles() {
-	my $customizedFilesLocation = "$AppVcaHome/customized/";
+	my $customizedFilesLocation = "$VcaDefLocation/customized/";
 	if ( -d $customizedFilesLocation) {
 		my $dirNotEmpty = sprintf('[ "$(ls -A %s)" ]', $customizedFilesLocation);
 		$CiomUtil->exec("$dirNotEmpty && /bin/cp -rf $customizedFilesLocation/* ./");
@@ -536,7 +552,7 @@ sub packageApp() {
 	}
 	$CiomUtil->exec("/bin/cp -f $repo0Name/$Consts->{revid} $dir4Pkg/");
 	$CiomUtil->exec("/bin/cp -f $AppPkg->{sumfile} $dir4Pkg/");	
-	$CiomUtil->exec("(cd $Output; tar --exclude-vcs -czvf $ENV{WORKSPACE}/$AppPkg->{file} $appName)");		
+	$CiomUtil->exec("(cd $Output; tar --exclude-vcs -czvf $ENV{VCA_WORKSPACE}/$AppPkg->{file} $appName)");		
 }
 
 sub sumPackage() {
@@ -686,10 +702,10 @@ sub test() {
 
 my $Subs = [
     {fn => \&gatherUDV,				presence => '.*'},
+    {fn => \&pullCode,				presence => 'deploy'},
     {fn => \&setRevisionId,			presence => '.*'},
     {fn => \&loadAndProcessPlugin,	presence => '.*'},
     {fn => \&initRollbackNode,		presence => 'rollback'},
-    {fn => \&pullCode,				presence => 'deploy'},
     {fn => \&customizeFiles,		presence => 'deploy'},
     {fn => \&processSEIs, 			presence => 'deploy'},
     {fn => \&streamedit,			presence => 'deploy'},
@@ -704,7 +720,7 @@ my $Subs = [
 ];
 
 sub getBuildLogFile() {
-	return "$ENV{JENKINS_HOME}/jobs/$ENV{JOB_NAME}/builds/$ENV{BUILD_NUMBER}/log";
+	return "$ENV{VCA_BUILDNO_LOCATION}/log";
 }
 
 sub getSvnError() {
@@ -728,8 +744,8 @@ sub getErrorInLog(){
 }
 
 sub main() {
-	enterWorkspace();
 	init();
+	enterWorkspace();
 
 	map { $DeployMode =~ m/$_->{presence}/ && $_->{fn}->() } @{$Subs};
 	

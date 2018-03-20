@@ -10,7 +10,7 @@ deploy:
     extract:
       - mkdir -p (% root.deploy.locations.%instanceIdx% %)
       - rm -rf (% root.deploy.locations.%instanceIdx% %)/[% root.vca.appName %]
-      - tar -xzf [% root.dispatch.workspace %]/[% root.apppkg.name %] -C (% root.deploy.locations.%instanceIdx% %)/
+      - tar -xzvf [% root.dispatch.workspace %]/[% root.apppkg.name %] -C (% root.deploy.locations.%instanceIdx% %)/
 
     chownmode:
       - chown -R [% root.deploy.owner %]:[% root.deploy.group %] (% root.deploy.locations.%instanceIdx% %)

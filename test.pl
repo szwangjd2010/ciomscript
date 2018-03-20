@@ -10,40 +10,13 @@ use Data::Dumper;
 use ScmActor;
 use Text::Sprintf::Named qw(named_sprintf);
 use Template;
+use File::Path qw(make_path remove_tree);
 
-my $Tpl;
-
-
-my $h1 = {
-    '/opt/ins1' => {
-        pActive => "hello",
-        port => "8080"
-    },
-    "hello" => "world"
-};
-
-sub initTpl() {
-    $Tpl = Template->new({
-        ABSOLUTE => 1,
-        TAG_STYLE => 'outline',
-        PRE_CHOMP  => 0,
-        POST_CHOMP => 0
-    }); 
-}
-sub processTemplate {
-    my ($in, $data, $out) = @_;
-    $Tpl->process($in, $data, $out) 
-        || die "Template process failed: ", $Tpl->error(), "\n";    
-}
+make_path("/tmp/1111/2222/3333") || die "error in creating dir";
 
 
-#my $cmd = "[% root.item('hello') %]";
-my $cmd = "[% root.item('/opt/ins1').pActive %]";
-
-my $out = "";
-
-initTpl();
-processTemplate(\$cmd, {root => $h1}, \$out);
-
-print $out . "\n";
+my %h1 = (a => 'a', b => 'b');
+print Dump(%h1);
+print $h1{a} . "\n";
+print $h1{b} . "\n";
 
