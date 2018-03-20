@@ -58,7 +58,7 @@ my $Tpl;
 my $Plugin;
 my $RevisionId;
 
-sub initVcaEnv() {
+sub setVcaEnv() {
 	$ENV{VCA_HOME} = "$ENV{WORKSPACE}/..";
 	$ENV{VCA_WORKSPACE} = $ENV{WORKSPACE};
 	$ENV{VCA_BUILDNO} = $ENV{BUILD_NUMBER};
@@ -73,6 +73,7 @@ sub initVcaEnv() {
 }
 
 sub enterWorkspace() {
+	setVcaEnv();
 	(! -d $ENV{VCA_WORKSPACE}) && make_path($ENV{VCA_WORKSPACE});
 	(! -d $ENV{VCA_BUILDNO_LOCATION}) && make_path($ENV{VCA_BUILDNO_LOCATION});	
 	chdir($ENV{VCA_WORKSPACE});
@@ -83,6 +84,11 @@ sub leaveWorkspace() {
 	chdir($OldPwd);
 }
 
+sub initConsts() {
+	$Consts->{revid} = ".revid";
+	$Consts->{appavatar} = "ciom.yaml";
+}
+
 sub initTpl() {
 	$Tpl = Template->new({
 		ABSOLUTE => 1,
@@ -90,6 +96,19 @@ sub initTpl() {
 		PRE_CHOMP  => 0,
 	    POST_CHOMP => 0
 	});	
+}
+
+sub init() {
+	initConsts();
+	initTpl();
+}
+
+sub gatherUDV() {
+	while ( my ($key, $value) = each(%ENV) ) {
+        if ($key =~ m/^CIOMPM_([\w_]+)$/) {
+        	$UDV->{$1} = $value;
+        }
+    }
 }
 
 sub getAppPkgUrl() {
@@ -115,29 +134,10 @@ sub setAppPkgInfo() {
 	$AppAvatar->{apppkg} = $AppPkg;
 }
 
-sub initConsts() {
-	$Consts->{revid} = ".revid";
-	$Consts->{appavatar} = "ciom.yaml";
-}
-
-sub init() {
-	initVcaEnv();
-	initConsts();
-	initTpl();
-}
-
 sub processTemplate {
 	my ($in, $data, $out) = @_;
 	$Tpl->process($in, $data, $out) 
 		|| die "Template process failed: ", $Tpl->error(), "\n";	
-}
-
-sub gatherUDV() {
-	while ( my ($key, $value) = each(%ENV) ) {
-        if ($key =~ m/^CIOMPM_([\w_]+)$/) {
-        	$UDV->{$1} = $value;
-        }
-    }
 }
 
 sub enrichAppAvatar {
@@ -725,13 +725,13 @@ sub getBuildLogFile() {
 
 sub getSvnError() {
 	my $logFile = getBuildLogFile();
-	my $buildFailedCnt = $CiomUtil->execWithReturn("grep -c 'svn: E' $logFile");
+	my $buildFailedCnt = $CiomUtil->execWithReturn("grep -c 'svn: E' $logFile") || 0;
 	return $buildFailedCnt - 1;	
 }
 
 sub getMavenCompilationError() {
 	my $logFile = getBuildLogFile();
-	my $mvnCompileErrorCnt = $CiomUtil->execWithReturn("grep -c 'COMPILATION ERROR' $logFile");
+	my $mvnCompileErrorCnt = $CiomUtil->execWithReturn("grep -c 'COMPILATION ERROR' $logFile") || 0;
 	return $mvnCompileErrorCnt - 1;	
 }
 
