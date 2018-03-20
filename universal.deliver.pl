@@ -31,11 +31,32 @@ my $appName = $ARGV[2];
 
 my $RuntimeContext = defined($ENV{JENKINS_URL}) ? "JENKINS" : "CLI";
 
-# $DeployMode: deploy or rollback
-# it's corresponding to same name node which defined in %app%.ciom & %plugin%.yaml
-# in deploy process, will execute pre, cmds, post actions defined in the $DeployMode node
-my $DeployMode = lc($ENV{DeployMode} || 'deploy'); 
-my $RollbackTo = lc($ENV{RollbackTo} || '');
+# $DeployMode, $RollbackTo value set 
+my $DeployMode = (sub {
+    my $mode = "deploy";
+    if ($RuntimeContext eq "JENKINS" && defined($ENV{DeployMode})) {
+        $mode = $ENV{DeployMode};
+    }
+    if ($RuntimeContext eq "CLI" && $#ARGV + 1 > 3) {
+        $mode = $ARGV[3];
+    }
+    return lc($mode);
+})->();
+
+my $RollbackTo = (sub {
+    if ($DeployMode eq "deploy") {
+        return "";
+    }
+    my $to = "";
+    if ($RuntimeContext eq "JENKINS" && defined($ENV{RollbackTo})) {
+        $to = $ENV{RollbackTo};
+    }
+    if ($RuntimeContext eq "CLI" && $#ARGV + 1 > 4) {
+        $to = $ARGV[4];
+    }
+    return lc($to);
+})->();
+# $DeployMode, $RollbackTo value set end
 
 # if $HostDeployMode set as 'parallel', will deploy apps in parallel on one host
 # it will host count reach $HostCntCriteria and location count reach $LocationCntCriteria
@@ -59,10 +80,12 @@ my $Plugin;
 my $RevisionId;
 
 sub setVcaEnv() {
-	$ENV{VCA_HOME} = "$ENV{WORKSPACE}/..";
-	$ENV{VCA_WORKSPACE} = $ENV{WORKSPACE};
-	$ENV{VCA_BUILDNO} = $ENV{BUILD_NUMBER};
-	$ENV{VCA_BUILDNO_LOCATION} = "$ENV{VCA_HOME}/builds/$ENV{VCA_BUILDNO}";
+	if ($RuntimeContext eq "JENKINS") {
+		$ENV{VCA_HOME} = "$ENV{WORKSPACE}/..";
+		$ENV{VCA_WORKSPACE} = $ENV{WORKSPACE};
+		$ENV{VCA_BUILDNO} = $ENV{BUILD_NUMBER};
+		$ENV{VCA_BUILDNO_LOCATION} = "$ENV{VCA_HOME}/builds/$ENV{VCA_BUILDNO}";
+	}
 	
 	if ($RuntimeContext eq "CLI") {
 		$ENV{VCA_HOME} = "$ENV{CIOM_CLI_WORKSPACE}/${version}/${cloudId}/${appName}";
