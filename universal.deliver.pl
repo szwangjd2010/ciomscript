@@ -1,3 +1,4 @@
+
 #!/usr/bin/perl -W
 # 
 #
@@ -59,7 +60,6 @@ sub setContextBased() {
         $ENV{VCA_HOME} = "$ENV{WORKSPACE}/..";
         $ENV{VCA_WORKSPACE} = $ENV{WORKSPACE};
         $ENV{VCA_BUILDNO} = $ENV{BUILD_NUMBER};
-        $ENV{VCA_BUILDNO_LOCATION} = "$ENV{VCA_HOME}/builds/$ENV{VCA_BUILDNO}";
 
         $DeployMode = lc($ENV{DeployMode} || 'deploy');
         $RollbackTo = $ENV{RollbackTo} || '';
@@ -69,13 +69,13 @@ sub setContextBased() {
         $ENV{VCA_HOME} = "$ENV{CIOM_CLI_WORKSPACE}/${version}/${cloudId}/${appName}";
         $ENV{VCA_WORKSPACE} = "$ENV{VCA_HOME}/workspace";
         $ENV{VCA_BUILDNO} = $CiomUtil->getTimestamp();
-        $ENV{VCA_BUILDNO_LOCATION} = "$ENV{VCA_HOME}/builds/$ENV{VCA_BUILDNO}";
 
         if ($#ARGV + 1 > 4) {
             $DeployMode = lc($ARGV[3]);
             $RollbackTo = $ARGV[4];
         }
     }
+    $ENV{VCA_BUILDNO_LOCATION} = "$ENV{VCA_HOME}/builds/$ENV{VCA_BUILDNO}";
 }
 
 sub enterWorkspace() {
