@@ -1,8 +1,7 @@
-
 #!/usr/bin/perl -W
 # 
 #
-package UniveralDeliver;
+package UniversalDeliver;
 
 use lib "$ENV{CIOM_SCRIPT_HOME}";
 use strict;
