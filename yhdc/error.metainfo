@@ -1,7 +1,7 @@
 env: ucloud
 logs: error
 logroot: /data
-loglocalroot: /sdc/ciompub
+loglocalroot: /data/log
 
 #lecai
 10.10.125.17

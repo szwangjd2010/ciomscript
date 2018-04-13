@@ -8,11 +8,11 @@ setMode 1
 hdfsBin="/opt/hadoop-2.7.1/bin/hdfs"
 
 getSrcFile() {
-	echo -n "hdfs://hdc-54/raw/${logType}log/${product}.${logType}.${year}${month}.log"	
+	echo -n "hdfs://uydc-56/raw/${logType}log/${product}.${logType}.${year}${month}.log"	
 }
 
 getDstLocation() {
-	echo -n "hdfs://hdc-54/user/hive/warehouse/yxt.db/${product}_${logType}log/year=${year}/month=${month}/"	
+	echo -n "hdfs://uydc-56/user/hive/warehouse/yxt.db/${product}_${logType}log/year=${year}/month=${month}/"	
 }
 
 cp2016() {

@@ -6,11 +6,11 @@ logRootLocation="$LogLocalHome/_clean"
 hdfsBin="/opt/hadoop-2.7.1/bin/hdfs"
 
 getLogFileHdfsLocation() {
-	echo -n "hdfs://hdc-54/raw/${logType}log"
+	echo -n "hdfs://uydc-56/raw/${logType}log"
 }
 
 getHiveDbHdfsRoot() {
-	echo -n "hdfs://hdc-54/user/hive/warehouse/yxt.db"
+	echo -n "hdfs://uydc-56/user/hive/warehouse/yxt.db"
 }
 
 getLogLocalFileName() {
