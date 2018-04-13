@@ -56,7 +56,7 @@ main() {
 				logFile=$(getLogLocalFile)
 				hdfsFile=$(getLogFileHdfsLocation)/$logFileName
 
-				echo "put $logFile to hdfs ... "
+				echo "put $logFile to $hdfsFile ... "
 				$hdfsBin dfs -test -f $hdfsFile
 				if [ $? -eq 0 ]; then
 					echo "already exists"
