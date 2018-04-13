@@ -1,4 +1,4 @@
 #!/bin/bash
 #
-ssh root@hdc-63 "impala-shell -q 'invalidate metadata'"
+ssh root@uydc-66 "impala-shell -q 'invalidate metadata'"
 
