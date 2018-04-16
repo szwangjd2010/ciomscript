@@ -504,6 +504,15 @@ sub build() {
 		"build cmds",
 		"build post"
 	]);
+
+	getBuildErrorInLog();
+}
+
+sub getBuildErrorInLog(){
+	my $mvnCompileErrCnt = getMavenCompilationError();
+	if ( $mvnCompileErrCnt > 0) {
+		exit 1;
+	}
 }
 
 sub getIncludeFileRoot($) {
@@ -741,10 +750,10 @@ sub getMavenCompilationError() {
 }
 
 sub getErrorInLog(){
-	my $mvnCompileErrCnt = getMavenCompilationError();
-	if ( $mvnCompileErrCnt > 0) {
-		return 1;
-	}
+	# my $mvnCompileErrCnt = getMavenCompilationError();
+	# if ( $mvnCompileErrCnt > 0) {
+	# 	return 1;
+	# }
 	return 0;
 }
 
