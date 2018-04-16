@@ -193,5 +193,15 @@
     "version": "v0",
     "cloudId": "ucloud-qida-xjk",
     "appName": "qidaudpweb"
+  },
+  "ucloud.env-yxt.qida.ojt.web.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida",
+    "appName": "qidaojtweb"
+  },
+  "ucloud.xjk.env-yxt.qida.ojt.web.publish":{
+    "version": "v0",
+    "cloudId": "ucloud-qida-xjk",
+    "appName": "qidaojtweb"
   }
 }
