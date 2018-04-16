@@ -25,6 +25,14 @@ if [ "$CiomPassphraseQida" == "qidacmwyx" ]; then
 	exit 0
 fi
 
+if [ "$CiomPassphraseQidaXjk" == "xjk@yxt2018" ]; then
+	exit 0
+fi
+
+if [ "$CiomPassphraseQidaUdp" == "qidaudppwd01!" ]; then
+	exit 0
+fi
+
 if [ "$CiomPassphraseYMall" == "ymallzy" ]; then
 	exit 0
 fi
