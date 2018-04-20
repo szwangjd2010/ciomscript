@@ -11,7 +11,8 @@ pullLog() {
 	reProducts=${Products// /\|}
 	reLogTypes=${LogTypes// /\|}
 	joinedLogTypes=${LogTypes// /+}
-
+	pulledListFile=_${joinedLogTypes}_pulledlist
+	tmpDirName=${Hostname}.${joinedLogTypes}
 	for host in $hosts; do
 		echo -n "pull $host logs ... "
 		localHostLogLocation=$localLogYmdLocation/$host
@@ -23,14 +24,15 @@ pullLog() {
 
 		mkdir -p $localHostLogLocation
 
+
 		ssh root@$host "\
 			cd $LogRoot; \
-			mkdir -p tmp; \
-			rm -rf ./tmp/$logTgzFile; \
-			find -regextype posix-extended -regex '.*/($reProducts)_($reLogTypes).$ymd.log' > ./tmp/_pulllog; \
-			tar -czvf ./tmp/$logTgzFile --files-from ./tmp/_pulllog;\
+			mkdir -p ${tmpDirName}; \
+			rm -rf ./${tmpDirName}/$logTgzFile; \
+			find -regextype posix-extended -regex '.*/($reProducts)_($reLogTypes).$ymd.log' > ./${tmpDirName}/${pulledListFile}; \
+			tar -czvf ./${tmpDirName}/$logTgzFile --files-from ./${tmpDirName}/${pulledListFile};\
 		"
-		scp root@$host:$LogRoot/tmp/$logTgzFile ${localHostLogLocation}/
+		scp root@$host:$LogRoot/${tmpDirName}/$logTgzFile ${localHostLogLocation}/
 		(cd $localHostLogLocation; tar -xzvf $logTgzFile --no-same-owner)
 		echo "done"
 	done	
@@ -47,8 +49,10 @@ mergeLog() {
 				continue
 			fi
 
-			find "$localLogYmdLocation" -name "${product}_${logType}.${ymd}.log" -exec cat {} >> ${toFile}.merging \;
-			mv ${toFile}.merging $toFile
+			if [ $(find "$localLogYmdLocation" -name "${product}_${logType}.${ymd}.log" | wc -l) -gt 0 ]; then
+				find "$localLogYmdLocation" -name "${product}_${logType}.${ymd}.log" -exec cat {} >> ${toFile}.merging \;
+				mv ${toFile}.merging $toFile
+			fi
 		done
 	done
 }
