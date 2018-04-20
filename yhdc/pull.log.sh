@@ -12,7 +12,7 @@ pullLog() {
 	reLogTypes=${LogTypes// /\|}
 	joinedLogTypes=${LogTypes// /+}
 	pulledListFile=_${joinedLogTypes}_pulledlist
-	tmpDirName=${Hostname}.${joinedLogTypes}
+	tmpDirName=ydata.${joinedLogTypes}.${Hostname}
 	for host in $hosts; do
 		echo -n "pull $host logs ... "
 		localHostLogLocation=$localLogYmdLocation/$host
