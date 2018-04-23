@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS ${tableName} (
 PARTITIONED BY (year STRING, month STRING) 
 ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t';
 
-<#list 2017..2018 as year>
+<#list 2015..2022 as year>
   <#list 1..12 as month>
 ALTER TABLE ${tableName} ADD IF NOT EXISTS PARTITION (year='${year}', month='${month?left_pad(2, '0')}');
   </#list>
