@@ -34,7 +34,12 @@ getProducts() {
 	echo -n $(grep -o -P '(?<=^#)[\w]+' $logMetainfoFile | sort -u | perl -pE 's/\n/ /g' | perl -pE 's/ $//')
 }
 
+getTimestamp() {
+    echo -n $(date +%04Y%02m%02d.%02k%02M%02S)  
+}
 
+Timestamp=$(getTimestamp)
+Hostname=$(hostname)
 Env=$(getEnv)
 HostsLogPresentin=$(getHostsLogPresentin)
 Products=$(getProducts)
