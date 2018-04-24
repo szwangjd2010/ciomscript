@@ -44,7 +44,7 @@ def start(addr, location, appName, jvmopt, profile, port):
 
 
 @task
-def waitAlive(addr, port, appName)
+def waitAlive(addr, port, appName):
     	print "Waiting for service up"
         count = 0
     	while not(alive(addr,port,appName)) and count < 300:
