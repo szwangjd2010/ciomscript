@@ -6,7 +6,9 @@ jvmRefs = {
     'OPT_S64M_X512M_SS512K' : '-Xms64m -Xmx512m -Xss512k',
     'OPT_S128M_X1024M_SS512K' : '-Xms128m -Xmx1024m -Xss512k'
 }
-EurekaHost = {"dev": "172.17.128.156"}
+EurekaHost = {"dev": "172.17.128.156",
+              "prod": "",
+              "xjk": ""}
 
 
 @task
@@ -14,16 +16,15 @@ def hello():
     run("echo hello")
 
 
-def alive(addr, port, appName):
+def alive('127.0.0.1', port, appName, profile):
 
-    service = SpringbootService(addr, port, appName)
-    eureka = Eureka(EurekaHost["dev"])
-    return (service.GetStatus() and (addr in eureka.GetInstanceList(appName)))
+    service = SpringbootService('127.0.0.1', port, appName)
+    return service.GetStatus()
 
 
 def stop(addr, port, appName):
     if alive(addr, port, appName):
-        run("pkill -9 -f 'server.port={}'".format(port), warn_only=True)
+       run("pkill -9 -f 'server.port={}'".format(port), warn_only=True)
     
 
 @task
