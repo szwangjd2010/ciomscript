@@ -63,13 +63,3 @@ class SpringbootService:
         else:
             return False
 
-
-
-
-
-
-if __name__ == '__main__':
-    imapi_eureka = Eureka(EurekaHost["dev"], port="7000")
-    # Get
-    imapi = SpringbootService('172.17.128.156', '8080', 'gwapi')
-    print imapi.GetStatus()
