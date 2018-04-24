@@ -40,10 +40,19 @@ def start(addr, location, appName, jvmopt, profile, port):
     else:
     	jvmOption = jvmRefs.get(jvmopt)
     	run('nohup java {} -jar {}/{}/{}.jar --spring.profiles.active={} --server.port={} >/dev/null &'.format(jvmOption, location, appName, appName, profile, port), pty=False)
-    	print "Waiting for service up"
-    	while not(alive(addr,port,appName)):
-		sleep(1)
     	#run('nohup java {} -jar {}/{}/{}.jar --spring.profiles.active={} --server.port={} >/data/logback/test &'.format(jvmOption, location, appName, appName, profile, port), pty=False)  
+
+
+@task
+def waitAlive(addr, port, appName)
+    	print "Waiting for service up"
+        count = 0
+    	while not(alive(addr,port,appName)) and count < 300:
+		sleep(1)
+                count+=1
+        if count ==300:
+            print "Start timed out"
+
 
 @task
 def shutdown(addr, port, appName):
