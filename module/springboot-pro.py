@@ -16,9 +16,9 @@ def hello():
     run("echo hello")
 
 
-def alive(port, appName):
+def alive(host, port, appName):
     
-    service = SpringbootService(env.host, port, appName)
+    service = SpringbootService(host, port, appName)
     return service.GetStatus()
 
 
