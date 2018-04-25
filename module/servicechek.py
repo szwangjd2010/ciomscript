@@ -49,7 +49,7 @@ class SpringbootService:
     
     def GetStatus(self, retry=0):
         if retry == 3:
-            return True
+            return False
         try:
             resp = self.s.get("http://{}:{}/serverstatus".format(self.host, self.port))
         except requests.exceptions.ConnectionError:
