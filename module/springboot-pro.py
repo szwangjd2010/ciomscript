@@ -61,7 +61,7 @@ def shutdown(port, appName):
 	print alive(env.host, port, appName)
         run('curl -X POST localhost:{}/act/shutdown'.format(port), warn_only=True)
         sleep(2)
-        stop(env.host, port, appName)
+        stop(port, appName)
     print('Application {} was stopped on port {}!!!'.format(appName, port))
 
 @task
