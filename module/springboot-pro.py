@@ -16,27 +16,27 @@ def hello():
     run("echo hello")
 
 
-def alive('127.0.0.1', port, appName, profile):
-
-    service = SpringbootService('127.0.0.1', port, appName)
+def alive(port, appName):
+    
+    service = SpringbootService(env.host, port, appName)
     return service.GetStatus()
 
 
-def stop(addr, port, appName):
-    if alive(addr, port, appName):
+def stop(port, appName):
+    if alive(port, appName):
        run("pkill -9 -f 'server.port={}'".format(port), warn_only=True)
     
 
 @task
-def deploy(addr, location, appName, jvmopt, profile, svcport):
+def deploy(location, appName, jvmopt, profile, svcport):
     #shutdown(appName, svcport)
     #sleep(2)
-    start(addr, location, appName, jvmopt, profile, svcport)
+    start(location, appName, jvmopt, profile, svcport)
     #sleep(2)
     #print run('curl localhost:{}/{}/v1/health'.format(port, appName),warn_only=True)
 
-def start(addr, location, appName, jvmopt, profile, port):
-    if alive(addr, port, appName):
+def start(location, appName, jvmopt, profile, port):
+    if alive(env.host, port, appName):
 	print "Service up already"
     else:
     	jvmOption = jvmRefs.get(jvmopt)
@@ -45,10 +45,10 @@ def start(addr, location, appName, jvmopt, profile, port):
 
 
 @task
-def waitAlive(addr, port, appName):
+def waitAlive(port, appName):
     	print "Waiting for service up"
         count = 0
-    	while not(alive(addr,port,appName)) and count < 300:
+    	while not(alive(env.host,port,appName)) and count < 300:
 		sleep(1)
                 count+=1
         if count ==300:
@@ -56,12 +56,12 @@ def waitAlive(addr, port, appName):
 
 
 @task
-def shutdown(addr, port, appName):
-    if alive(addr, port, appName):
-	print alive(addr, port, appName)
+def shutdown(port, appName):
+    if alive(env.host, port, appName):
+	print alive(env.host, port, appName)
         run('curl -X POST localhost:{}/act/shutdown'.format(port), warn_only=True)
         sleep(2)
-        stop(addr, port, appName)
+        stop(env.host, port, appName)
     print('Application {} was stopped on port {}!!!'.format(appName, port))
 
 @task
